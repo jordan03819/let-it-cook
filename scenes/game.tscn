@@ -1,0 +1,317 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/game.gd" id="1_game"]
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 1
+background_color = Color(0.08, 0.09, 0.16, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.55, 0.6, 0.75, 1)
+ambient_light_energy = 0.7
+tonemap_mode = 2
+glow_enabled = false
+fog_enabled = true
+fog_light_color = Color(0.1, 0.1, 0.18, 1)
+fog_density = 0.005
+
+[sub_resource type="StyleBoxFlat" id="FireBack"]
+bg_color = Color(0.12, 0.08, 0.08, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="FireFill"]
+bg_color = Color(1, 0.45, 0.1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="Game" type="Node3D"]
+script = ExtResource("1_game")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.819152, -0.271654, 0.506638, 0, 0.881775, 0.471567, -0.573576, -0.386192, 0.722844, 0, 12, 0)
+light_color = Color(1, 0.85, 0.7, 1)
+light_energy = 0.9
+shadow_enabled = false
+
+[node name="CameraRig" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 18, 18, 18)
+projection = 1
+size = 21.0
+far = 200.0
+
+[node name="Village" type="Node3D" parent="."]
+
+[node name="Units" type="Node3D" parent="."]
+
+[node name="CracklePlayer" type="AudioStreamPlayer" parent="."]
+bus = &"Master"
+
+[node name="SfxPlayer" type="AudioStreamPlayer" parent="."]
+bus = &"Master"
+
+[node name="HUD" type="CanvasLayer" parent="."]
+process_mode = 3
+
+[node name="TopBar" type="PanelContainer" parent="HUD"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 64.0
+grow_horizontal = 2
+
+[node name="HBox" type="HBoxContainer" parent="HUD/TopBar"]
+theme_override_constants/separation = 12
+alignment = 0
+
+[node name="FireLabel" type="Label" parent="HUD/TopBar/HBox"]
+theme_override_font_sizes/font_size = 20
+text = "FIRE"
+
+[node name="FireBar" type="ProgressBar" parent="HUD/TopBar/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 28)
+size_flags_horizontal = 3
+theme_override_styles/background = SubResource("FireBack")
+theme_override_styles/fill = SubResource("FireFill")
+max_value = 100.0
+value = 60.0
+show_percentage = false
+
+[node name="EmberLabel" type="Label" parent="HUD/TopBar/HBox"]
+unique_name_in_owner = true
+theme_override_font_sizes/font_size = 16
+text = "Embers"
+
+[node name="BurnLabel" type="Label" parent="HUD/TopBar/HBox"]
+unique_name_in_owner = true
+theme_override_font_sizes/font_size = 18
+text = "Cooked"
+
+[node name="WindLabel" type="Label" parent="HUD/TopBar/HBox"]
+unique_name_in_owner = true
+theme_override_font_sizes/font_size = 16
+text = "Wind"
+
+[node name="ObjectiveLabel" type="Label" parent="HUD"]
+unique_name_in_owner = true
+mouse_filter = 2
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 66.0
+offset_bottom = 90.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+text = "Objective"
+horizontal_alignment = 1
+
+[node name="ComboLabel" type="Label" parent="HUD"]
+unique_name_in_owner = true
+mouse_filter = 2
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 96.0
+offset_bottom = 150.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 0.6, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.05, 0, 1)
+theme_override_constants/outline_size = 8
+horizontal_alignment = 1
+
+[node name="ToastLabel" type="Label" parent="HUD"]
+unique_name_in_owner = true
+mouse_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -190.0
+offset_right = 400.0
+offset_bottom = -140.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 0.95, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+horizontal_alignment = 1
+
+[node name="HintLabel" type="Label" parent="HUD"]
+unique_name_in_owner = true
+mouse_filter = 2
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -320.0
+offset_top = -64.0
+offset_right = 320.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 16
+text = "Click house = ignite (1 ember) | Drag = gust wind"
+horizontal_alignment = 1
+
+[node name="ControlsLabel" type="Label" parent="HUD"]
+unique_name_in_owner = true
+mouse_filter = 2
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -460.0
+offset_top = -30.0
+offset_right = -10.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(1, 1, 1, 0.75)
+text = "controls"
+horizontal_alignment = 2
+
+[node name="MessagePanel" type="PanelContainer" parent="HUD"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -170.0
+offset_right = 260.0
+offset_bottom = 170.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="HUD/MessagePanel"]
+theme_override_constants/separation = 12
+
+[node name="MessageLabel" type="Label" parent="HUD/MessagePanel/VBox"]
+unique_name_in_owner = true
+theme_override_font_sizes/font_size = 20
+text = "Done"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="StatsLabel" type="Label" parent="HUD/MessagePanel/VBox"]
+unique_name_in_owner = true
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(1, 1, 1, 0.85)
+text = "stats"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="RestartButton" type="Button" parent="HUD/MessagePanel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 48)
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "Cook Again"
+
+[node name="MenuButton" type="Button" parent="HUD/MessagePanel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 40)
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 16
+text = "Back to Menu"
+
+[node name="PausePanel" type="PanelContainer" parent="HUD"]
+unique_name_in_owner = true
+process_mode = 3
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -120.0
+offset_right = 160.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="HUD/PausePanel"]
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="PausedLabel" type="Label" parent="HUD/PausePanel/VBox"]
+theme_override_font_sizes/font_size = 28
+text = "Paused"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="HUD/PausePanel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 44)
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 18
+text = "Resume"
+
+[node name="PauseMenuButton" type="Button" parent="HUD/PausePanel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 40)
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 16
+text = "Back to Menu"
+
+[node name="UpgradePanel" type="PanelContainer" parent="HUD"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -190.0
+offset_right = 280.0
+offset_bottom = 190.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="HUD/UpgradePanel"]
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="UpTitle" type="Label" parent="HUD/UpgradePanel/VBox"]
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
+text = "DISTRICT COOKED! Pick a spice:"
+horizontal_alignment = 1
+
+[node name="UpCrispy" type="Button" parent="HUD/UpgradePanel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 56)
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 17
+text = "Extra Crispy"
+
+[node name="UpGrease" type="Button" parent="HUD/UpgradePanel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 56)
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 17
+text = "Grease Fire"
+
+[node name="UpAura" type="Button" parent="HUD/UpgradePanel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 56)
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 17
+text = "Marshmallow Aura"
