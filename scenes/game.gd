@@ -239,6 +239,7 @@ func _load_level() -> void:
 	for h in houses:
 		h.burned_out.connect(_on_house_burned_out)
 		h.burn_ending.connect(_on_house_burn_ending)
+		h.extinguished.connect(_on_house_extinguished)
 
 	# Wire barrel signals
 	for b in barrels:
@@ -379,13 +380,12 @@ func _process(delta: float) -> void:
 			last_spark_timer -= delta
 			if last_spark_timer <= 0.0 or last_spark_house == null or last_spark_house.state == VoxelHouse.State.BURNT:
 				last_spark_active = false
-				if fire_sim.count_burning() == 0:
+				if fire_sim.count_burning() == 0 and fire_sim.count_smoldering() == 0:
 					_end_game(false)
 					return
 		elif burning_count == 0 and smoldering_count == 0:
-			if not last_spark_available:
-				_end_game(false)
-				return
+			_end_game(false)
+			return
 
 	_update_hud()
 
@@ -401,6 +401,19 @@ func _on_house_burn_ending(h: VoxelHouse) -> void:
 			other_burning += 1
 
 	if other_burning == 0 and last_spark_available and burnt_mandatory < mandatory_houses.size():
+		last_spark_available = false
+		last_spark_active = true
+		last_spark_house = h
+		last_spark_timer = 8.0
+		h.start_smolder(8.0)
+		_flash_hint("LAST SPARK! Final fire smoldering (8s) — Click house to reignite for 1 Ember!")
+		_update_hud()
+
+
+func _on_house_extinguished(h: VoxelHouse) -> void:
+	if game_over or not starter_ignited:
+		return
+	if fire_sim.count_burning() == 0 and fire_sim.count_smoldering() == 0 and last_spark_available and burnt_mandatory < mandatory_houses.size():
 		last_spark_available = false
 		last_spark_active = true
 		last_spark_house = h

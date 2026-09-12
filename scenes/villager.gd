@@ -148,7 +148,7 @@ func set_bucket(t: Node3D) -> void:
 	has_water = false
 	_build_bucket()
 	_update_bucket_visual()
-	_show_bubble("💧", Color(0.4, 0.7, 1.0))
+	_show_bubble("BUCKET!", Color(0.4, 0.7, 1.0))
 
 
 func clear_bucket() -> void:
@@ -327,6 +327,18 @@ func _physics_bucket(delta: float) -> void:
 	# 2. If full bucket: path to burning target -> douse fire -> return to water source.
 	_think_t -= delta
 
+	# Check courage / personal danger threshold (SPEC 9.2: retreats when danger exceeds courage)
+	var nearby_flames := 0
+	for h in get_tree().get_nodes_in_group("houses"):
+		if is_instance_valid(h) and h is VoxelHouse and (h as VoxelHouse).state == VoxelHouse.State.BURNING:
+			if global_position.distance_to((h as Node3D).global_position) <= 2.6:
+				nearby_flames += 1
+	if nearby_flames >= 3:
+		clear_bucket()
+		_panicking = true
+		_show_bubble("TOO HOT!!", Color(1.0, 0.35, 0.1))
+		return
+
 	# Check target validity
 	if bucket_target == null or not is_instance_valid(bucket_target) or (bucket_target as VoxelHouse).state != VoxelHouse.State.BURNING:
 		bucket_target = _find_nearest_burning_house()
@@ -352,9 +364,9 @@ func _physics_bucket(delta: float) -> void:
 			velocity = Vector3.ZERO
 			has_water = true
 			_update_bucket_visual()
-			_show_bubble("💧", Color(0.3, 0.7, 1.0))
+			_show_bubble("WATER!", Color(0.3, 0.7, 1.0))
 	else:
-		# Step 2: Carry water to burning house and splash
+		# Step 2: Carry water to burning house and splash (SPEC 6.7: displays target)
 		var to_target := (bucket_target as Node3D).global_position - global_position
 		to_target.y = 0.0
 		var dist := to_target.length()
@@ -363,11 +375,12 @@ func _physics_bucket(delta: float) -> void:
 			_dir = to_target.normalized()
 			velocity = _dir * speed_bucket
 		else:
-			# At target! Splash water.
+			# At target! Splash water (SPEC 6.7 & 9.2: balanced douse)
 			velocity = Vector3.ZERO
 			var h := bucket_target as VoxelHouse
-			h.apply_water(2.2, 1.0)
+			h.apply_water(0.55, 1.0)
 			SoundManager.play_sfx("splash")
+			_spawn_bucket_splash_vfx(h.global_position)
 
 			# Also rescue nearby burning characters
 			for c in get_tree().get_nodes_in_group("burning_chars"):
@@ -378,12 +391,50 @@ func _physics_bucket(delta: float) -> void:
 
 			has_water = false
 			_update_bucket_visual()
-			_show_bubble("~", Color(0.4, 0.7, 1.0))
+			_show_bubble("SPLASH!", Color(0.4, 0.7, 1.0))
 
 	if _dir.length_squared() > 0.01:
 		_visual.rotation.y = atan2(_dir.x, _dir.z)
 	_visual.position.y = absf(sin(Time.get_ticks_msec() * 0.016)) * 0.09
 	move_and_slide()
+
+
+func _spawn_bucket_splash_vfx(pos: Vector3) -> void:
+	if not is_inside_tree():
+		return
+	var p := GPUParticles3D.new()
+	p.amount = 24
+	p.lifetime = 0.65
+	p.one_shot = true
+	p.explosiveness = 0.9
+	p.local_coords = false
+	p.visibility_aabb = AABB(Vector3(-3, -1, -3), Vector3(6, 6, 6))
+
+	var pm := ParticleProcessMaterial.new()
+	pm.direction = Vector3(0, 1, 0)
+	pm.spread = 45.0
+	pm.initial_velocity_min = 3.5
+	pm.initial_velocity_max = 6.0
+	pm.gravity = Vector3(0, -9.8, 0)
+	pm.scale_min = 0.6
+	pm.scale_max = 1.3
+	pm.color = Color(0.35, 0.72, 1.0, 0.8)
+	p.process_material = pm
+
+	var cube := BoxMesh.new()
+	cube.size = Vector3(0.12, 0.12, 0.12)
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(0.35, 0.72, 1.0)
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	cube.material = m
+	p.draw_pass_1 = cube
+
+	get_parent().add_child(p)
+	p.global_position = pos + Vector3(0, 0.8, 0)
+	p.emitting = true
+	var tree := get_tree()
+	if tree != null:
+		tree.create_timer(1.2).timeout.connect(p.queue_free)
 
 
 func _find_nearest_water_source() -> Node3D:

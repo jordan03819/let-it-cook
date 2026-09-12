@@ -541,9 +541,9 @@ func _process(delta: float) -> void:
 	if _flash > 0.0:
 		_flash = maxf(0.0, _flash - delta * 1.2)
 
-	# Evaporation: drying over time
+	# Evaporation: drying over time (SPEC 6.7 & 8.4)
 	if wetness > 0.0:
-		var dry_rate := 0.22 if state == State.BURNING else 0.045
+		var dry_rate := 0.065 if state == State.BURNING else 0.035
 		wetness = maxf(0.0, wetness - delta * dry_rate)
 
 	if state == State.SMOLDERING:

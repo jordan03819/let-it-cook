@@ -19,7 +19,8 @@ var elite: bool = false # L3 elites: faster, more spray, braver
 var target_house: VoxelHouse = null
 var home_pos: Vector3 = Vector3.ZERO
 var burn: CharBurn = null
-var _retarget_t: float = 0.0
+var commit_timer: float = 0.0
+const COMMITMENT_MIN: float = 6.0
 var _spread_t: float = 0.0
 var catch_cd: float = 0.0
 var _dead: bool = false
@@ -32,6 +33,13 @@ var _spraying: bool = false
 var retreating: bool = false # wave over: walk home, clock out
 var _retreat_t: float = 0.0
 
+var _telegraph_root: Node3D = null
+var _aim_line_instance: MeshInstance3D = null
+var _aim_line_mesh: ImmediateMesh = null
+var _reticle_instance: MeshInstance3D = null
+var _reticle_mesh: ImmediateMesh = null
+var _telegraph_mat: StandardMaterial3D = null
+
 
 func _ready() -> void:
 	add_to_group("firefighters")
@@ -39,6 +47,7 @@ func _ready() -> void:
 	_build_visuals()
 	_build_water()
 	_build_bubble()
+	_build_telegraph()
 	if elite:
 		speed = 5.2
 		spray_rate = 1.3
@@ -80,15 +89,25 @@ func _build_visuals() -> void:
 	col.shape = cap
 	col.position = Vector3(0, 0.8, 0)
 	add_child(col)
-	var coat := Color(0.85, 0.7, 0.35) if not elite else Color(0.2, 0.25, 0.85)
+	var coat := Color(0.85, 0.7, 0.35) if not elite else Color(0.12, 0.22, 0.65)
+	var trim := Color(1.0, 0.9, 0.2) if not elite else Color(0.2, 0.85, 1.0)
+	var helm := Color(0.85, 0.15, 0.1) if not elite else Color(0.95, 0.85, 0.2)
 	_box(_visual, Vector3(0.22, 0.5, 0.22), Vector3(-0.15, 0.25, 0), _voxel_mat(Color(0.1, 0.15, 0.4)))
 	_box(_visual, Vector3(0.22, 0.5, 0.22), Vector3(0.15, 0.25, 0), _voxel_mat(Color(0.1, 0.15, 0.4)))
 	_box(_visual, Vector3(0.7, 0.7, 0.45), Vector3(0, 0.85, 0), _voxel_mat(coat))
-	_box(_visual, Vector3(0.72, 0.15, 0.47), Vector3(0, 0.85, 0), _voxel_mat(Color(1.0, 0.9, 0.2), true))
+	_box(_visual, Vector3(0.72, 0.15, 0.47), Vector3(0, 0.85, 0), _voxel_mat(trim, true))
 	_box(_visual, Vector3(0.45, 0.4, 0.45), Vector3(0, 1.4, 0), _voxel_mat(Color(0.95, 0.75, 0.6)))
-	_box(_visual, Vector3(0.6, 0.25, 0.6), Vector3(0, 1.68, 0), _voxel_mat(Color(0.85, 0.15, 0.1) if not elite else Color(0.9, 0.75, 0.1)))
-	_box(_visual, Vector3(0.62, 0.08, 0.62), Vector3(0, 1.56, 0), _voxel_mat(Color(0.7, 0.1, 0.08)))
+	_box(_visual, Vector3(0.6, 0.25, 0.6), Vector3(0, 1.68, 0), _voxel_mat(helm))
+	_box(_visual, Vector3(0.62, 0.08, 0.62), Vector3(0, 1.56, 0), _voxel_mat(Color(0.7, 0.1, 0.08) if not elite else Color(0.8, 0.7, 0.15)))
 	_box(_visual, Vector3(0.15, 0.15, 0.7), Vector3(0.3, 1.0, 0.4), _voxel_mat(Color(0.3, 0.3, 0.32)))
+	if elite:
+		var lamp := OmniLight3D.new()
+		lamp.light_color = Color(0.8, 0.95, 1.0)
+		lamp.light_energy = 1.4
+		lamp.omni_range = 3.5
+		lamp.position = Vector3(0, 1.7, 0.35)
+		_visual.add_child(lamp)
+		_box(_visual, Vector3(0.18, 0.14, 0.12), Vector3(0, 1.7, 0.32), _voxel_mat(Color(0.85, 0.95, 1.0), true))
 
 
 func _build_water() -> void:
@@ -117,6 +136,91 @@ func _build_water() -> void:
 	_water_particles.draw_pass_1 = cube
 	_water_particles.position = Vector3(0.3, 1.0, 0.6)
 	add_child(_water_particles)
+
+
+func _build_telegraph() -> void:
+	_telegraph_root = Node3D.new()
+	_telegraph_root.name = "FirefighterTelegraph"
+	_telegraph_root.top_level = true
+	add_child(_telegraph_root)
+
+	_telegraph_mat = StandardMaterial3D.new()
+	_telegraph_mat.albedo_color = Color(0.25, 0.75, 1.0, 0.6)
+	_telegraph_mat.emission_enabled = true
+	_telegraph_mat.emission = Color(0.2, 0.68, 0.95)
+	_telegraph_mat.emission_energy_multiplier = 1.5
+	_telegraph_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_telegraph_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+
+	# Aim line connecting firefighter to committed target house (SPEC 6.7)
+	_aim_line_mesh = ImmediateMesh.new()
+	_aim_line_instance = MeshInstance3D.new()
+	_aim_line_instance.mesh = _aim_line_mesh
+	_telegraph_root.add_child(_aim_line_instance)
+
+	# Target ring on the ground at the committed house (SPEC 6.7)
+	_reticle_mesh = ImmediateMesh.new()
+	_reticle_instance = MeshInstance3D.new()
+	_reticle_instance.mesh = _reticle_mesh
+	_telegraph_root.add_child(_reticle_instance)
+
+	_draw_reticle_ring()
+	_telegraph_root.hide()
+
+
+func _draw_reticle_ring() -> void:
+	if _reticle_mesh == null or _telegraph_mat == null:
+		return
+	_reticle_mesh.clear_surfaces()
+	_reticle_mesh.surface_begin(Mesh.PRIMITIVE_LINES, _telegraph_mat)
+	var segs := 20
+	var r := 1.7
+	for i in segs:
+		var a1 := float(i) * TAU / float(segs)
+		var a2 := float(i + 1) * TAU / float(segs)
+		var p1 := Vector3(cos(a1) * r, 0.04, sin(a1) * r)
+		var p2 := Vector3(cos(a2) * r, 0.04, sin(a2) * r)
+		_reticle_mesh.surface_add_vertex(p1)
+		_reticle_mesh.surface_add_vertex(p2)
+	# Cross tick marks
+	_reticle_mesh.surface_add_vertex(Vector3(-r * 1.3, 0.04, 0))
+	_reticle_mesh.surface_add_vertex(Vector3(-r * 0.75, 0.04, 0))
+	_reticle_mesh.surface_add_vertex(Vector3(r * 0.75, 0.04, 0))
+	_reticle_mesh.surface_add_vertex(Vector3(r * 1.3, 0.04, 0))
+	_reticle_mesh.surface_add_vertex(Vector3(0, 0.04, -r * 1.3))
+	_reticle_mesh.surface_add_vertex(Vector3(0, 0.04, -r * 0.75))
+	_reticle_mesh.surface_add_vertex(Vector3(0, 0.04, r * 0.75))
+	_reticle_mesh.surface_add_vertex(Vector3(0, 0.04, r * 1.3))
+	_reticle_mesh.surface_end()
+
+
+func _update_target_telegraph() -> void:
+	if _telegraph_root == null:
+		return
+	if is_burning() or retreating or _dead or target_house == null or not is_instance_valid(target_house) or target_house.state != VoxelHouse.State.BURNING:
+		_telegraph_root.hide()
+		return
+
+	_telegraph_root.show()
+	_reticle_instance.global_position = target_house.global_position
+
+	# Draw dashed aim line from firefighter to target house
+	_aim_line_mesh.clear_surfaces()
+	_aim_line_mesh.surface_begin(Mesh.PRIMITIVE_LINES, _telegraph_mat)
+	var p_start := global_position + Vector3(0, 0.5, 0)
+	var p_end := target_house.global_position + Vector3(0, 0.5, 0)
+	var to_end := p_end - p_start
+	var total_len := to_end.length()
+	var step := 0.75
+	var segs := int(total_len / step)
+	var dir_norm := to_end.normalized()
+	for i in segs:
+		if i % 2 == 0:
+			var s1 := p_start + dir_norm * (float(i) * step)
+			var s2 := p_start + dir_norm * minf(total_len, float(i + 1) * step)
+			_aim_line_mesh.surface_add_vertex(s1)
+			_aim_line_mesh.surface_add_vertex(s2)
+	_aim_line_mesh.surface_end()
 
 
 func _build_bubble() -> void:
@@ -181,6 +285,7 @@ func _physics_process(delta: float) -> void:
 	if retreating and not is_burning():
 		_retreat_t -= delta
 		_set_spray(false)
+		_update_target_telegraph()
 		var to_home := home_pos - global_position
 		to_home.y = 0.0
 		if to_home.length() < 1.5 or _retreat_t <= 0.0:
@@ -190,13 +295,28 @@ func _physics_process(delta: float) -> void:
 		_move(to_home.normalized(), delta)
 		return
 	if is_burning():
+		_update_target_telegraph()
 		_physics_flee(delta)
 		return
-	_retarget_t -= delta
-	if _retarget_t <= 0.0 or not is_instance_valid(target_house) or target_house.state != VoxelHouse.State.BURNING:
+
+	# Target commitment (SPEC Section 6.7: commits for >= 6 seconds unless fire goes out)
+	if commit_timer > 0.0:
+		commit_timer -= delta
+
+	var need_retarget := false
+	if target_house == null or not is_instance_valid(target_house):
+		need_retarget = true
+	elif target_house.state != VoxelHouse.State.BURNING:
+		need_retarget = true
+	elif commit_timer <= 0.0:
+		need_retarget = true
+
+	if need_retarget:
 		target_house = _find_best_fire()
-		_retarget_t = 0.7
+		commit_timer = randf_range(COMMITMENT_MIN, COMMITMENT_MIN + 1.5)
 		_check_catch_fire()
+
+	_update_target_telegraph()
 
 	if target_house == null or not is_instance_valid(target_house):
 		_set_spray(false)
@@ -340,6 +460,7 @@ func _on_burn_death() -> void:
 		return
 	_dead = true
 	_set_spray(false)
+	_update_target_telegraph()
 	if is_in_group("firefighters"):
 		remove_from_group("firefighters")
 	if is_in_group("flammable"):

@@ -34,6 +34,7 @@ var helicopter_active: bool = false
 var helicopter_timer: float = 0.0
 var helicopter_cooldown: float = 48.0
 var helicopter_target_pos: Vector3 = Vector3.ZERO
+var _no_fire_timer: float = 0.0
 
 
 func setup(p_level_idx: int, p_units_root: Node3D, p_houses: Array[VoxelHouse], p_cam_bound: float, p_shaman: VoxelShaman) -> void:
@@ -55,6 +56,7 @@ func setup(p_level_idx: int, p_units_root: Node3D, p_houses: Array[VoxelHouse], 
 	helicopter_timer = 0.0
 	helicopter_cooldown = 48.0
 	helicopter_target_pos = Vector3.ZERO
+	_no_fire_timer = 0.0
 
 
 func tick(delta: float, elapsed: float, starter_ignited: bool, burning_count: int, game_over: bool) -> void:
@@ -65,6 +67,15 @@ func tick(delta: float, elapsed: float, starter_ignited: bool, burning_count: in
 	_tick_buckets(delta, burning_count, game_over)
 
 	if starter_ignited and not game_over:
+		if firefighter_spawned and burning_count == 0:
+			_no_fire_timer += delta
+			if _no_fire_timer >= 6.0:
+				for f in get_tree().get_nodes_in_group("firefighters"):
+					if is_instance_valid(f) and f is VoxelFirefighter and not (f as VoxelFirefighter).retreating:
+						(f as VoxelFirefighter).begin_retreat()
+		else:
+			_no_fire_timer = 0.0
+
 		_tick_firefighter_escalation(elapsed)
 		_tick_shaman_ritual(elapsed, burning_count)
 		_tick_helicopter(delta, elapsed, burning_count)
@@ -80,9 +91,9 @@ func _tick_alarm(delta: float, burning_count: int) -> void:
 
 	var target := 0.0
 	if spotted:
-		target = clampf(20.0 + float(burning_count) * 15.0, 0.0, 100.0)
+		target = clampf(25.0 + float(burning_count) * 15.0, 0.0, 100.0)
 	else:
-		target = clampf(float(burning_count) * 4.0, 0.0, 12.0)
+		target = clampf(float(burning_count) * 6.0, 0.0, 15.0)
 
 	if target > alarm:
 		alarm = minf(target, alarm + 8.0 * delta)
@@ -124,11 +135,11 @@ func _pick_bucket_target() -> VoxelHouse:
 
 func _tick_buckets(_delta: float, burning_count: int, game_over: bool) -> void:
 	var allowed := 0
-	if alarm >= 40.0 and burning_count >= 1:
+	if (spotted or alarm >= 25.0) and burning_count >= 1:
 		allowed = 1
-	if alarm >= 60.0 and burning_count >= 2:
+	if alarm >= 45.0 and burning_count >= 2:
 		allowed = 2
-	if alarm >= 75.0 and burning_count >= 5:
+	if alarm >= 65.0 and burning_count >= 3:
 		allowed = 3
 	allowed = mini(allowed, BUCKET_MAX)
 
