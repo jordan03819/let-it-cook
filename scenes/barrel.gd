@@ -183,6 +183,14 @@ func _process(delta: float) -> void:
 	if wetness > 0.0 and state == State.UNBURNED:
 		wetness = maxf(0.0, wetness - delta * 0.05)
 
+	if state == State.UNBURNED:
+		if heat > 0.04 and _barrel_mat != null:
+			_barrel_mat.emission_enabled = true
+			_barrel_mat.emission = Color(1.0, 0.35, 0.08)
+			_barrel_mat.emission_energy_multiplier = heat * 2.2
+		elif _barrel_mat != null:
+			_barrel_mat.emission_energy_multiplier = 0.0
+
 	if state == State.PRIMED:
 		prime_timer -= delta
 		if _danger_label != null and is_instance_valid(_danger_label):

@@ -60,6 +60,23 @@ var wind_cone_preview: MeshInstance3D = null
 var wind_cone_mesh: ImmediateMesh = null
 var wind_cone_mat: StandardMaterial3D = null
 
+# Hover Inspection & In-World Feedback (SPEC Section 6.4)
+var hover_badge: Node3D = null
+var hover_label: Label3D = null
+var hover_target: Node3D = null
+var hover_alpha: float = 0.0
+
+# Wind Gust Forecast & Connection Lines (SPEC Section 6.4 & 7.4)
+var wind_lines_preview: MeshInstance3D = null
+var wind_lines_mesh: ImmediateMesh = null
+var wind_lines_mat: StandardMaterial3D = null
+var forecast_label_pool: Array[Label3D] = []
+
+# Directional Ember Trails between active heat connections (SPEC Section 6.4)
+var heat_links_preview: MeshInstance3D = null
+var heat_links_mesh: ImmediateMesh = null
+var heat_links_mat: StandardMaterial3D = null
+
 # Fire strength & Last Spark (SPEC Section 6.9 & 8.3)
 var fire_strength: float = 60.0
 var last_spark_available: bool = true
@@ -109,6 +126,7 @@ func _ready() -> void:
 	_setup_subsystems()
 	_setup_hud()
 	_setup_wind_cone_preview()
+	_setup_tactical_feedback()
 
 	if not restart_button.pressed.is_connected(_on_restart):
 		restart_button.pressed.connect(_on_restart)
@@ -196,6 +214,71 @@ func _setup_wind_cone_preview() -> void:
 	wind_cone_preview.hide()
 
 
+func _setup_tactical_feedback() -> void:
+	# 1. Hover Badge (in-world inspection, SPEC Section 6.4)
+	hover_badge = Node3D.new()
+	hover_badge.name = "HoverBadge"
+	add_child(hover_badge)
+
+	hover_label = Label3D.new()
+	hover_label.name = "HoverLabel"
+	hover_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	hover_label.no_depth_test = true
+	hover_label.render_priority = 10
+	hover_label.font_size = 38
+	hover_label.pixel_size = 0.009
+	hover_label.outline_size = 14
+	hover_label.outline_modulate = Color(0.0, 0.0, 0.0, 1.0)
+	hover_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hover_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	hover_badge.add_child(hover_label)
+	hover_badge.hide()
+
+	# 2. Wind Connection Lines Mesh
+	wind_lines_preview = MeshInstance3D.new()
+	wind_lines_preview.name = "WindLinesPreview"
+	wind_lines_mesh = ImmediateMesh.new()
+	wind_lines_preview.mesh = wind_lines_mesh
+
+	wind_lines_mat = StandardMaterial3D.new()
+	wind_lines_mat.vertex_color_use_as_albedo = true
+	wind_lines_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	wind_lines_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	wind_lines_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	add_child(wind_lines_preview)
+	wind_lines_preview.hide()
+
+	# 3. Forecast Label Pool for Wind Aiming
+	for i in 20:
+		var fl := Label3D.new()
+		fl.name = "ForecastLabel_%d" % i
+		fl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		fl.no_depth_test = true
+		fl.render_priority = 10
+		fl.font_size = 34
+		fl.pixel_size = 0.0085
+		fl.outline_size = 12
+		fl.outline_modulate = Color(0.0, 0.0, 0.0, 1.0)
+		fl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		fl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		add_child(fl)
+		fl.hide()
+		forecast_label_pool.append(fl)
+
+	# 4. Directional Ember Trails Mesh
+	heat_links_preview = MeshInstance3D.new()
+	heat_links_preview.name = "HeatLinksPreview"
+	heat_links_mesh = ImmediateMesh.new()
+	heat_links_preview.mesh = heat_links_mesh
+
+	heat_links_mat = StandardMaterial3D.new()
+	heat_links_mat.vertex_color_use_as_albedo = true
+	heat_links_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	heat_links_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	heat_links_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	add_child(heat_links_preview)
+
+
 # ---------- Level Loading & Lifecycle ----------
 func _load_level() -> void:
 	_clear_level()
@@ -270,6 +353,18 @@ func _clear_level() -> void:
 	if active_gust_visual != null and is_instance_valid(active_gust_visual):
 		active_gust_visual.queue_free()
 		active_gust_visual = null
+
+	if hover_badge != null:
+		hover_badge.hide()
+	hover_alpha = 0.0
+	hover_target = null
+	if heat_links_mesh != null:
+		heat_links_mesh.clear_surfaces()
+	if wind_lines_mesh != null:
+		wind_lines_mesh.clear_surfaces()
+	for fl in forecast_label_pool:
+		if is_instance_valid(fl):
+			fl.hide()
 
 	starter_house = null
 	starter_ignited = false
@@ -388,6 +483,8 @@ func _process(delta: float) -> void:
 			return
 
 	_update_hud()
+	_update_hover_inspection(delta)
+	_update_directional_embers(delta)
 
 
 # ---------- Event & Signal Handlers ----------
@@ -735,6 +832,12 @@ func _update_wind_cone_preview(origin: Vector3, dir: Vector3, valid: bool) -> vo
 	if wind_cone_mesh == null:
 		return
 	wind_cone_mesh.clear_surfaces()
+	if wind_lines_mesh != null:
+		wind_lines_mesh.clear_surfaces()
+
+	for fl in forecast_label_pool:
+		if is_instance_valid(fl):
+			fl.hide()
 
 	var col: Color
 	if not valid:
@@ -751,7 +854,7 @@ func _update_wind_cone_preview(origin: Vector3, dir: Vector3, valid: bool) -> vo
 
 	var half_angle := WIND_GUST_HALF_ANGLE
 	var base_angle := atan2(dir.x, dir.z)
-	var segments := 20
+	var segments := 24
 	var radius := WIND_GUST_RANGE
 	var y_off := 0.25
 	var center := origin + Vector3(0, y_off, 0)
@@ -779,25 +882,199 @@ func _update_wind_cone_preview(origin: Vector3, dir: Vector3, valid: bool) -> vo
 	wind_cone_mesh.surface_end()
 	wind_cone_preview.show()
 
-	# Highlight structures inside cone that receive boosted heat
-	if valid and embers >= WIND_GUST_COST and wind_cooldown <= 0.0:
-		for h in houses:
-			if is_instance_valid(h) and h.state == VoxelHouse.State.UNBURNED and h.kind != "stone":
-				var to_h := h.global_position - origin
-				to_h.y = 0.0
-				if to_h.length() <= radius and to_h.normalized().dot(dir) >= cos(half_angle):
-					h._flash = maxf(h._flash, 0.4)
-		for b in barrels:
-			if is_instance_valid(b) and b.state == VoxelBarrel.State.UNBURNED:
-				var to_b := b.global_position - origin
-				to_b.y = 0.0
-				if to_b.length() <= radius and to_b.normalized().dot(dir) >= cos(half_angle):
-					b.add_heat(0.04)
+	if not valid:
+		if wind_lines_preview != null:
+			wind_lines_preview.hide()
+		return
+
+	# Draw connection lines and forecast badges for structures inside cone (SPEC Section 6.4)
+	if wind_lines_mesh != null:
+		wind_lines_mesh.surface_begin(Mesh.PRIMITIVE_LINES, wind_lines_mat)
+
+	var label_idx := 0
+	var p_src := origin + Vector3(0, 1.2, 0)
+
+	var targets: Array[Node3D] = []
+	for h in houses:
+		if is_instance_valid(h):
+			targets.append(h)
+	for b in barrels:
+		if is_instance_valid(b):
+			targets.append(b)
+
+	for tgt in targets:
+		var eval := fire_sim.evaluate_spread_state(tgt, origin, dir, true, weather.rain_active)
+		if not eval.get("inside_cone", false):
+			continue
+
+		var tgt_pos := tgt.global_position + Vector3(0, 1.2, 0)
+		var line_col: Color = eval.color
+		line_col.a = 0.92
+
+		# Draw connection ray (with small parallel offset for thickness)
+		var ray_dir := (tgt_pos - p_src).normalized()
+		var ray_side := ray_dir.cross(Vector3.UP).normalized() * 0.05
+		wind_lines_mesh.surface_set_color(line_col)
+		wind_lines_mesh.surface_add_vertex(p_src + ray_side)
+		wind_lines_mesh.surface_set_color(line_col)
+		wind_lines_mesh.surface_add_vertex(tgt_pos + ray_side)
+		wind_lines_mesh.surface_set_color(line_col)
+		wind_lines_mesh.surface_add_vertex(p_src - ray_side)
+		wind_lines_mesh.surface_set_color(line_col)
+		wind_lines_mesh.surface_add_vertex(tgt_pos - ray_side)
+
+		# Draw directional chevron at target end
+		var p_arrow_l := tgt_pos - ray_dir * 0.7 + ray_side * 7.0
+		var p_arrow_r := tgt_pos - ray_dir * 0.7 - ray_side * 7.0
+		wind_lines_mesh.surface_set_color(line_col)
+		wind_lines_mesh.surface_add_vertex(tgt_pos)
+		wind_lines_mesh.surface_set_color(line_col)
+		wind_lines_mesh.surface_add_vertex(p_arrow_l)
+		wind_lines_mesh.surface_set_color(line_col)
+		wind_lines_mesh.surface_add_vertex(tgt_pos)
+		wind_lines_mesh.surface_set_color(line_col)
+		wind_lines_mesh.surface_add_vertex(p_arrow_r)
+
+		# Display forecast badge above target
+		if label_idx < forecast_label_pool.size():
+			var lbl := forecast_label_pool[label_idx]
+			var y_h := 2.6
+			if tgt is VoxelHouse:
+				y_h = (tgt as VoxelHouse).house_size.y + 1.8
+			elif tgt is VoxelBarrel:
+				y_h = 2.2
+			lbl.global_position = tgt.global_position + Vector3(0, y_h, 0)
+			lbl.text = "[ %s ]\n%s" % [eval.status.to_upper(), eval.detail]
+			lbl.modulate = eval.color
+			lbl.show()
+			label_idx += 1
+
+		# House rim flash
+		if tgt is VoxelHouse:
+			tgt._flash = maxf(tgt._flash, 0.45)
+
+	if wind_lines_mesh != null:
+		wind_lines_mesh.surface_end()
+		wind_lines_preview.show()
 
 
 func _hide_wind_cone_preview() -> void:
 	if wind_cone_preview != null and is_instance_valid(wind_cone_preview):
 		wind_cone_preview.hide()
+	if wind_lines_preview != null and is_instance_valid(wind_lines_preview):
+		wind_lines_preview.hide()
+	if wind_lines_mesh != null:
+		wind_lines_mesh.clear_surfaces()
+	for fl in forecast_label_pool:
+		if is_instance_valid(fl):
+			fl.hide()
+
+
+func _update_hover_inspection(delta: float) -> void:
+	if game_over or get_tree().paused or aiming_wind:
+		hover_alpha = move_toward(hover_alpha, 0.0, delta * 8.0)
+		if hover_label != null:
+			hover_label.modulate.a = hover_alpha
+		if hover_badge != null and hover_alpha <= 0.01:
+			hover_badge.hide()
+		return
+
+	var mp := get_viewport().get_mouse_position()
+	var obj := _pick_object(mp)
+
+	if obj != null and (obj is VoxelHouse or obj is VoxelBarrel or obj is VoxelShaman):
+		hover_target = obj as Node3D
+		var eval := fire_sim.evaluate_spread_state(hover_target, Vector3.ZERO, Vector3.FORWARD, false, weather.rain_active)
+
+		var y_off := 2.6
+		if hover_target is VoxelHouse:
+			y_off = (hover_target as VoxelHouse).house_size.y + 1.8
+		elif hover_target is VoxelBarrel:
+			y_off = 2.2
+
+		var target_pos := hover_target.global_position + Vector3(0, y_off, 0)
+		if not hover_badge.visible:
+			hover_badge.global_position = target_pos
+			hover_badge.show()
+		else:
+			hover_badge.global_position = hover_badge.global_position.lerp(target_pos, minf(1.0, delta * 20.0))
+
+		if hover_target == starter_house and not starter_ignited:
+			hover_label.text = "[ STARTER HOUSE ]\nFree Spark! Click to ignite."
+			hover_label.modulate = Color(1.0, 0.85, 0.2)
+			if _hint_t <= 0.0 and hint_label != null:
+				hint_label.text = "Inspect: [STARTER] Free initial spark! Click to ignite."
+				hint_label.modulate.a = 0.9
+		else:
+			hover_label.text = "[ %s ]\n%s" % [eval.status.to_upper(), eval.detail]
+			hover_label.modulate = eval.color
+			if _hint_t <= 0.0 and hint_label != null:
+				hint_label.text = "Inspect: [%s] %s" % [eval.status.to_upper(), eval.detail]
+				hint_label.modulate.a = 0.9
+
+		hover_alpha = move_toward(hover_alpha, 1.0, delta * 10.0)
+		hover_label.modulate.a = hover_alpha
+	else:
+		hover_target = null
+		hover_alpha = move_toward(hover_alpha, 0.0, delta * 6.0)
+		if hover_label != null:
+			hover_label.modulate.a = hover_alpha
+		if hover_badge != null and hover_alpha <= 0.01:
+			hover_badge.hide()
+
+
+func _update_directional_embers(_delta: float) -> void:
+	if heat_links_mesh == null:
+		return
+	heat_links_mesh.clear_surfaces()
+
+	if game_over or get_tree().paused or aiming_wind:
+		if heat_links_preview != null:
+			heat_links_preview.hide()
+		return
+
+	if fire_sim == null or fire_sim.active_heat_links.is_empty():
+		if heat_links_preview != null:
+			heat_links_preview.hide()
+		return
+
+	heat_links_mesh.surface_begin(Mesh.PRIMITIVE_LINES, heat_links_mat)
+	var t_cycle := fmod(elapsed * 2.2, 1.0)
+
+	for link in fire_sim.active_heat_links:
+		var src: Node3D = link.get("src")
+		var dst: Node3D = link.get("dst")
+		var power: float = float(link.get("power", 0.0))
+		if not is_instance_valid(src) or not is_instance_valid(dst):
+			continue
+
+		var p1 := src.global_position + Vector3(0, 1.1, 0)
+		var p2 := dst.global_position + Vector3(0, 1.1, 0)
+		var link_vec := p2 - p1
+		var link_len := link_vec.length()
+		if link_len < 0.2:
+			continue
+
+		var alpha := clampf(power * 0.35, 0.3, 0.9)
+		var ember_col := Color(1.0, 0.72, 0.15, alpha)
+
+		# Draw travelling ember dashes from burning src to receiving dst
+		for k in 2:
+			var frac := fmod(t_cycle + float(k) * 0.5, 1.0)
+			var dash_start := p1 + link_vec * frac
+			var dash_end := p1 + link_vec * minf(1.0, frac + 0.22)
+			# Arched arc in Y
+			var arch := sin(frac * PI) * 0.55
+			dash_start.y += arch
+			dash_end.y += arch
+			heat_links_mesh.surface_set_color(ember_col)
+			heat_links_mesh.surface_add_vertex(dash_start)
+			heat_links_mesh.surface_set_color(ember_col)
+			heat_links_mesh.surface_add_vertex(dash_end)
+
+	heat_links_mesh.surface_end()
+	if heat_links_preview != null:
+		heat_links_preview.show()
 
 
 # ---------- Raycast Helpers ----------

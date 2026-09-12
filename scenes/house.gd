@@ -47,6 +47,11 @@ var _flash: float = 0.0
 var _mat_base: StandardMaterial3D
 var _mat_roof: StandardMaterial3D
 
+# Progressive pre-ignition in-world feedback (SPEC Section 6.4)
+var _warmth_root: Node3D = null
+var _smoke_warmth: GPUParticles3D = null
+var _sparks_warmth: GPUParticles3D = null
+
 
 func setup(p_base_color: Color, p_roof_color: Color, p_fuel: float, p_size: Vector3, p_kind: String = "house") -> void:
 	base_color = p_base_color
@@ -69,6 +74,7 @@ func _ready() -> void:
 	_build_collision()
 	_build_visuals()
 	_build_fire_visuals()
+	_build_warmth_visuals()
 	_set_fire_visible(false)
 
 
@@ -286,9 +292,38 @@ func _make_voxel_particles(col: Color, cube_size: Vector3, amount: int, lifetime
 	return p
 
 
+func _build_warmth_visuals() -> void:
+	if _warmth_root != null and is_instance_valid(_warmth_root):
+		_warmth_root.queue_free()
+	_warmth_root = Node3D.new()
+	_warmth_root.name = "WarmthVisual"
+	_warmth_root.position = Vector3(0, house_size.y + 0.2, 0)
+	add_child(_warmth_root)
+
+	# Faint smoke for heat >= 0.12 (SPEC 6.4: "1. Warm edge or faint smoke: receiving heat")
+	_smoke_warmth = _make_voxel_particles(Color(0.42, 0.40, 0.40, 0.65), Vector3(0.14, 0.14, 0.14), 10, 1.6, Vector3(0, 2.2, 0), 0.7)
+	_warmth_root.add_child(_smoke_warmth)
+	_smoke_warmth.emitting = false
+
+	# Scorching sparks for heat >= 0.55 (SPEC 6.4: "2. Scorching and sparks: likely to ignite soon")
+	_sparks_warmth = _make_voxel_particles(Color(1.0, 0.65, 0.1), Vector3(0.08, 0.08, 0.08), 14, 0.9, Vector3(0, 3.2, 0), 1.2)
+	_warmth_root.add_child(_sparks_warmth)
+	_sparks_warmth.emitting = false
+
+
 func _set_fire_visible(v: bool) -> void:
 	if _fire_root:
 		_fire_root.visible = v
+	if v:
+		if _warmth_root != null:
+			_warmth_root.visible = false
+		if _smoke_warmth != null:
+			_smoke_warmth.emitting = false
+		if _sparks_warmth != null:
+			_sparks_warmth.emitting = false
+	else:
+		if _warmth_root != null:
+			_warmth_root.visible = true
 
 
 # --- core verb: lighting. No conditions besides state. ---
@@ -563,6 +598,32 @@ func _process(delta: float) -> void:
 		return
 
 	if state != State.BURNING:
+		if _smoke_warmth != null:
+			if state == State.UNBURNED and kind != "stone":
+				if wetness > 0.2 and heat > 0.04:
+					# Steaming droplets cooling the structure (SPEC 6.4: "4. Wet sheen or droplets")
+					_smoke_warmth.emitting = true
+					var pm := _smoke_warmth.process_material as ParticleProcessMaterial
+					if pm != null:
+						pm.color = Color(0.85, 0.92, 1.0, 0.75)
+					if _sparks_warmth != null:
+						_sparks_warmth.emitting = false
+				elif heat > 0.12:
+					_smoke_warmth.emitting = true
+					var pm := _smoke_warmth.process_material as ParticleProcessMaterial
+					if pm != null:
+						pm.color = Color(0.35, 0.33, 0.33, 0.5 + heat * 0.4)
+					if _sparks_warmth != null:
+						_sparks_warmth.emitting = (heat >= 0.55)
+				else:
+					_smoke_warmth.emitting = false
+					if _sparks_warmth != null:
+						_sparks_warmth.emitting = false
+			else:
+				_smoke_warmth.emitting = false
+				if _sparks_warmth != null:
+					_sparks_warmth.emitting = false
+
 		if _mat_base != null:
 			if state == State.BURNT:
 				_mat_base.emission = Color(1.0, 0.3, 0.05)
@@ -570,19 +631,28 @@ func _process(delta: float) -> void:
 			elif _flash > 0.0:
 				_mat_base.emission = Color(1.0, 0.5, 0.1)
 				_mat_base.emission_energy_multiplier = _flash * 1.6
-			elif state == State.UNBURNED and heat > 0.02:
+			elif state == State.UNBURNED and heat > 0.02 and kind != "stone":
 				# Warming forecast: hotter = brighter orange rim. This IS the UI.
 				_mat_base.emission = Color(1.0, 0.45, 0.1)
-				_mat_base.emission_energy_multiplier = heat * 1.2
+				_mat_base.emission_energy_multiplier = heat * 1.5
+				if _mat_roof != null:
+					_mat_roof.emission_enabled = true
+					_mat_roof.emission = Color(1.0, 0.35, 0.08)
+					_mat_roof.emission_energy_multiplier = heat * 1.2
 			else:
 				_mat_base.emission_energy_multiplier = 0.0
+				if _mat_roof != null and not _scorched:
+					_mat_roof.emission_energy_multiplier = 0.0
 
 			# Wet sheen visual feedback: darker wood and glossy roughness when wet
 			if state == State.UNBURNED:
 				var wet_factor := 1.0 - wetness * 0.38
-				var target_col := (base_color * 0.55 if _scorched else base_color) * wet_factor
+				var scorch_factor := (1.0 - (heat - 0.45) * 0.5) if (heat > 0.45 and not _scorched) else 1.0
+				var target_col := (base_color * 0.55 if _scorched else base_color * scorch_factor) * wet_factor
 				_mat_base.albedo_color = target_col
 				_mat_base.roughness = clampf(1.0 - wetness * 0.7, 0.25, 1.0)
+				if _mat_roof != null and not _scorched:
+					_mat_roof.albedo_color = roof_color * scorch_factor * wet_factor
 		return
 
 	# Burning: simple fuel countdown, local flicker clock (no global sim).

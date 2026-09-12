@@ -39,6 +39,8 @@ var catch_cd: float = 0.0
 func _ready() -> void:
 	add_to_group("shamans")
 	add_to_group("flammable")
+	collision_layer = 2
+	collision_mask = 0
 	_build_collision()
 	_build_visuals()
 	_build_ritual_vfx()
