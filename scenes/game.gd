@@ -1,78 +1,115 @@
 extends Node3D
-## Let It Cook — REFORMED foundation (strategic heat-spread).
-## - Houses: manual light (1 match) + deterministic heat-chain, 60-75s burn, refund 1.
-## - Forest: same heat, faster (fuse). No dice anywhere.
-## - Matches: start 6-7, +1/30s up to 12. Win on burn %.
+## Let It Cook — Strategy Fire Deity Foundation
+## Phase 1: Ember economy, starter ignition, RMB Wind Gust cone, Fire Strength, Last Spark, 100% settlement goal.
 
 const HOUSE_SCENE := preload("res://scenes/house.tscn")
 const VILLAGER_SCENE := preload("res://scenes/villager.tscn")
 
 const LEVELS := [
-	{"name": "VILLAGE", "sub": "Lookouts + crews + demolitions", "grid_half": 4, "spacing": 4.2, "matches": 6, "win": 55.0, "villagers": 7, "demos": 3},
-	{"name": "TOWN", "sub": "Denser streets", "grid_half": 5, "spacing": 4.0, "matches": 6, "win": 70.0, "villagers": 0, "demos": 0},
-	{"name": "CITY", "sub": "Big cook", "grid_half": 6, "spacing": 3.8, "matches": 7, "win": 75.0, "villagers": 0, "demos": 0},
+	{"name": "VILLAGE", "sub": "Clusters & Bucket Brigades", "grid_half": 4, "spacing": 4.2, "villagers": 7},
+	{"name": "TOWN", "sub": "Denser Streets & Water Channels", "grid_half": 5, "spacing": 4.0, "villagers": 0},
+	{"name": "CITY", "sub": "Firebreaks & Metropolitan Districts", "grid_half": 6, "spacing": 3.8, "villagers": 0},
 ]
 
-# Strategic heat-spread (deterministic, no dice):
-# - UNBURNED buildings warm from each burning neighbor in radius.
-# - house: 0.045/s per burner (~22s solo, ~11s with 2) | tree: 0.16/s (~6s)
-# - decay 0.02/s with no burner nearby. Gaps > radius = natural firebreak.
-const HOUSE_RADIUS := 4.7
+# Spread simulation tuning
+const HOUSE_RADIUS := 4.8
 const TREE_RADIUS := 4.5
-const HOUSE_HEAT := 0.028
+const HOUSE_HEAT := 0.030
 const TREE_HEAT := 0.13
-# Grass fire heats walls poorly: tree->house counts half. Fuse carries,
-# but town still needs your matches — the intended decision.
-const HEAT_DECAY := 0.03
-const MATCH_REGEN := 30.0
-const MATCH_MAX := 12
-# Wind (self-shifting, not controllable): biases heat by direction.
-# weight = 1 + align * strength * WIND_BIAS, min 0.2. Downwind ~1.8x, upwind ~0.2x.
-const BUCKET_MAX := 3
-const BUCKET_RANGE := 4.5
-const BUCKET_COOL := 0.5
-const BUCKET_DRAIN := 2.0
-const BUCKET_TICK := 1.0
-const DEMO_COOLDOWN := 20.0
+const HEAT_DECAY := 0.025
+
+# Prevailing ambient wind
 const WIND_BIAS := 0.8
 const WIND_SHIFT_MIN := 22.0
 const WIND_SHIFT_MAX := 34.0
+
+# Ember economy (SPEC Section 6.5)
+const EMBER_START: int = 2
+const EMBER_MAX: int = 5
+const EMBER_REWARD_COOLDOWN: float = 8.0
+const ANTI_STALL_DELAY: float = 12.0
+const MANUAL_IGNITE_COST: int = 3
+const WIND_GUST_COST: int = 1
+const LAST_SPARK_COST: int = 1
+
+# Local Wind Gust ability (SPEC Section 6.6 & 7.3 & 7.4)
+const WIND_COOLDOWN_MAX: float = 6.0
+const WIND_GUST_DURATION: float = 4.0
+const WIND_GUST_RANGE: float = 8.5
+const WIND_GUST_HALF_ANGLE: float = deg_to_rad(30.0) # 60-degree cone total
+
+# Bucket brigade tuning
+const BUCKET_MAX: int = 3
+const BUCKET_RANGE: float = 4.5
+const BUCKET_COOL: float = 0.4
+const BUCKET_DRAIN: float = 1.8
+const BUCKET_TICK: float = 1.0
 
 var cfg: Dictionary = LEVELS[0]
 var level_idx: int = 0
 
 var houses: Array[VoxelHouse] = []
-var matches: int = 5
+var mandatory_houses: Array[VoxelHouse] = []
+var burnt_mandatory: int = 0
 var burn_percent: float = 0.0
-var game_over: bool = false
-var won: bool = false
-var elapsed: float = 0.0
-var cam_bound: float = 16.0
-var edge_pan: bool = false
-var match_tick: float = 0.0
-var spotted: bool = false
-var alarm: float = 0.0
-var _alarm70_warned: bool = false
-var demo_used: int = 0
-var demo_max: int = 1
-var demo_target: VoxelHouse = null
-var demo_timer: float = 0.0
-var demo_cooldown: float = 0.0
-var splash_tick: float = 0.0
-var _buckets_warned: bool = false
-const DEMO_WARN := 15.0
-var demo_marker: Label3D = null
+
+# Economy & ability state
+var embers: int = EMBER_START
+var ember_reward_timer: float = 0.0
+var anti_stall_timer: float = 0.0
+var starter_ignited: bool = false
+var starter_house: VoxelHouse = null
+
+# Wind Gust state
+var wind_cooldown: float = 0.0
+var aiming_wind: bool = false
+var wind_aim_origin: Vector3 = Vector3.ZERO
+var wind_aim_dir: Vector3 = Vector3.FORWARD
+var wind_aim_dist: float = 0.0
+var wind_aim_valid: bool = false
+
+var active_gust_timer: float = 0.0
+var active_gust_origin: Vector3 = Vector3.ZERO
+var active_gust_dir: Vector3 = Vector3.FORWARD
+var active_gust_visual: Node3D = null
+
+var wind_cone_preview: MeshInstance3D = null
+var wind_cone_mesh: ImmediateMesh = null
+var wind_cone_mat: StandardMaterial3D = null
+
+# Fire strength & Last Spark (SPEC Section 6.9 & 8.3)
+var fire_strength: float = 60.0
+var last_spark_available: bool = true
+var last_spark_active: bool = false
+var last_spark_house: VoxelHouse = null
+var last_spark_timer: float = 0.0
+
+# Ambient wind
 var wind_dir: Vector3 = Vector3(1, 0, 0.3).normalized()
 var wind_strength: float = 1.0
 var _wind_target: Vector3 = Vector3(1, 0, 0.3).normalized()
 var _wind_target_strength: float = 1.0
 var _wind_timer: float = 25.0
 
+# Game loop state
+var game_over: bool = false
+var won: bool = false
+var elapsed: float = 0.0
+var cam_bound: float = 16.0
+var edge_pan: bool = false
+
+# Village response & bucket brigade
+var spotted: bool = false
+var alarm: float = 0.0
+var splash_tick: float = 0.0
+var _buckets_warned: bool = false
+
 @onready var rig: Node3D = $CameraRig
 @onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var village_root: Node3D = $Village
 @onready var units_root: Node3D = $Units
-# HUD: reuse existing nodes, hide the old-sim ones.
+
+# HUD nodes
 @onready var fire_bar: ProgressBar = %FireBar
 @onready var ember_label: Label = %EmberLabel
 @onready var burn_label: Label = %BurnLabel
@@ -94,12 +131,14 @@ var _wind_timer: float = 25.0
 
 func _ready() -> void:
 	randomize()
+	_setup_input_actions()
 	level_idx = clampi(RunState.level, 0, 2)
 	cfg = LEVELS[level_idx]
 	edge_pan = RunState.edge_pan
-	msg_panel.hide()
-	pause_panel.hide()
-	_hide_legacy_hud()
+
+	_setup_hud()
+	_setup_wind_cone_preview()
+
 	if not restart_button.pressed.is_connected(_on_restart):
 		restart_button.pressed.connect(_on_restart)
 	if not menu_button.pressed.is_connected(_on_menu):
@@ -108,28 +147,69 @@ func _ready() -> void:
 		resume_button.pressed.connect(_toggle_pause)
 	if not pause_menu_button.pressed.is_connected(_on_menu):
 		pause_menu_button.pressed.connect(_on_menu)
-	# Old upgrade panel: hide forever (no upgrades in reformed loop).
+
 	var up := get_node_or_null("HUD/UpgradePanel") as PanelContainer
 	if up != null:
 		up.hide()
+
 	_load_level()
 
 
-func _hide_legacy_hud() -> void:
-	# Old sim widgets: FIRE bar + combo hidden. Wind label REUSED for self-shifting wind.
+func _setup_input_actions() -> void:
+	_register_action("camera_up", [KEY_W, KEY_UP])
+	_register_action("camera_down", [KEY_S, KEY_DOWN])
+	_register_action("camera_left", [KEY_A, KEY_LEFT])
+	_register_action("camera_right", [KEY_D, KEY_RIGHT])
+	_register_action("camera_zoom_in", [KEY_E, KEY_EQUAL])
+	_register_action("camera_zoom_out", [KEY_Q, KEY_MINUS])
+	_register_action("pause", [KEY_ESCAPE, KEY_P])
+
+
+func _register_action(action_name: String, keys: Array) -> void:
+	if not InputMap.has_action(action_name):
+		InputMap.add_action(action_name)
+		for k in keys:
+			var ev := InputEventKey.new()
+			ev.physical_keycode = k
+			InputMap.action_add_event(action_name, ev)
+
+
+func _setup_hud() -> void:
 	if fire_bar != null:
-		fire_bar.hide()
-		var fl := get_node_or_null("HUD/TopBar/HBox/FireLabel") as Label
-		if fl != null:
-			fl.hide()
+		fire_bar.show()
+		fire_bar.min_value = 0.0
+		fire_bar.max_value = 100.0
+		fire_bar.value = 60.0
+	var fl := get_node_or_null("HUD/TopBar/Margin/HBox/FireLabel") as Label
+	if fl == null:
+		fl = get_node_or_null("HUD/TopBar/HBox/FireLabel") as Label
+	if fl != null:
+		fl.show()
+		fl.text = "FIRE"
 	if wind_label != null:
 		wind_label.show()
 	if combo_label != null:
 		combo_label.hide()
-	# Clean any ember-pip row the old build may have left in a hot-reload.
-	var pips := get_node_or_null("HUD/TopBar/HBox/EmberPips")
-	if pips != null:
-		pips.queue_free()
+	msg_panel.hide()
+	pause_panel.hide()
+
+
+func _setup_wind_cone_preview() -> void:
+	if wind_cone_preview != null and is_instance_valid(wind_cone_preview):
+		return
+	wind_cone_preview = MeshInstance3D.new()
+	wind_cone_preview.name = "WindConePreview"
+	wind_cone_mesh = ImmediateMesh.new()
+	wind_cone_preview.mesh = wind_cone_mesh
+
+	wind_cone_mat = StandardMaterial3D.new()
+	wind_cone_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	wind_cone_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	wind_cone_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	wind_cone_mat.albedo_color = Color(1.0, 0.55, 0.1, 0.4)
+
+	add_child(wind_cone_preview)
+	wind_cone_preview.hide()
 
 
 func _load_level() -> void:
@@ -138,51 +218,69 @@ func _load_level() -> void:
 	won = false
 	elapsed = 0.0
 	RunState.level_time = 0.0
-	matches = int(cfg["matches"])
-	match_tick = 0.0
-	burn_percent = 0.0
-	spotted = false
-	alarm = 0.0
-	demo_cooldown = 0.0
-	splash_tick = 0.0
-	_buckets_warned = false
-	_alarm70_warned = false
-	demo_used = 0
-	demo_max = int(cfg.get("demos", 0 if level_idx > 0 else 1))
-	demo_target = null
-	demo_timer = 0.0
-	_clear_demo_marker()
-	# Wind starts random, shifts on its own timer.
+
+	# Embers and abilities
+	embers = EMBER_START
+	ember_reward_timer = 0.0
+	anti_stall_timer = 0.0
+	wind_cooldown = 0.0
+	active_gust_timer = 0.0
+	aiming_wind = false
+	_hide_wind_cone_preview()
+
+	# Fire strength & Last Spark
+	fire_strength = 60.0
+	last_spark_available = true
+	last_spark_active = false
+	last_spark_house = null
+	last_spark_timer = 0.0
+
+	# Ambient wind
 	var a0 := randf() * TAU
 	wind_dir = Vector3(cos(a0), 0, sin(a0)).normalized()
 	_wind_target = wind_dir
 	wind_strength = randf_range(0.7, 1.1)
 	_wind_target_strength = wind_strength
 	_wind_timer = randf_range(WIND_SHIFT_MIN, WIND_SHIFT_MAX)
+
 	cam_bound = float(cfg["grid_half"]) * float(cfg["spacing"]) + 4.0
 	var cam_sizes := [19.0, 22.0, 25.0]
 	camera.size = cam_sizes[clampi(level_idx, 0, 2)]
 	rig.position = Vector3.ZERO
+
 	_build_ground()
 	_build_village()
 	_spawn_villagers(int(cfg.get("villagers", 7 if level_idx == 0 else 0)))
+
 	msg_panel.hide()
 	pause_panel.hide()
 	get_tree().paused = false
-	_flash_hint("Click a house to light it — 1 match. Burnt houses refund 1.")
+
+	_flash_hint("Tip: First fire is free on the starter house. Observe the wind direction before sparking.")
 	_update_hud()
 
 
 func _clear_level() -> void:
-	_clear_demo_marker()
-	demo_target = null
+	_hide_wind_cone_preview()
+	if active_gust_visual != null and is_instance_valid(active_gust_visual):
+		active_gust_visual.queue_free()
+		active_gust_visual = null
+
+	starter_house = null
+	starter_ignited = false
+	last_spark_house = null
+
 	for c in village_root.get_children():
 		if is_instance_valid(c) and not c.is_queued_for_deletion():
 			c.queue_free()
 	for c in units_root.get_children():
 		if is_instance_valid(c) and not c.is_queued_for_deletion():
 			c.queue_free()
+
 	houses.clear()
+	mandatory_houses.clear()
+	burnt_mandatory = 0
+	burn_percent = 0.0
 
 
 # ---------- builders ----------
@@ -222,7 +320,7 @@ func _build_ground() -> void:
 	col.shape = shape
 	col.position = Vector3(0, -0.5, 0)
 	ground.add_child(col)
-	# Dynamic slabs sized to cam_bound so bigger maps stay covered.
+
 	var w := extent * 2.0 - 2.0
 	match level_idx:
 		0:
@@ -248,87 +346,64 @@ func _place_house(pos: Vector3, kind: String, fuel: float, size: Vector3, c1: Co
 		h.rotation.y = [0.0, PI * 0.5, PI, -PI * 0.5][randi() % 4]
 	h.setup(c1, c2, fuel, size, kind)
 	h.burned_out.connect(_on_house_burned_out)
+	h.burn_ending.connect(_on_house_burn_ending)
 	houses.append(h)
+	if kind == "house":
+		mandatory_houses.append(h)
 	return h
 
 
 func _build_village() -> void:
-	# Two settlements separated by a forest fuse belt (N-S strip at x~0).
-	# Houses: manual-only. Forest: auto-spreads. This is the strategy map.
 	var half: int = int(cfg["grid_half"])
 	var spacing: float = float(cfg["spacing"])
 	var wall_cols := [Color(0.92, 0.82, 0.66), Color(0.9, 0.72, 0.55), Color(0.95, 0.88, 0.72)]
 	var roof_cols := [Color(0.78, 0.28, 0.16), Color(0.55, 0.2, 0.14), Color(0.35, 0.45, 0.7)]
 	var idx := 0
+
 	for gx in range(-half, half + 1):
 		for gz in range(-half, half + 1):
 			var px := float(gx) * spacing + randf_range(-0.2, 0.2)
 			var pz := float(gz) * spacing + randf_range(-0.2, 0.2)
-			# Middle strip = forest belt, no houses.
 			if absf(float(gx) * spacing) < spacing * 0.9:
 				continue
 			if gx == 0 and gz == 0:
 				continue
 			if randf() < 0.2:
 				continue
-			_place_house(Vector3(px, 0, pz), "house", randf_range(55.0, 70.0), Vector3(randf_range(1.8, 2.2), randf_range(1.4, 1.8), randf_range(1.8, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()])
+			_place_house(Vector3(px, 0, pz), "house", randf_range(50.0, 65.0), Vector3(randf_range(1.8, 2.2), randf_range(1.4, 1.8), randf_range(1.8, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()])
 			idx += 1
-	# Forest fuse: dense N-S line + a couple of offshoots toward each hamlet.
-	# 25s burn, chains on its own. Refund 0 — it's transport, not economy.
+
+	# Forest fuse belt (optional bridges - excluded from mandatory completion)
 	var belt_half := float(half) * spacing
 	var z := -belt_half
 	while z <= belt_half:
 		var jx := randf_range(-0.8, 0.8)
 		_place_house(Vector3(jx, 0, z + randf_range(-0.5, 0.5)), "tree", 25.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
 		z += 2.8
-	# Offshoots reaching toward settlements so fire can hop off the belt.
+
 	for side in [-1.0, 1.0]:
 		for k in 3:
 			var ox: float = float(side) * (spacing * 0.9 + float(k) * 1.6)
 			var oz: float = randf_range(-belt_half * 0.7, belt_half * 0.7)
 			_place_house(Vector3(ox + randf_range(-0.4, 0.4), 0, oz), "tree", 25.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
-	# A few rim trees for silhouette.
+
 	for i in 6:
 		var ang := TAU * float(i) / 6.0
 		var r := cam_bound * 0.85
 		_place_house(Vector3(cos(ang) * r, 0, sin(ang) * r), "tree", 25.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
 
-
-# ---------- per-frame ----------
-func _process(delta: float) -> void:
-	_update_camera(delta)
-	if game_over:
-		return
-	elapsed += delta
-	RunState.run_time += delta
-	RunState.level_time += delta
-	# Match regen: slow income so stalls resolve, spam doesn't.
-	if matches < MATCH_MAX:
-		match_tick += delta
-		if match_tick >= MATCH_REGEN:
-			match_tick = 0.0
-		matches = mini(matches + 1, MATCH_MAX)
-	_update_wind(delta)
-	_tick_heat(delta)
-	_tick_alarm(delta)
-	_tick_demo(delta)
-	_tick_buckets(delta)
-	# Burn % from actual states.
-	var burnt := 0
-	var burning := 0
-	for h in houses:
-		if is_instance_valid(h):
-			if h.state == VoxelHouse.State.BURNT:
-				burnt += 1
-			elif h.state == VoxelHouse.State.BURNING:
-				burning += 1
-	burn_percent = 100.0 * float(burnt) / float(maxi(1, houses.size()))
-	_update_hud()
-	var win := float(cfg["win"])
-	if burn_percent >= win:
-		_end_game(true)
-	# No hard lose: with regen a stall (0 matches + 0 burning) recovers.
-	# Rain/shamans later can add real lose pressure.
+	# Pick starter structure prominently framed in the opening camera view
+	if not mandatory_houses.is_empty():
+		var best_starter := mandatory_houses[0]
+		var best_dist := 1e9
+		for h in mandatory_houses:
+			var d := h.position.length()
+			if d < best_dist:
+				best_dist = d
+				best_starter = h
+		starter_house = best_starter
+		starter_house.set_starter(true)
+		starter_ignited = false
 
 
 func _spawn_villagers(n: int) -> void:
@@ -338,131 +413,233 @@ func _spawn_villagers(n: int) -> void:
 		v.position = Vector3(randf_range(-cam_bound * 0.55, cam_bound * 0.55), 0, randf_range(-cam_bound * 0.55, cam_bound * 0.55))
 
 
+# ---------- per-frame loop ----------
+func _process(delta: float) -> void:
+	_update_camera(delta)
+	if game_over:
+		return
+
+	elapsed += delta
+	RunState.run_time += delta
+	RunState.level_time += delta
+
+	# Ability & reward timers
+	if wind_cooldown > 0.0:
+		wind_cooldown = maxf(0.0, wind_cooldown - delta)
+	if ember_reward_timer > 0.0:
+		ember_reward_timer = maxf(0.0, ember_reward_timer - delta)
+
+	# Active gust duration
+	if active_gust_timer > 0.0:
+		active_gust_timer = maxf(0.0, active_gust_timer - delta)
+		if active_gust_timer <= 0.0 and active_gust_visual != null and is_instance_valid(active_gust_visual):
+			active_gust_visual.queue_free()
+			active_gust_visual = null
+
+	_update_wind(delta)
+	_tick_heat(delta)
+	_tick_alarm(delta)
+	_tick_buckets(delta)
+
+	var burning_count := _count_burning()
+	var smoldering_count := _count_smoldering()
+
+	# Anti-stall Ember rule (SPEC Section 6.5)
+	if embers == 0 and burning_count > 0:
+		anti_stall_timer += delta
+		if anti_stall_timer >= ANTI_STALL_DELAY:
+			anti_stall_timer = 0.0
+			embers = mini(embers + 1, EMBER_MAX)
+			_flash_hint("Anti-stall Spark: +1 Ember (%d/%d)" % [embers, EMBER_MAX])
+	else:
+		anti_stall_timer = 0.0
+
+	# Fire Strength update (SPEC Section 8.3)
+	if burning_count > 0:
+		var target := clampf(20.0 + float(burning_count) * 16.0, 10.0, 100.0)
+		fire_strength = move_toward(fire_strength, target, 20.0 * delta)
+	elif smoldering_count > 0:
+		fire_strength = move_toward(fire_strength, 15.0, 15.0 * delta)
+	else:
+		fire_strength = move_toward(fire_strength, 0.0, 30.0 * delta)
+
+	# 100% Mandatory structure progress (SPEC Section 11.4)
+	burnt_mandatory = 0
+	for h in mandatory_houses:
+		if is_instance_valid(h) and h.state == VoxelHouse.State.BURNT:
+			burnt_mandatory += 1
+
+	burn_percent = 100.0 * float(burnt_mandatory) / float(maxi(1, mandatory_houses.size()))
+
+	# Win check: 100% of ordinary combustible settlement structures destroyed
+	if burnt_mandatory >= mandatory_houses.size():
+		_end_game(true)
+		return
+
+	# Failure check: no flames and Last Spark either consumed or expired
+	if starter_ignited and not game_over:
+		if last_spark_active:
+			last_spark_timer -= delta
+			if last_spark_timer <= 0.0 or last_spark_house == null or last_spark_house.state == VoxelHouse.State.BURNT:
+				last_spark_active = false
+				if _count_burning() == 0:
+					_end_game(false)
+					return
+		elif burning_count == 0 and smoldering_count == 0:
+			if not last_spark_available:
+				_end_game(false)
+				return
+
+	_update_hud()
+
+
+func _count_burning() -> int:
+	var n := 0
+	for h in houses:
+		if is_instance_valid(h) and h.state == VoxelHouse.State.BURNING:
+			n += 1
+	return n
+
+
+func _count_smoldering() -> int:
+	var n := 0
+	for h in houses:
+		if is_instance_valid(h) and h.state == VoxelHouse.State.SMOLDERING:
+			n += 1
+	return n
+
+
+func _on_house_burn_ending(h: VoxelHouse) -> void:
+	if game_over or not starter_ignited:
+		return
+
+	# Trigger Last Spark if this is the final burning flame (SPEC Section 6.9)
+	var other_burning := 0
+	for other in houses:
+		if is_instance_valid(other) and other != h and other.state == VoxelHouse.State.BURNING:
+			other_burning += 1
+
+	if other_burning == 0 and last_spark_available and burnt_mandatory < mandatory_houses.size():
+		last_spark_available = false
+		last_spark_active = true
+		last_spark_house = h
+		last_spark_timer = 8.0
+		h.start_smolder(8.0)
+		_flash_hint("LAST SPARK! Final fire smoldering (8s) — Click house to reignite for 1 Ember!")
+		_update_hud()
+
+
+func _on_house_burned_out(h: VoxelHouse) -> void:
+	if game_over:
+		return
+	if is_instance_valid(h) and h.kind == "house":
+		if ember_reward_timer <= 0.0:
+			if embers < EMBER_MAX:
+				embers = mini(embers + 1, EMBER_MAX)
+				ember_reward_timer = EMBER_REWARD_COOLDOWN
+				_flash_hint("House consumed! +1 Ember (%d/%d)" % [embers, EMBER_MAX])
+		else:
+			_flash_hint("House consumed!")
+	else:
+		_flash_hint("Forest fuse burnt through.")
+	_update_hud()
+
+
+# ---------- Wind & Heat Simulation ----------
+func _update_wind(delta: float) -> void:
+	_wind_timer -= delta
+	if _wind_timer <= 0.0:
+		_wind_timer = randf_range(WIND_SHIFT_MIN, WIND_SHIFT_MAX)
+		var cur_ang := atan2(wind_dir.x, wind_dir.z)
+		cur_ang += randf_range(-2.2, 2.2)
+		_wind_target = Vector3(cos(cur_ang), 0, sin(cur_ang)).normalized()
+		_wind_target_strength = randf_range(0.6, 1.3)
+		_flash_hint("Prevailing wind shifting — watch the compass arrow.")
+	wind_dir = (wind_dir.lerp(_wind_target, minf(1.0, delta * 0.4))).normalized()
+	wind_strength = lerpf(wind_strength, _wind_target_strength, minf(1.0, delta * 0.3))
+
+
+func _tick_heat(delta: float) -> void:
+	var burning_nodes: Array[VoxelHouse] = []
+	for h in houses:
+		if is_instance_valid(h) and h.state == VoxelHouse.State.BURNING:
+			burning_nodes.append(h)
+
+	if burning_nodes.is_empty():
+		for h in houses:
+			if is_instance_valid(h) and h.state == VoxelHouse.State.UNBURNED and h.heat > 0.0:
+				h.heat = maxf(0.0, h.heat - HEAT_DECAY * delta)
+		return
+
+	# Apply gust visual tilt to flames within active gust
+	if active_gust_timer > 0.0:
+		for src in burning_nodes:
+			var to_src := src.global_position - active_gust_origin
+			to_src.y = 0.0
+			if to_src.length() <= WIND_GUST_RANGE + 1.0:
+				src.apply_gust_tilt(active_gust_dir)
+
+	for dst in houses:
+		if not is_instance_valid(dst) or dst.state != VoxelHouse.State.UNBURNED:
+			continue
+
+		var radius := TREE_RADIUS if dst.kind == "tree" else HOUSE_RADIUS
+		var rate := TREE_HEAT if dst.kind == "tree" else HOUSE_HEAT
+		var power := 0.0
+
+		for src in burning_nodes:
+			var to: Vector3 = dst.global_position - src.global_position
+			var dist := to.length()
+			if dist > radius or dist < 0.01:
+				continue
+
+			var align: float = (to / dist).dot(wind_dir)
+			var w: float = maxf(0.2, 1.0 + align * wind_strength * WIND_BIAS)
+			if dst.kind == "house" and src.kind == "tree":
+				w *= 0.5
+
+			# Active Local Wind Gust acceleration (SPEC Section 6.6)
+			if active_gust_timer > 0.0:
+				var to_dst: Vector3 = dst.global_position - active_gust_origin
+				to_dst.y = 0.0
+				var dst_dist := to_dst.length()
+				if dst_dist <= WIND_GUST_RANGE:
+					var gust_align := (to_dst / maxf(0.01, dst_dist)).dot(active_gust_dir)
+					if gust_align >= cos(WIND_GUST_HALF_ANGLE):
+						w *= 3.5
+
+			power += w
+			if power >= 3.5:
+				break
+
+		if power > 0.0:
+			dst.heat = minf(1.0, dst.heat + rate * power * delta)
+			if dst.heat >= 1.0:
+				dst.ignite()
+		elif dst.heat > 0.0:
+			dst.heat = maxf(0.0, dst.heat - HEAT_DECAY * delta)
+
+
+# ---------- Bucket Response (Village) ----------
 func _tick_alarm(delta: float) -> void:
-	# #5 Alarm escalation: unseen small fires barely register.
-	# Once any lookout spots fire, alarm tracks burning size. Big fire = fast answer.
 	for v in get_tree().get_nodes_in_group("villagers"):
 		if is_instance_valid(v) and v is VoxelVillager and (v as VoxelVillager).has_spotted():
 			if not spotted:
 				spotted = true
-				_flash_hint("Spotted! Villagers see the smoke (eye). Stay small or go fast.")
+				_flash_hint("Spotted! Villagers noticed smoke. Response incoming.")
 			break
-	var burning := 0
-	for h in houses:
-		if is_instance_valid(h) and h.state == VoxelHouse.State.BURNING:
-			burning += 1
+
+	var burning := _count_burning()
 	var target := 0.0
 	if spotted:
 		target = clampf(20.0 + float(burning) * 15.0, 0.0, 100.0)
 	else:
 		target = clampf(float(burning) * 4.0, 0.0, 12.0)
+
 	if target > alarm:
 		alarm = minf(target, alarm + 8.0 * delta)
 	else:
 		alarm = maxf(target, alarm - 2.5 * delta)
-	if alarm >= 70.0 and not _alarm70_warned:
-		_alarm70_warned = true
-		_flash_hint("Fully alert! The village will fight back (demolition).")
-
-
-func _alarm_text() -> String:
-	if not spotted:
-		return "hidden"
-	return "ALARM %d" % int(alarm)
-
-
-func _pick_demo_target() -> VoxelHouse:
-	var best: VoxelHouse = null
-	for h in houses:
-		if not is_instance_valid(h):
-			continue
-		if h.state != VoxelHouse.State.UNBURNED or h.kind != "house":
-			continue
-		if h.heat < 0.15:
-			continue
-		if best == null or h.heat > best.heat:
-			best = h
-	return best
-
-
-func _tick_demo(delta: float) -> void:
-	# #2 Demolition: telegraphed firebreaks on your hottest house-front (max 2, L1).
-	# Counterplay: burn the marked house before the timer ends.
-	if demo_cooldown > 0.0:
-		demo_cooldown = maxf(0.0, demo_cooldown - delta)
-	if level_idx != 0 and demo_max <= 0:
-		return
-	if demo_target != null and is_instance_valid(demo_target):
-		if demo_target.state != VoxelHouse.State.UNBURNED:
-			_flash_hint("Demolition stopped — already burning!")
-			demo_used += 1
-			demo_cooldown = DEMO_COOLDOWN
-			demo_target = null
-			_clear_demo_marker()
-			return
-		demo_timer -= delta
-		_update_demo_marker()
-		if demo_timer <= 0.0:
-			if demo_target.demolish():
-				_flash_hint("Demolished! Chain broken — go around.")
-			demo_used += 1
-			demo_cooldown = DEMO_COOLDOWN
-			demo_target = null
-			_clear_demo_marker()
-		return
-	elif demo_target != null:
-		demo_target = null
-		_clear_demo_marker()
-	if demo_target != null or game_over:
-		return
-	if demo_used >= demo_max:
-		return
-	if demo_cooldown > 0.0:
-		return
-	if alarm < 30.0 or elapsed < 30.0:
-		return
-	var burning := 0
-	for h in houses:
-		if is_instance_valid(h) and h.state == VoxelHouse.State.BURNING:
-			burning += 1
-	if burning < 2:
-		return
-	var pick := _pick_demo_target()
-	if pick == null:
-		return
-	demo_target = pick
-	demo_timer = DEMO_WARN if alarm < 70.0 else 12.0
-	_make_demo_marker()
-	_flash_hint("Villagers will demolish a warming house! Burn it first!")
-
-
-func _make_demo_marker() -> void:
-	_clear_demo_marker()
-	if demo_target == null or not is_instance_valid(demo_target):
-		return
-	var lab := Label3D.new()
-	lab.text = "DEMOLISH!"
-	lab.font_size = 96
-	lab.pixel_size = 0.012
-	lab.modulate = Color(1.0, 0.3, 0.2)
-	lab.outline_size = 16
-	lab.outline_modulate = Color(0, 0, 0)
-	lab.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	lab.position = Vector3(0, 3.4, 0)
-	demo_target.add_child(lab)
-	demo_marker = lab
-	_update_demo_marker()
-
-
-func _update_demo_marker() -> void:
-	if demo_marker != null and is_instance_valid(demo_marker) and demo_target != null:
-		demo_marker.text = "DEMOLISH %ds!" % int(ceil(demo_timer))
-
-
-func _clear_demo_marker() -> void:
-	if demo_marker != null and is_instance_valid(demo_marker):
-		demo_marker.queue_free()
-	demo_marker = null
 
 
 func _bucket_count() -> int:
@@ -474,7 +651,6 @@ func _bucket_count() -> int:
 
 
 func _pick_bucket_target() -> VoxelHouse:
-	# Front hub: burning house with the most warming (heat>0.05) unburnt neighbors.
 	var best: VoxelHouse = null
 	var best_score := -1
 	for src in houses:
@@ -499,14 +675,7 @@ func _pick_bucket_target() -> VoxelHouse:
 
 
 func _tick_buckets(delta: float) -> void:
-	# Bucket crews: tiered unlocks so the opening always establishes.
-	# 1 crew at alarm>=55 (75s grace), 2nd at 70, 3rd at 85 + 8 burning.
-	# Splash every 1s: cool warming neighbors, drain the burner.
-	# Counterplay: open more fronts than crews.
-	var burning := 0
-	for h in houses:
-		if is_instance_valid(h) and h.state == VoxelHouse.State.BURNING:
-			burning += 1
+	var burning := _count_burning()
 	var allowed := 0
 	if alarm >= 55.0 and elapsed > 75.0 and burning >= 1:
 		allowed = 1
@@ -515,6 +684,7 @@ func _tick_buckets(delta: float) -> void:
 	if alarm >= 85.0 and burning >= 8:
 		allowed = 3
 	allowed = mini(allowed, BUCKET_MAX)
+
 	if allowed > 0 and burning >= 1 and not game_over:
 		var have := _bucket_count()
 		if have < allowed:
@@ -529,20 +699,20 @@ func _tick_buckets(delta: float) -> void:
 					have += 1
 					if not _buckets_warned:
 						_buckets_warned = true
-						_flash_hint("Bucket crews incoming! They cool chains — split fronts!")
-	# Retarget dead assignments.
+						_flash_hint("Bucket carriers formed a brigade! They cool threatened homes.")
+
 	for v in get_tree().get_nodes_in_group("villagers"):
 		if not (is_instance_valid(v) and v is VoxelVillager and (v as VoxelVillager).is_bucket()):
 			continue
 		var vv := v as VoxelVillager
 		if vv.bucket_target == null or not is_instance_valid(vv.bucket_target) or (vv.bucket_target as VoxelHouse).state != VoxelHouse.State.BURNING:
-			var nt := _pick_bucket_target() if burning > 0 else null
-			vv.bucket_target = nt
-	# Splash tick.
+			vv.bucket_target = _pick_bucket_target() if burning > 0 else null
+
 	splash_tick += delta
 	if splash_tick < BUCKET_TICK:
 		return
 	splash_tick = 0.0
+
 	for v in get_tree().get_nodes_in_group("villagers"):
 		if not (is_instance_valid(v) and v is VoxelVillager and (v as VoxelVillager).is_bucket()):
 			continue
@@ -554,7 +724,7 @@ func _tick_buckets(delta: float) -> void:
 			continue
 		if (vv as Node3D).global_position.distance_to(tgt.global_position) > BUCKET_RANGE + 1.0:
 			continue
-		# Cool every warming neighbor in range, drain the burner itself.
+
 		for dst in houses:
 			if not is_instance_valid(dst) or dst.state != VoxelHouse.State.UNBURNED:
 				continue
@@ -564,96 +734,35 @@ func _tick_buckets(delta: float) -> void:
 		vv._show_bubble("~", Color(0.4, 0.7, 1.0))
 
 
-func _update_wind(delta: float) -> void:
-	# Self-shifting: drift toward target, pick new target every 22-34s.
-	_wind_timer -= delta
-	if _wind_timer <= 0.0:
-		_wind_timer = randf_range(WIND_SHIFT_MIN, WIND_SHIFT_MAX)
-		var cur_ang := atan2(wind_dir.x, wind_dir.z)
-		cur_ang += randf_range(-2.2, 2.2)
-		_wind_target = Vector3(cos(cur_ang), 0, sin(cur_ang)).normalized()
-		_wind_target_strength = randf_range(0.5, 1.4)
-		_flash_hint("Wind shifting - check the arrow.")
-	wind_dir = (wind_dir.lerp(_wind_target, minf(1.0, delta * 0.4))).normalized()
-	wind_strength = lerpf(wind_strength, _wind_target_strength, minf(1.0, delta * 0.3))
-
-
-func _tick_heat(delta: float) -> void:
-	# Deterministic strategic spread, wind-biased. No randomness.
-	# weight per burner = 1 + align(burner->dst, wind) * strength * BIAS (min 0.2).
-	# Downwind ~1.8x, upwind ~0.2x. Gaps > radius = firebreak.
-	var burning_nodes: Array[VoxelHouse] = []
-	for h in houses:
-		if is_instance_valid(h) and h.state == VoxelHouse.State.BURNING:
-			burning_nodes.append(h)
-	if burning_nodes.is_empty():
-		for h in houses:
-			if is_instance_valid(h) and h.state == VoxelHouse.State.UNBURNED and h.heat > 0.0:
-				h.heat = maxf(0.0, h.heat - HEAT_DECAY * delta)
-		return
-	for dst in houses:
-		if not is_instance_valid(dst) or dst.state != VoxelHouse.State.UNBURNED:
-			continue
-		var radius := TREE_RADIUS if dst.kind == "tree" else HOUSE_RADIUS
-		var rate := TREE_HEAT if dst.kind == "tree" else HOUSE_HEAT
-		var power := 0.0
-		for src in burning_nodes:
-			var to: Vector3 = dst.global_position - src.global_position
-			var dist := to.length()
-			if dist > radius or dist < 0.01:
-				continue
-			var align: float = (to / dist).dot(wind_dir)
-			var w: float = maxf(0.2, 1.0 + align * wind_strength * WIND_BIAS)
-			if dst.kind == "house" and src.kind == "tree":
-				w *= 0.5
-			power += w
-			if power >= 2.5:
-				break
-		if power > 0.0:
-			dst.heat = minf(1.0, dst.heat + rate * power * delta)
-			if dst.heat >= 1.0:
-				dst.ignite()
-		elif dst.heat > 0.0:
-			dst.heat = maxf(0.0, dst.heat - HEAT_DECAY * delta)
-
-
-func _on_house_burned_out(h: VoxelHouse) -> void:
-	if game_over:
-		return
-	# Houses refund the match (economy). Forest is transport: refund 0.
-	if is_instance_valid(h) and h.kind == "house":
-		matches = mini(matches + 1, MATCH_MAX)
-		_flash_hint("House burnt! +1 match.")
-	else:
-		_flash_hint("Forest burnt through.")
-	_update_hud()
-
-
-# ---------- camera ----------
+# ---------- Camera Control (SPEC Section 14.1) ----------
 func _update_camera(delta: float) -> void:
 	var pan := Vector2.ZERO
-	if Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A):
+	if Input.is_action_pressed("camera_left"):
 		pan.x -= 1.0
-	if Input.is_action_pressed("ui_right") or Input.is_key_pressed(KEY_D):
+	if Input.is_action_pressed("camera_right"):
 		pan.x += 1.0
-	if Input.is_action_pressed("ui_up") or Input.is_key_pressed(KEY_W):
+	if Input.is_action_pressed("camera_up"):
 		pan.y -= 1.0
-	if Input.is_action_pressed("ui_down") or Input.is_key_pressed(KEY_S):
+	if Input.is_action_pressed("camera_down"):
 		pan.y += 1.0
+
+	var fwd := -camera.global_transform.basis.z
+	fwd.y = 0.0
+	fwd = fwd.normalized()
+	var right := camera.global_transform.basis.x
+	right.y = 0.0
+	right = right.normalized()
+
 	if pan != Vector2.ZERO:
-		var fwd := -camera.global_transform.basis.z
-		fwd.y = 0.0
-		fwd = fwd.normalized()
-		var right := camera.global_transform.basis.x
-		right.y = 0.0
-		right = right.normalized()
-		rig.position += (right * pan.x + -fwd * pan.y) * delta * 14.0
+		rig.position += (right * pan.x - fwd * pan.y) * delta * 14.0
 		rig.position.x = clampf(rig.position.x, -cam_bound, cam_bound)
 		rig.position.z = clampf(rig.position.z, -cam_bound, cam_bound)
-	if Input.is_key_pressed(KEY_Q):
+
+	if Input.is_action_pressed("camera_zoom_in"):
 		_zoom_step(-8.0 * delta)
-	if Input.is_key_pressed(KEY_E):
+	if Input.is_action_pressed("camera_zoom_out"):
 		_zoom_step(8.0 * delta)
+
 	if edge_pan:
 		var mp := get_viewport().get_mouse_position()
 		var vs := get_viewport().get_visible_rect().size
@@ -668,7 +777,7 @@ func _update_camera(delta: float) -> void:
 		elif mp.y > vs.y - edge:
 			ep.y += 1.0
 		if ep != Vector2.ZERO:
-			rig.position += Vector3(ep.x, 0, ep.y) * delta * 12.0
+			rig.position += (right * ep.x - fwd * ep.y) * delta * 12.0
 			rig.position.x = clampf(rig.position.x, -cam_bound, cam_bound)
 			rig.position.z = clampf(rig.position.z, -cam_bound, cam_bound)
 
@@ -677,17 +786,21 @@ func _zoom_step(amount: float) -> void:
 	camera.size = clampf(camera.size + amount, 8.0, 40.0)
 
 
-# ---------- input: click = ignite. No drag, no gust. ----------
+# ---------- Desktop Input & Abilities (SPEC Section 14.1 & 7.4) ----------
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
+	if event.is_action_pressed("pause") or event.is_action_pressed("ui_cancel"):
+		if aiming_wind:
+			aiming_wind = false
+			_hide_wind_cone_preview()
+			_flash_hint("Wind aim cancelled.")
+			get_viewport().set_input_as_handled()
+			return
 		_toggle_pause()
 		return
-	if event is InputEventKey and event.pressed and not event.echo:
-		if (event as InputEventKey).keycode == KEY_P:
-			_toggle_pause()
-			return
+
 	if game_over or get_tree().paused:
 		return
+
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_WHEEL_UP and mb.pressed:
@@ -696,32 +809,238 @@ func _unhandled_input(event: InputEvent) -> void:
 		if mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
 			_zoom_step(2.0)
 			return
+
 		if mb.button_index == MOUSE_BUTTON_LEFT and not mb.pressed:
-			_try_ignite_at(mb.position)
-	elif event is InputEventScreenTouch:
-		var st := event as InputEventScreenTouch
-		if not st.pressed:
-			_try_ignite_at(st.position)
+			_handle_left_click(mb.position)
+			return
+
+		if mb.button_index == MOUSE_BUTTON_RIGHT:
+			if mb.pressed:
+				_start_wind_aim(mb.position)
+			else:
+				_release_wind_aim()
+			return
+
+	elif event is InputEventMouseMotion:
+		if aiming_wind:
+			_update_wind_aim(event.position)
 
 
-func _try_ignite_at(screen_pos: Vector2) -> void:
+func _handle_left_click(screen_pos: Vector2) -> void:
 	var house := _pick_house(screen_pos)
 	if house == null:
 		return
-	if house.state != VoxelHouse.State.UNBURNED:
-		return
-	if matches <= 0:
-		_flash_hint("No matches! Next free in %ds — or wait for a house to finish." % int(ceil(MATCH_REGEN - match_tick)))
-		return
-	if house.ignite():
-		matches -= 1
-		if house.kind == "tree":
-			_flash_hint("Forest lit — heat will run down the belt.")
+
+	if not starter_ignited:
+		if house == starter_house:
+			starter_house.set_starter(false)
+			starter_house.ignite()
+			starter_ignited = true
+			_flash_hint("Fire sparked! Direct spread with Wind Gust (Hold RMB on flames).")
+			_update_hud()
 		else:
-			_flash_hint("Lit — neighbors warm orange. Cluster for chains.")
-		_update_hud()
+			_flash_hint("First fire must be on the highlighted STARTER house!")
+		return
+
+	if house.state == VoxelHouse.State.SMOLDERING:
+		if embers >= LAST_SPARK_COST:
+			embers -= LAST_SPARK_COST
+			house.reignite(35.0)
+			last_spark_active = false
+			last_spark_house = null
+			_flash_hint("Last Spark caught! Fire restored! (-1 Ember)")
+			_update_hud()
+		else:
+			_flash_hint("Need 1 Ember to reignite Last Spark! (Have 0)")
+		return
+
+	if house.state == VoxelHouse.State.UNBURNED:
+		if embers >= MANUAL_IGNITE_COST:
+			embers -= MANUAL_IGNITE_COST
+			house.ignite()
+			_flash_hint("Manual Ignition sparked! (-3 Embers, %d remaining)" % embers)
+			_update_hud()
+		else:
+			_flash_hint("Manual Ignition costs 3 Embers! (Have %d) Guide fire with Wind instead." % embers)
 
 
+func _start_wind_aim(screen_pos: Vector2) -> void:
+	var house := _pick_house(screen_pos)
+	var origin := Vector3.ZERO
+	var found := false
+
+	if house != null and (house.state == VoxelHouse.State.BURNING or house.state == VoxelHouse.State.SMOLDERING):
+		origin = house.global_position
+		found = true
+	else:
+		var ground_pos := _raycast_plane_y(screen_pos, 0.0)
+		var nearest_d := 4.5
+		for h in houses:
+			if is_instance_valid(h) and (h.state == VoxelHouse.State.BURNING or h.state == VoxelHouse.State.SMOLDERING):
+				var d := ground_pos.distance_to(h.global_position)
+				if d < nearest_d:
+					nearest_d = d
+					origin = h.global_position
+					found = true
+
+	if found:
+		aiming_wind = true
+		wind_aim_origin = origin
+		wind_aim_dir = Vector3.FORWARD
+		wind_aim_valid = false
+		_update_wind_cone_preview(wind_aim_origin, wind_aim_dir, false)
+	else:
+		if _count_burning() > 0:
+			_flash_hint("Wind Gust must originate from an active BURNING structure!")
+		else:
+			_flash_hint("No active fire to cast wind from!")
+
+
+func _update_wind_aim(screen_pos: Vector2) -> void:
+	var mouse_world := _raycast_plane_y(screen_pos, wind_aim_origin.y)
+	var vec := mouse_world - wind_aim_origin
+	vec.y = 0.0
+	wind_aim_dist = vec.length()
+
+	if wind_aim_dist >= 1.0:
+		wind_aim_valid = true
+		wind_aim_dir = vec.normalized()
+	else:
+		wind_aim_valid = false
+
+	_update_wind_cone_preview(wind_aim_origin, wind_aim_dir, wind_aim_valid)
+
+
+func _release_wind_aim() -> void:
+	if not aiming_wind:
+		return
+	aiming_wind = false
+	_hide_wind_cone_preview()
+
+	if wind_aim_valid:
+		if embers >= WIND_GUST_COST and wind_cooldown <= 0.0:
+			embers -= WIND_GUST_COST
+			wind_cooldown = WIND_COOLDOWN_MAX
+			_cast_wind_gust(wind_aim_origin, wind_aim_dir)
+			_flash_hint("Wind Gust released! 4s intense spread downwind.")
+			_update_hud()
+		elif wind_cooldown > 0.0:
+			_flash_hint("Wind Gust on cooldown (%.1fs)!" % wind_cooldown)
+		else:
+			_flash_hint("Need 1 Ember to cast Wind Gust!")
+	else:
+		_flash_hint("Drag further from the fire to establish wind direction.")
+
+
+func _cast_wind_gust(origin: Vector3, dir: Vector3) -> void:
+	active_gust_origin = origin
+	active_gust_dir = dir
+	active_gust_timer = WIND_GUST_DURATION
+	_spawn_gust_visual(origin, dir)
+
+
+func _spawn_gust_visual(origin: Vector3, dir: Vector3) -> void:
+	if active_gust_visual != null and is_instance_valid(active_gust_visual):
+		active_gust_visual.queue_free()
+
+	var p := GPUParticles3D.new()
+	p.name = "GustParticles"
+	p.amount = 40
+	p.lifetime = 0.85
+	p.local_coords = true
+	p.visibility_aabb = AABB(Vector3(-10, -2, -10), Vector3(20, 6, 20))
+
+	var pm := ParticleProcessMaterial.new()
+	pm.direction = dir
+	pm.spread = 24.0
+	pm.initial_velocity_min = 10.0
+	pm.initial_velocity_max = 14.0
+	pm.gravity = Vector3(0, 0.4, 0)
+	pm.scale_min = 0.6
+	pm.scale_max = 1.3
+	pm.color = Color(1.0, 0.75, 0.2, 0.85)
+	p.process_material = pm
+
+	var b := BoxMesh.new()
+	b.size = Vector3(0.12, 0.12, 0.28)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.8, 0.25)
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.6, 0.1)
+	mat.emission_energy_multiplier = 2.5
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	b.material = mat
+	p.draw_pass_1 = b
+
+	add_child(p)
+	p.global_position = origin + Vector3(0, 0.6, 0)
+	active_gust_visual = p
+
+
+func _update_wind_cone_preview(origin: Vector3, dir: Vector3, valid: bool) -> void:
+	if wind_cone_mesh == null:
+		return
+	wind_cone_mesh.clear_surfaces()
+
+	var col: Color
+	if not valid:
+		col = Color(1.0, 0.8, 0.2, 0.2)
+	elif embers < WIND_GUST_COST:
+		col = Color(0.9, 0.2, 0.2, 0.3)
+	elif wind_cooldown > 0.0:
+		col = Color(0.5, 0.5, 0.5, 0.3)
+	else:
+		col = Color(1.0, 0.6, 0.15, 0.45)
+
+	wind_cone_mat.albedo_color = col
+	wind_cone_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, wind_cone_mat)
+
+	var half_angle := WIND_GUST_HALF_ANGLE
+	var base_angle := atan2(dir.x, dir.z)
+	var segments := 20
+	var radius := WIND_GUST_RANGE
+	var y_off := 0.25
+	var center := origin + Vector3(0, y_off, 0)
+
+	for i in segments:
+		var f1 := float(i) / float(segments)
+		var f2 := float(i + 1) / float(segments)
+		var a1 := base_angle - half_angle + f1 * (half_angle * 2.0)
+		var a2 := base_angle - half_angle + f2 * (half_angle * 2.0)
+		var p1 := origin + Vector3(sin(a1) * radius, y_off, cos(a1) * radius)
+		var p2 := origin + Vector3(sin(a2) * radius, y_off, cos(a2) * radius)
+
+		wind_cone_mesh.surface_add_vertex(center)
+		wind_cone_mesh.surface_add_vertex(p1)
+		wind_cone_mesh.surface_add_vertex(p2)
+
+	# Center aiming arrow
+	var p_mid := origin + Vector3(sin(base_angle) * (radius + 0.6), y_off, cos(base_angle) * (radius + 0.6))
+	var p_left := origin + Vector3(sin(base_angle - 0.09) * radius * 0.8, y_off, cos(base_angle - 0.09) * radius * 0.8)
+	var p_right := origin + Vector3(sin(base_angle + 0.09) * radius * 0.8, y_off, cos(base_angle + 0.09) * radius * 0.8)
+	wind_cone_mesh.surface_add_vertex(p_mid)
+	wind_cone_mesh.surface_add_vertex(p_left)
+	wind_cone_mesh.surface_add_vertex(p_right)
+
+	wind_cone_mesh.surface_end()
+	wind_cone_preview.show()
+
+	# Highlight structures inside cone that receive boosted heat
+	if valid and embers >= WIND_GUST_COST and wind_cooldown <= 0.0:
+		for h in houses:
+			if is_instance_valid(h) and h.state == VoxelHouse.State.UNBURNED:
+				var to_h := h.global_position - origin
+				to_h.y = 0.0
+				if to_h.length() <= radius and to_h.normalized().dot(dir) >= cos(half_angle):
+					h._flash = maxf(h._flash, 0.4)
+
+
+func _hide_wind_cone_preview() -> void:
+	if wind_cone_preview != null and is_instance_valid(wind_cone_preview):
+		wind_cone_preview.hide()
+
+
+# ---------- Raycast helpers ----------
 func _pick_house(screen_pos: Vector2) -> VoxelHouse:
 	if camera == null:
 		return null
@@ -738,50 +1057,72 @@ func _pick_house(screen_pos: Vector2) -> VoxelHouse:
 	return null
 
 
-# ---------- HUD ----------
-var _hint_t: float = 0.0
-var _toast_t: float = 0.0
+func _raycast_plane_y(screen_pos: Vector2, plane_y: float) -> Vector3:
+	if camera == null:
+		return Vector3.ZERO
+	var from := camera.project_ray_origin(screen_pos)
+	var dir := camera.project_ray_normal(screen_pos)
+	if absf(dir.y) < 0.0001:
+		return from
+	var t := (plane_y - from.y) / dir.y
+	return from + dir * t
 
+
+# ---------- HUD Presentation ----------
+var _hint_t: float = 0.0
 
 func _flash_hint(text: String) -> void:
 	if hint_label == null:
 		return
 	hint_label.text = text
 	hint_label.modulate.a = 1.0
-	_hint_t = 2.5
+	_hint_t = 3.0
 
 
 func _update_hud() -> void:
+	if fire_bar != null:
+		fire_bar.value = fire_strength
+
 	if ember_label != null:
-		var regen_in := int(ceil(MATCH_REGEN - match_tick)) if matches < MATCH_MAX else 0
-		if matches < MATCH_MAX:
-			ember_label.text = "Matches: %d (+1 in %ds)" % [matches, regen_in]
-		else:
-			ember_label.text = "Matches: %d (full)" % matches
-	if burn_label != null:
-		burn_label.text = "Burnt %d%% / %d%%" % [int(burn_percent), int(float(cfg["win"]))]
-	if wind_label != null:
-		wind_label.text = "Wind %s %s" % [_wind_arrow(), _wind_word()]
-	if objective_label != null and not game_over:
 		var extra := ""
-		var nb := _bucket_count()
-		if nb > 0:
-			extra += " · buckets:%d" % nb
-		if demo_target != null and is_instance_valid(demo_target):
-			objective_label.text = "Lv%d %s: BURN the marked house before demolition! (%s%s)" % [level_idx + 1, str(cfg["name"]), _alarm_text(), extra]
+		if embers == 0 and _count_burning() > 0:
+			extra = " (+1 anti-stall in %ds)" % int(ceil(ANTI_STALL_DELAY - anti_stall_timer))
+		ember_label.text = "Embers: %d / %d%s" % [embers, EMBER_MAX, extra]
+
+	if burn_label != null:
+		burn_label.text = "Settlement: %d / %d (100%% Goal)" % [burnt_mandatory, mandatory_houses.size()]
+
+	if wind_label != null:
+		var gust_str := ""
+		if active_gust_timer > 0.0:
+			gust_str = "ACTIVE (%.1fs)" % active_gust_timer
+		elif wind_cooldown > 0.0:
+			gust_str = "CD %.1fs" % wind_cooldown
 		else:
-			objective_label.text = "Lv%d %s: burn %d%% — downwind chains fast (%s%s)" % [level_idx + 1, str(cfg["name"]), int(float(cfg["win"])), _alarm_text(), extra]
+			gust_str = "Ready (1 Ember, RMB)"
+		wind_label.text = "Wind: %s %s | Gust: %s" % [_wind_arrow(), _wind_word(), gust_str]
+
+	if objective_label != null and not game_over:
+		var spark_status := "READY"
+		if last_spark_active:
+			spark_status = "ACTIVE (%.1fs)!" % maxf(0.0, last_spark_timer)
+		elif not last_spark_available:
+			spark_status = "USED"
+
+		if not starter_ignited:
+			objective_label.text = "SPARK PHASE: Click the highlighted STARTER house to begin"
+		elif last_spark_active:
+			objective_label.text = "CRITICAL: LAST SPARK SMOLDERING (%.1fs)! Click house to save (1 Ember)!" % maxf(0.0, last_spark_timer)
+		else:
+			objective_label.text = "Lv%d %s: Burn 100%% of settlement houses (%d/%d) · Last Spark: %s" % [level_idx + 1, str(cfg["name"]), burnt_mandatory, mandatory_houses.size(), spark_status]
+
 	if controls_label != null:
-		controls_label.text = "WASD/arrows pan | Q/E/wheel zoom | Click burn | P pause"
-	# Fade hint/toast.
+		controls_label.text = "LMB: Ignite (Starter free / Manual 3) | RMB Drag: Wind Gust (1 Ember) | WASD: Pan | Q/E: Zoom | P: Pause"
+
 	if _hint_t > 0.0:
 		_hint_t -= get_process_delta_time()
 		if _hint_t <= 0.0 and hint_label != null:
-			hint_label.modulate.a = 0.35
-	if _toast_t > 0.0:
-		_toast_t -= get_process_delta_time()
-		if _toast_t <= 0.0 and toast_label != null:
-			toast_label.modulate.a = 0.0
+			hint_label.modulate.a = 0.45
 
 
 func _wind_arrow() -> String:
@@ -795,13 +1136,13 @@ func _wind_arrow() -> String:
 
 func _wind_word() -> String:
 	if wind_strength < 0.7:
-		return "weak"
+		return "gentle"
 	if wind_strength < 1.1:
-		return ""
+		return "steady"
 	return "strong"
 
 
-# ---------- pause / end ----------
+# ---------- Pause / Game End ----------
 func _toggle_pause() -> void:
 	if game_over:
 		return
@@ -815,20 +1156,22 @@ func _end_game(did_win: bool) -> void:
 	game_over = true
 	won = did_win
 	msg_panel.show()
+
 	if did_win:
 		RunState.unlocked = mini(2, maxi(RunState.unlocked, level_idx + 1))
 		if level_idx < 2:
-			msg_label.text = "%s COOKED! Burnt %d%%.\nNext district unlocked." % [str(cfg["name"]), int(burn_percent)]
-			stats_label.text = "Time: %ds | Matches left: %d\nPress Cook Again for Lv%d." % [int(RunState.level_time), matches, level_idx + 2]
-			restart_button.text = "Cook Lv%d" % [level_idx + 2]
+			msg_label.text = "%s FULLY COOKED!\nAll %d settlement structures consumed." % [str(cfg["name"]), mandatory_houses.size()]
+			stats_label.text = "Time: %ds | Embers remaining: %d\nProceed to Level %d." % [int(RunState.level_time), embers, level_idx + 2]
+			restart_button.text = "Advance to Lv%d" % [level_idx + 2]
 		else:
-			msg_label.text = "CITY COOKED! YOU WIN THE RUN!\nAll three districts burnt."
-			stats_label.text = "Run time: %ds" % int(RunState.run_time)
-			restart_button.text = "Cook Again (L1)"
+			msg_label.text = "ALL DISTRICTS COOKED!\nYOU WIN THE DISASTER CAMPAIGN!"
+			stats_label.text = "Total Run Time: %ds | Fire deity victorious." % int(RunState.run_time)
+			restart_button.text = "Play Again (L1)"
 	else:
-		msg_label.text = "Out of matches... the fire went cold.\n%s: burnt only %d%% of %d%%." % [str(cfg["name"]), int(burn_percent), int(float(cfg["win"]))]
-		stats_label.text = "Time: %ds | Try a different order." % int(RunState.level_time)
+		msg_label.text = "FIRE EXTINGUISHED!\nThe settlement survived the disaster."
+		stats_label.text = "%s: Burnt %d of %d houses (%d%%)\nTime: %ds | Replan your route and fronts." % [str(cfg["name"]), burnt_mandatory, mandatory_houses.size(), int(burn_percent), int(RunState.level_time)]
 		restart_button.text = "Retry Level %d" % [level_idx + 1]
+
 	restart_button.grab_focus()
 
 

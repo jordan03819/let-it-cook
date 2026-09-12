@@ -64,39 +64,56 @@ process_mode = 3
 [node name="TopBar" type="PanelContainer" parent="HUD"]
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 64.0
+offset_bottom = 54.0
 grow_horizontal = 2
 
-[node name="HBox" type="HBoxContainer" parent="HUD/TopBar"]
-theme_override_constants/separation = 12
+[node name="Margin" type="MarginContainer" parent="HUD/TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="HBox" type="HBoxContainer" parent="HUD/TopBar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
 alignment = 0
 
-[node name="FireLabel" type="Label" parent="HUD/TopBar/HBox"]
-theme_override_font_sizes/font_size = 20
+[node name="FireLabel" type="Label" parent="HUD/TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 18
 text = "FIRE"
 
-[node name="FireBar" type="ProgressBar" parent="HUD/TopBar/HBox"]
+[node name="FireBar" type="ProgressBar" parent="HUD/TopBar/Margin/HBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(260, 28)
-size_flags_horizontal = 3
+custom_minimum_size = Vector2(160, 20)
+layout_mode = 2
+size_flags_vertical = 4
 theme_override_styles/background = SubResource("FireBack")
 theme_override_styles/fill = SubResource("FireFill")
 max_value = 100.0
 value = 60.0
 show_percentage = false
 
-[node name="EmberLabel" type="Label" parent="HUD/TopBar/HBox"]
+[node name="EmberLabel" type="Label" parent="HUD/TopBar/Margin/HBox"]
 unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
 theme_override_font_sizes/font_size = 16
-text = "Embers"
+text = "Embers: 2 / 5"
 
-[node name="BurnLabel" type="Label" parent="HUD/TopBar/HBox"]
+[node name="BurnLabel" type="Label" parent="HUD/TopBar/Margin/HBox"]
 unique_name_in_owner = true
-theme_override_font_sizes/font_size = 18
-text = "Cooked"
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 16
+text = "Settlement: 0 / 52"
 
-[node name="WindLabel" type="Label" parent="HUD/TopBar/HBox"]
+[node name="WindLabel" type="Label" parent="HUD/TopBar/Margin/HBox"]
 unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
 theme_override_font_sizes/font_size = 16
 text = "Wind"
 
@@ -105,11 +122,13 @@ unique_name_in_owner = true
 mouse_filter = 2
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 66.0
-offset_bottom = 90.0
+offset_top = 56.0
+offset_bottom = 78.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(1, 0.92, 0.65, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
+theme_override_constants/outline_size = 4
 text = "Objective"
 horizontal_alignment = 1
 

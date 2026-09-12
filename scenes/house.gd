@@ -7,8 +7,9 @@ class_name VoxelHouse
 signal burned_out(house: VoxelHouse)
 signal ignited(house: VoxelHouse)
 signal demolished(house: VoxelHouse)
+signal burn_ending(house: VoxelHouse)
 
-enum State { UNBURNED, BURNING, BURNT, DEMOLISHED }
+enum State { UNBURNED, BURNING, BURNT, DEMOLISHED, SMOLDERING }
 
 var state: int = State.UNBURNED
 var fuel_max: float = 22.0
@@ -18,6 +19,12 @@ var kind: String = "house" # house | tree (different heat rates, same states)
 var house_size: Vector3 = Vector3(2.0, 1.6, 2.0)
 var base_color: Color = Color(0.9, 0.8, 0.65)
 var roof_color: Color = Color(0.75, 0.25, 0.15)
+var is_starter: bool = false
+var smolder_timer: float = 0.0
+
+var _starter_marker: Node3D = null
+var _smolder_label: Label3D = null
+var _gust_tilt: Vector3 = Vector3.ZERO
 
 var _scorched: bool = false
 var _scorch_tween: Tween = null
@@ -258,9 +265,102 @@ func demolish() -> bool:
 	return true
 
 
+func set_starter(active: bool) -> void:
+	is_starter = active
+	if active:
+		if _starter_marker == null or not is_instance_valid(_starter_marker):
+			_starter_marker = Node3D.new()
+			_starter_marker.name = "StarterMarker"
+			_starter_marker.position = Vector3(0, house_size.y + 1.2, 0)
+			add_child(_starter_marker)
+
+			var lab := Label3D.new()
+			lab.text = "STARTER\n[CLICK TO IGNITE - FREE]"
+			lab.font_size = 56
+			lab.pixel_size = 0.009
+			lab.modulate = Color(1.0, 0.88, 0.2)
+			lab.outline_size = 12
+			lab.outline_modulate = Color(0.15, 0.05, 0.0)
+			lab.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			lab.position = Vector3(0, 0.45, 0)
+			_starter_marker.add_child(lab)
+
+			var arrow := MeshInstance3D.new()
+			var prism := PrismMesh.new()
+			prism.size = Vector3(0.5, 0.55, 0.35)
+			var am := StandardMaterial3D.new()
+			am.albedo_color = Color(1.0, 0.75, 0.15)
+			am.emission_enabled = true
+			am.emission = Color(1.0, 0.65, 0.1)
+			am.emission_energy_multiplier = 2.5
+			am.roughness = 0.3
+			arrow.mesh = prism
+			arrow.material_override = am
+			arrow.rotation.z = PI
+			arrow.position = Vector3(0, 0.0, 0)
+			_starter_marker.add_child(arrow)
+
+		if _mat_base != null:
+			_mat_base.emission = Color(1.0, 0.75, 0.15)
+			_mat_base.emission_energy_multiplier = 1.4
+	else:
+		if _starter_marker != null and is_instance_valid(_starter_marker):
+			_starter_marker.queue_free()
+		_starter_marker = null
+		if _mat_base != null and state == State.UNBURNED:
+			_mat_base.emission_energy_multiplier = 0.0
+
+
+func start_smolder(duration: float = 8.0) -> void:
+	state = State.SMOLDERING
+	smolder_timer = duration
+	_set_fire_visible(true)
+	for i in _flames.size():
+		_flames[i].scale = Vector3(0.35, 0.35, 0.35)
+	if _light:
+		_light.light_energy = 0.5
+	if _smolder_label != null and is_instance_valid(_smolder_label):
+		_smolder_label.queue_free()
+	_smolder_label = Label3D.new()
+	_smolder_label.name = "SmolderLabel"
+	_smolder_label.text = "LAST SPARK: %ds\nCLICK (1 EMBER)" % int(ceil(smolder_timer))
+	_smolder_label.font_size = 80
+	_smolder_label.pixel_size = 0.011
+	_smolder_label.modulate = Color(1.0, 0.4, 0.1)
+	_smolder_label.outline_size = 14
+	_smolder_label.outline_modulate = Color(0.1, 0, 0)
+	_smolder_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_smolder_label.position = Vector3(0, house_size.y + 2.2, 0)
+	add_child(_smolder_label)
+
+
+func reignite(new_fuel: float = 35.0) -> bool:
+	if state != State.SMOLDERING and state != State.UNBURNED:
+		return false
+	state = State.BURNING
+	fuel = new_fuel
+	fuel_max = maxf(fuel_max, new_fuel)
+	heat = 0.0
+	if _smolder_label != null and is_instance_valid(_smolder_label):
+		_smolder_label.queue_free()
+		_smolder_label = null
+	_set_fire_visible(true)
+	_flash = 1.0
+	_pop(1.3)
+	ignited.emit(self)
+	return true
+
+
+func apply_gust_tilt(dir: Vector3) -> void:
+	_gust_tilt = dir
+
+
 func ignite() -> bool:
 	if state != State.UNBURNED:
 		return false
+	if _starter_marker != null and is_instance_valid(_starter_marker):
+		_starter_marker.queue_free()
+		_starter_marker = null
 	state = State.BURNING
 	heat = 0.0
 	_set_fire_visible(true)
@@ -306,8 +406,29 @@ func _burn_out() -> void:
 
 
 func _process(delta: float) -> void:
+	if _starter_marker != null and is_instance_valid(_starter_marker):
+		var bob := sin(float(Time.get_ticks_msec()) * 0.005) * 0.12
+		_starter_marker.position.y = house_size.y + 1.2 + bob
+
 	if _flash > 0.0:
 		_flash = maxf(0.0, _flash - delta * 1.2)
+
+	if state == State.SMOLDERING:
+		smolder_timer -= delta
+		if _smolder_label != null and is_instance_valid(_smolder_label):
+			_smolder_label.text = "LAST SPARK: %ds\nCLICK (1 EMBER)" % int(ceil(maxf(0.0, smolder_timer)))
+			var pulse := 0.7 + 0.3 * sin(float(Time.get_ticks_msec()) * 0.01)
+			_smolder_label.modulate = Color(1.0, pulse * 0.5, 0.1)
+		if _mat_base != null:
+			_mat_base.emission = Color(1.0, 0.25, 0.05)
+			_mat_base.emission_energy_multiplier = 0.8 + 0.4 * sin(float(Time.get_ticks_msec()) * 0.008)
+		if smolder_timer <= 0.0:
+			if _smolder_label != null and is_instance_valid(_smolder_label):
+				_smolder_label.queue_free()
+				_smolder_label = null
+			_burn_out()
+		return
+
 	if state != State.BURNING:
 		if _mat_base != null:
 			if state == State.BURNT:
@@ -323,6 +444,7 @@ func _process(delta: float) -> void:
 			else:
 				_mat_base.emission_energy_multiplier = 0.0
 		return
+
 	# Burning: simple fuel countdown, local flicker clock (no global sim).
 	if _phase_off < 0.0:
 		_phase_off = fmod(float(abs(get_instance_id())) * 0.618, TAU)
@@ -335,13 +457,19 @@ func _process(delta: float) -> void:
 			_mat_base.albedo_color = base_color * 0.55
 		if _mat_roof != null:
 			_mat_roof.albedo_color = roof_color * 0.55
+
+	var lean := _gust_tilt * 0.2
+	_gust_tilt = _gust_tilt.lerp(Vector3.ZERO, delta * 3.0)
+
 	for i in _flames.size():
 		var f := _flames[i]
 		var s := 1.0 + sin(t + float(i) * 2.1) * 0.18 + randf_range(-0.06, 0.06)
 		f.scale = Vector3(s, 1.0 + sin(t * 1.3 + float(i)) * 0.22, s)
 		f.rotation.y += delta * (1.5 + float(i) * 0.7)
+		f.position = Vector3(lean.x * float(i + 1), 0.3 + float(i) * 0.45, lean.z * float(i + 1))
 	if _light:
 		_light.light_energy = 1.4 + sin(t * 1.7) * 0.4 + randf_range(-0.15, 0.15)
+		_light.position = Vector3(lean.x, 1.0, lean.z)
 	if _mat_base != null:
 		if _flash > 0.0:
 			_mat_base.emission = Color(1.0, 0.5, 0.1)
@@ -352,4 +480,6 @@ func _process(delta: float) -> void:
 		else:
 			_mat_base.emission_energy_multiplier = 0.0
 	if fuel <= 0.0:
-		_burn_out()
+		burn_ending.emit(self)
+		if state == State.BURNING:
+			_burn_out()
