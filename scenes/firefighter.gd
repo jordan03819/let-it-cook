@@ -24,6 +24,9 @@ var _spread_t: float = 0.0
 var catch_cd: float = 0.0
 var _dead: bool = false
 var _visual: Node3D = null
+var _bubble: Label3D = null
+var _bubble_t: float = 0.0
+var _shout_t: float = 0.0
 var _water_particles: GPUParticles3D = null
 var _spraying: bool = false
 var retreating: bool = false # wave over: walk home, clock out
@@ -35,6 +38,7 @@ func _ready() -> void:
 	add_to_group("flammable")
 	_build_visuals()
 	_build_water()
+	_build_bubble()
 	if elite:
 		speed = 5.2
 		spray_rate = 1.3
@@ -115,6 +119,29 @@ func _build_water() -> void:
 	add_child(_water_particles)
 
 
+func _build_bubble() -> void:
+	_bubble = Label3D.new()
+	_bubble.text = "!"
+	_bubble.font_size = 128
+	_bubble.pixel_size = 0.012
+	_bubble.modulate = Color(1.0, 0.85, 0.2)
+	_bubble.outline_size = 16
+	_bubble.outline_modulate = Color(0.1, 0.05, 0.05)
+	_bubble.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_bubble.position = Vector3(0, 2.4, 0)
+	_bubble.visible = false
+	add_child(_bubble)
+
+
+func _show_bubble(txt: String, col: Color = Color(1.0, 0.85, 0.2)) -> void:
+	if _bubble == null:
+		return
+	_bubble.text = txt
+	_bubble.modulate = col
+	_bubble.visible = true
+	_bubble_t = 1.6
+
+
 func ignite() -> bool:
 	if burn == null or _dead:
 		return false
@@ -147,6 +174,10 @@ func _physics_process(delta: float) -> void:
 	if _dead:
 		return
 	catch_cd = maxf(0.0, catch_cd - delta)
+	if _bubble_t > 0.0:
+		_bubble_t -= delta
+		if _bubble_t <= 0.0 and _bubble != null:
+			_bubble.visible = false
 	if retreating and not is_burning():
 		_retreat_t -= delta
 		_set_spray(false)
@@ -199,8 +230,12 @@ func _physics_flee(delta: float) -> void:
 	_set_spray(false)
 	_spread_t -= delta
 	if _spread_t <= 0.0:
-		_spread_t = 0.9
+		_spread_t = 0.8
 		_spread_fire()
+	_shout_t -= delta
+	if _shout_t <= 0.0:
+		_shout_t = randf_range(1.2, 2.0)
+		_show_bubble("AAA!!", Color(1.0, 0.3, 0.1))
 	var away := Vector3.ZERO
 	for h in get_tree().get_nodes_in_group("houses"):
 		if h is VoxelHouse and h.state == VoxelHouse.State.BURNING:
@@ -284,16 +319,14 @@ func _find_best_fire() -> VoxelHouse:
 
 func _spray_at(house: VoxelHouse, delta: float) -> void:
 	_set_spray(true)
-	house.apply_water(spray_rate, delta)
+	house.apply_water(spray_rate * 2.2, delta)
 	# Hose water also rescues burning characters near the spray or self.
 	for c in get_tree().get_nodes_in_group("burning_chars"):
 		if c is Node3D and c != self:
 			var cp := (c as Node3D).global_position
-			if cp.distance_to(house.global_position) < 4.0 or cp.distance_to(global_position) < 3.0:
-				if c is VoxelVillager:
-					(c as VoxelVillager).apply_water(1.4, delta)
-				elif c is VoxelFirefighter:
-					(c as VoxelFirefighter).apply_water(1.4, delta)
+			if cp.distance_to(house.global_position) < 4.5 or cp.distance_to(global_position) < 3.5:
+				if c.has_method("apply_water"):
+					c.apply_water(2.0, delta)
 
 
 func _set_spray(v: bool) -> void:

@@ -6,6 +6,7 @@ class_name VoxelHouse
 
 signal burned_out(house: VoxelHouse)
 signal ignited(house: VoxelHouse)
+signal extinguished(house: VoxelHouse)
 signal demolished(house: VoxelHouse)
 signal burn_ending(house: VoxelHouse)
 
@@ -15,6 +16,7 @@ var state: int = State.UNBURNED
 var fuel_max: float = 22.0
 var fuel: float = 22.0
 var heat: float = 0.0 # 0..1 warming from nearby burning buildings. 1 = catches.
+var wetness: float = 0.0 # 0..1 water saturation; cools heat, resists fire, dries over time
 var kind: String = "house" # house | tree (different heat rates, same states)
 var house_size: Vector3 = Vector3(2.0, 1.6, 2.0)
 var base_color: Color = Color(0.9, 0.8, 0.65)
@@ -51,6 +53,7 @@ func setup(p_base_color: Color, p_roof_color: Color, p_fuel: float, p_size: Vect
 	fuel_max = p_fuel
 	fuel = p_fuel
 	heat = 0.0
+	wetness = 0.0
 	house_size = p_size
 	kind = p_kind
 	if is_node_ready():
@@ -246,6 +249,73 @@ func is_burnable() -> bool:
 	return state == State.UNBURNED
 
 
+func apply_water(amount: float, delta: float) -> void:
+	if state == State.BURNT or state == State.DEMOLISHED:
+		return
+	wetness = clampf(wetness + amount * delta * 1.1, 0.0, 1.0)
+	if state == State.BURNING:
+		if wetness >= 0.8:
+			extinguish()
+	elif state == State.SMOLDERING:
+		if wetness >= 0.4:
+			extinguish()
+	elif state == State.UNBURNED:
+		heat = maxf(0.0, heat - amount * delta * 2.5)
+
+
+func extinguish() -> void:
+	if state != State.BURNING and state != State.SMOLDERING:
+		return
+	state = State.UNBURNED
+	heat = 0.0
+	wetness = 0.85
+	_set_fire_visible(false)
+	if _smolder_label != null and is_instance_valid(_smolder_label):
+		_smolder_label.queue_free()
+		_smolder_label = null
+	if _light != null:
+		_light.visible = false
+	_flash = 0.6
+	_spawn_steam()
+	extinguished.emit(self)
+
+
+func _spawn_steam() -> void:
+	if not is_inside_tree():
+		return
+	var p := GPUParticles3D.new()
+	p.amount = 16
+	p.lifetime = 1.0
+	p.one_shot = true
+	p.explosiveness = 0.85
+	p.local_coords = false
+	p.visibility_aabb = AABB(Vector3(-4, -1, -4), Vector3(8, 8, 8))
+	var pm := ParticleProcessMaterial.new()
+	pm.direction = Vector3(0, 1, 0)
+	pm.spread = 28.0
+	pm.initial_velocity_min = 2.0
+	pm.initial_velocity_max = 4.5
+	pm.gravity = Vector3(0, 1.2, 0)
+	pm.scale_min = 0.8
+	pm.scale_max = 1.8
+	pm.color = Color(0.85, 0.88, 0.92, 0.7)
+	p.process_material = pm
+	var cube := BoxMesh.new()
+	cube.size = Vector3(0.2, 0.2, 0.2)
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(0.85, 0.88, 0.92, 0.6)
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	cube.material = m
+	p.draw_pass_1 = cube
+	add_child(p)
+	p.position = Vector3(0, house_size.y * 0.7, 0)
+	p.emitting = true
+	var tree := get_tree()
+	if tree != null:
+		tree.create_timer(1.6).timeout.connect(p.queue_free)
+
+
 func demolish() -> bool:
 	if state != State.UNBURNED:
 		return false
@@ -413,6 +483,11 @@ func _process(delta: float) -> void:
 	if _flash > 0.0:
 		_flash = maxf(0.0, _flash - delta * 1.2)
 
+	# Evaporation: drying over time
+	if wetness > 0.0:
+		var dry_rate := 0.22 if state == State.BURNING else 0.045
+		wetness = maxf(0.0, wetness - delta * dry_rate)
+
 	if state == State.SMOLDERING:
 		smolder_timer -= delta
 		if _smolder_label != null and is_instance_valid(_smolder_label):
@@ -443,6 +518,13 @@ func _process(delta: float) -> void:
 				_mat_base.emission_energy_multiplier = heat * 1.2
 			else:
 				_mat_base.emission_energy_multiplier = 0.0
+
+			# Wet sheen visual feedback: darker wood and glossy roughness when wet
+			if state == State.UNBURNED:
+				var wet_factor := 1.0 - wetness * 0.38
+				var target_col := (base_color * 0.55 if _scorched else base_color) * wet_factor
+				_mat_base.albedo_color = target_col
+				_mat_base.roughness = clampf(1.0 - wetness * 0.7, 0.25, 1.0)
 		return
 
 	# Burning: simple fuel countdown, local flicker clock (no global sim).

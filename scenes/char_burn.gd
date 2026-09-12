@@ -23,6 +23,7 @@ var _flames: Array[MeshInstance3D] = []
 var _light: OmniLight3D = null
 var _fire_particles: GPUParticles3D = null
 var _smoke_particles: GPUParticles3D = null
+var _flicker_t: float = 0.0
 var _flicker: float = 0.0
 var _phase_off: float = -1.0
 
@@ -58,8 +59,8 @@ func ignite() -> bool:
 func apply_water(amount: float, delta: float) -> void:
 	if not is_burning or is_dead:
 		return
-	wetness = clampf(wetness + amount * delta * 0.7, 0.0, 1.0)
-	if wetness >= 1.0:
+	wetness = clampf(wetness + amount * delta * 0.85, 0.0, 1.0)
+	if wetness >= 0.85:
 		extinguish()
 
 
@@ -86,15 +87,16 @@ func _process(delta: float) -> void:
 		return
 	if _phase_off < 0.0:
 		_phase_off = fmod(float(abs(get_instance_id())) * 0.618, TAU)
-	_flicker = RunState.fire_pulse * 13.0 + _phase_off
-	wetness = maxf(0.0, wetness - delta * 0.05)
+	_flicker_t += delta * 12.0
+	_flicker = _flicker_t + _phase_off
+	wetness = maxf(0.0, wetness - delta * 0.06)
 	burn_hp -= delta
 	# Animate voxel flames: crunchy jitter like house fire
 	for i in _flames.size():
 		var f := _flames[i]
 		if not is_instance_valid(f):
 			continue
-		var grow := 0.8 + 0.5 * RunState.inferno
+		var grow := 0.7 + 0.4 * heat()
 		var s := (1.0 + sin(_flicker + float(i) * 2.1) * 0.2 + randf_range(-0.07, 0.07)) * grow
 		f.scale = Vector3(s, (1.0 + sin(_flicker * 1.3 + float(i)) * 0.24) * grow, s)
 		f.rotation.y += delta * (2.0 + float(i))

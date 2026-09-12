@@ -4,6 +4,7 @@ extends Node3D
 
 const HOUSE_SCENE := preload("res://scenes/house.tscn")
 const VILLAGER_SCENE := preload("res://scenes/villager.tscn")
+const FIREFIGHTER_SCENE := preload("res://scenes/firefighter.tscn")
 
 const LEVELS := [
 	{"name": "VILLAGE", "sub": "Clusters & Bucket Brigades", "grid_half": 4, "spacing": 4.2, "villagers": 7},
@@ -103,6 +104,8 @@ var spotted: bool = false
 var alarm: float = 0.0
 var splash_tick: float = 0.0
 var _buckets_warned: bool = false
+var firefighter_warning: bool = false
+var firefighter_wave_spawned: bool = false
 
 @onready var rig: Node3D = $CameraRig
 @onready var camera: Camera3D = $CameraRig/Camera3D
@@ -234,6 +237,13 @@ func _load_level() -> void:
 	last_spark_active = false
 	last_spark_house = null
 	last_spark_timer = 0.0
+
+	# Response state
+	spotted = false
+	alarm = 0.0
+	_buckets_warned = false
+	firefighter_warning = false
+	firefighter_wave_spawned = false
 
 	# Ambient wind
 	var a0 := randf() * TAU
@@ -381,6 +391,9 @@ func _build_village() -> void:
 		_place_house(Vector3(jx, 0, z + randf_range(-0.5, 0.5)), "tree", 25.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
 		z += 2.8
 
+	# Water well for bucket carriers (SPEC Section 6.7 & 9.2)
+	_build_water_well(Vector3(-1.2, 0, 1.2))
+
 	for side in [-1.0, 1.0]:
 		for k in 3:
 			var ox: float = float(side) * (spacing * 0.9 + float(k) * 1.6)
@@ -404,6 +417,39 @@ func _build_village() -> void:
 		starter_house = best_starter
 		starter_house.set_starter(true)
 		starter_ignited = false
+
+
+func _build_water_well(pos: Vector3) -> StaticBody3D:
+	var well := StaticBody3D.new()
+	well.name = "WaterWell"
+	well.position = pos
+	well.add_to_group("water_sources")
+	village_root.add_child(well)
+
+	var col := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(1.6, 1.2, 1.6)
+	col.shape = shape
+	col.position = Vector3(0, 0.6, 0)
+	well.add_child(col)
+
+	var stone_col := Color(0.48, 0.46, 0.45)
+	_add_voxel_box(well, Vector3(1.6, 0.6, 0.35), Vector3(0, 0.3, 0.65), stone_col)
+	_add_voxel_box(well, Vector3(1.6, 0.6, 0.35), Vector3(0, 0.3, -0.65), stone_col)
+	_add_voxel_box(well, Vector3(0.35, 0.6, 1.0), Vector3(-0.65, 0.3, 0), stone_col)
+	_add_voxel_box(well, Vector3(0.35, 0.6, 1.0), Vector3(0.65, 0.3, 0), stone_col)
+
+	var water_col := Color(0.2, 0.55, 0.92)
+	_add_voxel_box(well, Vector3(1.0, 0.3, 1.0), Vector3(0, 0.25, 0), water_col)
+
+	var wood_col := Color(0.38, 0.25, 0.14)
+	_add_voxel_box(well, Vector3(0.18, 1.5, 0.18), Vector3(-0.6, 0.85, 0), wood_col)
+	_add_voxel_box(well, Vector3(0.18, 1.5, 0.18), Vector3(0.6, 0.85, 0), wood_col)
+
+	var roof_col := Color(0.55, 0.2, 0.14)
+	_add_voxel_box(well, Vector3(1.8, 0.25, 1.8), Vector3(0, 1.6, 0), roof_col)
+	_add_voxel_box(well, Vector3(1.1, 0.25, 1.1), Vector3(0, 1.8, 0), roof_col)
+	return well
 
 
 func _spawn_villagers(n: int) -> void:
@@ -440,6 +486,17 @@ func _process(delta: float) -> void:
 	_tick_heat(delta)
 	_tick_alarm(delta)
 	_tick_buckets(delta)
+
+	# Firefighter Escalation Wave (SPEC Section 6.2, 9.3, 11.1)
+	if starter_ignited and not game_over:
+		if not firefighter_warning and not firefighter_wave_spawned:
+			if elapsed >= 80.0 or (alarm >= 70.0 and elapsed >= 60.0):
+				firefighter_warning = true
+				_flash_hint("SIRENS! Official firefighters dispatched — arriving on the road in 5s!")
+		elif firefighter_warning and not firefighter_wave_spawned:
+			if elapsed >= 85.0 or (alarm >= 70.0 and elapsed >= 65.0):
+				firefighter_wave_spawned = true
+				_spawn_firefighter_wave()
 
 	var burning_count := _count_burning()
 	var smoldering_count := _count_smoldering()
@@ -491,6 +548,17 @@ func _process(delta: float) -> void:
 				return
 
 	_update_hud()
+
+
+func _spawn_firefighter_wave() -> void:
+	var road_z: float = -cam_bound + 1.5
+	var positions := [Vector3(-1.2, 0, road_z), Vector3(1.2, 0, road_z)]
+	for p in positions:
+		var ff: VoxelFirefighter = FIREFIGHTER_SCENE.instantiate()
+		units_root.add_child(ff)
+		ff.position = p
+		ff.home_pos = p
+	_flash_hint("FIREFIGHTERS DEPLOYED! High-pressure water hoses attacking flames.")
 
 
 func _count_burning() -> int:
@@ -612,6 +680,10 @@ func _tick_heat(delta: float) -> void:
 			if power >= 3.5:
 				break
 
+		# Wetness suppresses incoming heat (SPEC Section 6.4 & 8.4)
+		if dst.wetness > 0.05:
+			power *= maxf(0.08, 1.0 - dst.wetness * 0.9)
+
 		if power > 0.0:
 			dst.heat = minf(1.0, dst.heat + rate * power * delta)
 			if dst.heat >= 1.0:
@@ -677,11 +749,11 @@ func _pick_bucket_target() -> VoxelHouse:
 func _tick_buckets(delta: float) -> void:
 	var burning := _count_burning()
 	var allowed := 0
-	if alarm >= 55.0 and elapsed > 75.0 and burning >= 1:
+	if alarm >= 40.0 and burning >= 1:
 		allowed = 1
-	if alarm >= 70.0:
+	if alarm >= 60.0 and burning >= 2:
 		allowed = 2
-	if alarm >= 85.0 and burning >= 8:
+	if alarm >= 75.0 and burning >= 5:
 		allowed = 3
 	allowed = mini(allowed, BUCKET_MAX)
 
@@ -691,7 +763,7 @@ func _tick_buckets(delta: float) -> void:
 			for v in get_tree().get_nodes_in_group("villagers"):
 				if have >= allowed:
 					break
-				if is_instance_valid(v) and v is VoxelVillager and not (v as VoxelVillager).is_bucket():
+				if is_instance_valid(v) and v is VoxelVillager and not (v as VoxelVillager).is_bucket() and not (v as VoxelVillager).is_burning():
 					var tgt := _pick_bucket_target()
 					if tgt == null:
 						break
@@ -699,39 +771,15 @@ func _tick_buckets(delta: float) -> void:
 					have += 1
 					if not _buckets_warned:
 						_buckets_warned = true
-						_flash_hint("Bucket carriers formed a brigade! They cool threatened homes.")
+						_flash_hint("Bucket carriers formed a brigade! Fetching water to cool homes.")
 
+	# Keep bucket targets updated
 	for v in get_tree().get_nodes_in_group("villagers"):
 		if not (is_instance_valid(v) and v is VoxelVillager and (v as VoxelVillager).is_bucket()):
 			continue
 		var vv := v as VoxelVillager
 		if vv.bucket_target == null or not is_instance_valid(vv.bucket_target) or (vv.bucket_target as VoxelHouse).state != VoxelHouse.State.BURNING:
 			vv.bucket_target = _pick_bucket_target() if burning > 0 else null
-
-	splash_tick += delta
-	if splash_tick < BUCKET_TICK:
-		return
-	splash_tick = 0.0
-
-	for v in get_tree().get_nodes_in_group("villagers"):
-		if not (is_instance_valid(v) and v is VoxelVillager and (v as VoxelVillager).is_bucket()):
-			continue
-		var vv := v as VoxelVillager
-		if vv.bucket_target == null or not is_instance_valid(vv.bucket_target):
-			continue
-		var tgt := vv.bucket_target as VoxelHouse
-		if tgt.state != VoxelHouse.State.BURNING:
-			continue
-		if (vv as Node3D).global_position.distance_to(tgt.global_position) > BUCKET_RANGE + 1.0:
-			continue
-
-		for dst in houses:
-			if not is_instance_valid(dst) or dst.state != VoxelHouse.State.UNBURNED:
-				continue
-			if (vv as Node3D).global_position.distance_to(dst.global_position) <= BUCKET_RANGE:
-				dst.heat = maxf(0.0, dst.heat - BUCKET_COOL)
-		tgt.fuel = maxf(0.0, tgt.fuel - BUCKET_DRAIN)
-		vv._show_bubble("~", Color(0.4, 0.7, 1.0))
 
 
 # ---------- Camera Control (SPEC Section 14.1) ----------
