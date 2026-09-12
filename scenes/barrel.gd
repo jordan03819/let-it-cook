@@ -237,7 +237,7 @@ func _detonate_blast() -> void:
 
 	# 1. Structures (Houses and Trees)
 	for h in get_tree().get_nodes_in_group("houses"):
-		if is_instance_valid(h) and h is VoxelHouse:
+		if is_instance_valid(h) and h is VoxelHouse and h.kind != "stone":
 			var d := pos.distance_to(h.global_position)
 			if d <= explosion_radius:
 				if h.state == VoxelHouse.State.UNBURNED:

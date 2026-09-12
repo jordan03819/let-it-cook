@@ -17,7 +17,7 @@ var fuel_max: float = 22.0
 var fuel: float = 22.0
 var heat: float = 0.0 # 0..1 warming from nearby burning buildings. 1 = catches.
 var wetness: float = 0.0 # 0..1 water saturation; cools heat, resists fire, dries over time
-var kind: String = "house" # house | tree (different heat rates, same states)
+var kind: String = "house" # house | tree | stone
 var house_size: Vector3 = Vector3(2.0, 1.6, 2.0)
 var base_color: Color = Color(0.9, 0.8, 0.65)
 var roof_color: Color = Color(0.75, 0.25, 0.15)
@@ -27,6 +27,7 @@ var smolder_timer: float = 0.0
 var _starter_marker: Node3D = null
 var _smolder_label: Label3D = null
 var _gust_tilt: Vector3 = Vector3.ZERO
+var _tree_foliage_mats: Array[StandardMaterial3D] = []
 
 var _scorched: bool = false
 var _scorch_tween: Tween = null
@@ -131,6 +132,9 @@ func _build_visuals() -> void:
 	if kind == "tree":
 		_build_tree_visuals()
 		return
+	elif kind == "stone":
+		_build_stone_visuals()
+		return
 	_build_house_visuals()
 
 
@@ -153,12 +157,55 @@ func _build_house_visuals() -> void:
 
 
 func _build_tree_visuals() -> void:
+	_tree_foliage_mats.clear()
 	_mat_base = _voxel_mat(Color(0.42, 0.27, 0.13))
 	_mat_roof = _voxel_mat(Color(0.14, 0.56, 0.2))
+	_tree_foliage_mats.append(_mat_roof)
+	var mat_mid := _voxel_mat(Color(0.18, 0.63, 0.24))
+	_tree_foliage_mats.append(mat_mid)
+	var mat_top := _voxel_mat(Color(0.25, 0.7, 0.28))
+	_tree_foliage_mats.append(mat_top)
+
 	_add_box(_visual_root, Vector3(0.35, 1.1, 0.35), Vector3(0, 0.55, 0), _mat_base)
 	_add_box(_visual_root, Vector3(1.6, 0.9, 1.6), Vector3(0, 1.4, 0), _mat_roof)
-	_add_box(_visual_root, Vector3(1.15, 0.8, 1.15), Vector3(0, 2.1, 0), _voxel_mat(Color(0.18, 0.63, 0.24)))
-	_add_box(_visual_root, Vector3(0.65, 0.5, 0.65), Vector3(0, 2.7, 0), _voxel_mat(Color(0.25, 0.7, 0.28)))
+	_add_box(_visual_root, Vector3(1.15, 0.8, 1.15), Vector3(0, 2.1, 0), mat_mid)
+	_add_box(_visual_root, Vector3(0.65, 0.5, 0.65), Vector3(0, 2.7, 0), mat_top)
+
+
+func _build_stone_visuals() -> void:
+	_mat_base = _voxel_mat(base_color if base_color != Color(0.9, 0.8, 0.65) else Color(0.48, 0.46, 0.45))
+	_mat_roof = _voxel_mat(roof_color if roof_color != Color(0.75, 0.25, 0.15) else Color(0.24, 0.25, 0.28))
+	var stone_dark := _voxel_mat(Color(0.34, 0.33, 0.32))
+	var iron_mat := _voxel_mat(Color(0.18, 0.18, 0.2))
+
+	# Heavy masonry base
+	_base_box = _add_box(_visual_root, house_size, Vector3(0, house_size.y * 0.5, 0), _mat_base)
+
+	# Stone corner buttresses
+	var pw: float = 0.4
+	for sx: float in [-1.0, 1.0]:
+		for sz: float in [-1.0, 1.0]:
+			var px: float = sx * (house_size.x * 0.5 + pw * 0.15)
+			var pz: float = sz * (house_size.z * 0.5 + pw * 0.15)
+			_add_box(_visual_root, Vector3(pw, house_size.y + 0.3, pw), Vector3(px, (house_size.y + 0.3) * 0.5, pz), stone_dark)
+
+	# Crenellated roof parapet
+	var parapet_size := Vector3(house_size.x + 0.3, 0.5, house_size.z + 0.3)
+	_roof_box = _add_box(_visual_root, parapet_size, Vector3(0, house_size.y + 0.25, 0), _mat_roof)
+
+	# Battlements
+	for sx: float in [-1.0, 1.0]:
+		_add_box(_visual_root, Vector3(house_size.x * 0.35, 0.35, 0.25), Vector3(sx * house_size.x * 0.3, house_size.y + 0.65, house_size.z * 0.5), stone_dark)
+		_add_box(_visual_root, Vector3(house_size.x * 0.35, 0.35, 0.25), Vector3(sx * house_size.x * 0.3, house_size.y + 0.65, -house_size.z * 0.5), stone_dark)
+
+	# Arched entrance
+	_add_box(_visual_root, Vector3(0.85, 1.3, 0.12), Vector3(0, 0.65, house_size.z * 0.5 + 0.04), stone_dark)
+	_add_box(_visual_root, Vector3(0.65, 1.1, 0.14), Vector3(0, 0.55, house_size.z * 0.5 + 0.05), iron_mat)
+
+	# Narrow arrow slits
+	var slit_mat := _voxel_mat(Color(0.1, 0.1, 0.12))
+	_add_box(_visual_root, Vector3(0.18, 0.55, 0.08), Vector3(-house_size.x * 0.28, house_size.y * 0.65, house_size.z * 0.5 + 0.02), slit_mat)
+	_add_box(_visual_root, Vector3(0.18, 0.55, 0.08), Vector3(house_size.x * 0.28, house_size.y * 0.65, house_size.z * 0.5 + 0.02), slit_mat)
 
 
 func _build_fire_visuals() -> void:
@@ -246,11 +293,11 @@ func _set_fire_visible(v: bool) -> void:
 
 # --- core verb: lighting. No conditions besides state. ---
 func is_burnable() -> bool:
-	return state == State.UNBURNED
+	return state == State.UNBURNED and kind != "stone"
 
 
 func apply_water(amount: float, delta: float) -> void:
-	if state == State.BURNT or state == State.DEMOLISHED:
+	if kind == "stone" or state == State.BURNT or state == State.DEMOLISHED:
 		return
 	wetness = clampf(wetness + amount * delta * 1.1, 0.0, 1.0)
 	if state == State.BURNING:
@@ -407,7 +454,7 @@ func start_smolder(duration: float = 8.0) -> void:
 
 
 func reignite(new_fuel: float = 35.0) -> bool:
-	if state != State.SMOLDERING and state != State.UNBURNED:
+	if kind == "stone" or (state != State.SMOLDERING and state != State.UNBURNED):
 		return false
 	state = State.BURNING
 	fuel = new_fuel
@@ -429,7 +476,7 @@ func apply_gust_tilt(dir: Vector3) -> void:
 
 
 func ignite() -> bool:
-	if state != State.UNBURNED:
+	if kind == "stone" or state != State.UNBURNED:
 		return false
 	if _starter_marker != null and is_instance_valid(_starter_marker):
 		_starter_marker.queue_free()
@@ -462,6 +509,9 @@ func _burn_out() -> void:
 		_scorch_tween.kill()
 	_mat_base.albedo_color = Color(0.12, 0.1, 0.1)
 	_mat_roof.albedo_color = Color(0.08, 0.07, 0.07)
+	if kind == "tree":
+		for m in _tree_foliage_mats:
+			m.albedo_color = Color(0.08, 0.07, 0.07)
 	_mat_base.emission = Color(1.0, 0.3, 0.05)
 	_flash = 0.8
 	if _light != null:
@@ -481,6 +531,9 @@ func _burn_out() -> void:
 
 
 func _process(delta: float) -> void:
+	if kind == "stone":
+		return
+
 	if _starter_marker != null and is_instance_valid(_starter_marker):
 		var bob := sin(float(Time.get_ticks_msec()) * 0.005) * 0.12
 		_starter_marker.position.y = house_size.y + 1.2 + bob
@@ -544,6 +597,8 @@ func _process(delta: float) -> void:
 			_mat_base.albedo_color = base_color * 0.55
 		if _mat_roof != null:
 			_mat_roof.albedo_color = roof_color * 0.55
+		for m in _tree_foliage_mats:
+			m.albedo_color = m.albedo_color * 0.55
 
 	var lean := _gust_tilt * 0.2
 	_gust_tilt = _gust_tilt.lerp(Vector3.ZERO, delta * 3.0)

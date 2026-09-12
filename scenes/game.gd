@@ -565,6 +565,10 @@ func _handle_left_click(screen_pos: Vector2) -> void:
 
 	var house: VoxelHouse = obj as VoxelHouse
 
+	if house.kind == "stone":
+		_flash_hint("Stone structures are fireproof and cannot be ignited!")
+		return
+
 	if not starter_ignited:
 		if house == starter_house:
 			starter_house.set_starter(false)
@@ -765,7 +769,7 @@ func _update_wind_cone_preview(origin: Vector3, dir: Vector3, valid: bool) -> vo
 	# Highlight structures inside cone that receive boosted heat
 	if valid and embers >= WIND_GUST_COST and wind_cooldown <= 0.0:
 		for h in houses:
-			if is_instance_valid(h) and h.state == VoxelHouse.State.UNBURNED:
+			if is_instance_valid(h) and h.state == VoxelHouse.State.UNBURNED and h.kind != "stone":
 				var to_h := h.global_position - origin
 				to_h.y = 0.0
 				if to_h.length() <= radius and to_h.normalized().dot(dir) >= cos(half_angle):

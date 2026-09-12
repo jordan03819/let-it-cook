@@ -101,7 +101,7 @@ func _tick_heat(delta: float, rain_active: bool) -> void:
 				src.apply_gust_tilt(active_gust_dir)
 
 	for dst in houses:
-		if not is_instance_valid(dst) or dst.state != VoxelHouse.State.UNBURNED:
+		if not is_instance_valid(dst) or dst.state != VoxelHouse.State.UNBURNED or dst.kind == "stone":
 			continue
 
 		var radius := TREE_RADIUS if dst.kind == "tree" else HOUSE_RADIUS

@@ -23,6 +23,8 @@ var alarm: float = 0.0
 var _buckets_warned: bool = false
 var firefighter_warned: bool = false
 var firefighter_spawned: bool = false
+var elite_warned: bool = false
+var elite_spawned: bool = false
 var shaman_ritual_triggered: bool = false
 
 
@@ -38,6 +40,8 @@ func setup(p_level_idx: int, p_units_root: Node3D, p_houses: Array[VoxelHouse], 
 	_buckets_warned = false
 	firefighter_warned = false
 	firefighter_spawned = false
+	elite_warned = false
+	elite_spawned = false
 	shaman_ritual_triggered = false
 
 
@@ -141,9 +145,18 @@ func _tick_buckets(_delta: float, burning_count: int, game_over: bool) -> void:
 
 
 func _tick_firefighter_escalation(elapsed: float) -> void:
-	var warn_time := 45.0 if level_idx == 1 else 80.0
-	var spawn_time := 50.0 if level_idx == 1 else 85.0
-	var alarm_threshold := 50.0 if level_idx == 1 else 70.0
+	var warn_time := 80.0
+	var spawn_time := 85.0
+	var alarm_threshold := 70.0
+
+	if level_idx == 1:
+		warn_time = 45.0
+		spawn_time = 50.0
+		alarm_threshold = 50.0
+	elif level_idx == 2:
+		warn_time = 32.0
+		spawn_time = 37.0
+		alarm_threshold = 38.0
 
 	if not firefighter_warned and not firefighter_spawned:
 		if elapsed >= warn_time or (alarm >= alarm_threshold and elapsed >= warn_time - 15.0):
@@ -154,27 +167,52 @@ func _tick_firefighter_escalation(elapsed: float) -> void:
 	elif firefighter_warned and not firefighter_spawned:
 		if elapsed >= spawn_time or (alarm >= alarm_threshold and elapsed >= warn_time - 10.0):
 			firefighter_spawned = true
-			_spawn_firefighter_wave()
+			_spawn_firefighter_wave(false)
 			firefighter_wave_deployed.emit()
 
+	# City Wave 2: Elite Firefighters (SPEC Section 6.10 & 11.3)
+	if level_idx == 2 and firefighter_spawned and not elite_spawned:
+		var elite_warn_t := 75.0
+		var elite_spawn_t := 80.0
+		if not elite_warned:
+			if elapsed >= elite_warn_t or (alarm >= 65.0 and elapsed >= elite_warn_t - 15.0):
+				elite_warned = true
+				SoundManager.play_sfx("siren")
+				hint_requested.emit("HIGH ALERT! Elite Metropolitan Firefighters responding in 5s!")
+		else:
+			if elapsed >= elite_spawn_t or (alarm >= 65.0 and elapsed >= elite_warn_t - 10.0):
+				elite_spawned = true
+				_spawn_firefighter_wave(true)
+				firefighter_wave_deployed.emit()
 
-func _spawn_firefighter_wave() -> void:
+
+func _spawn_firefighter_wave(is_elite: bool = false) -> void:
 	if units_root == null:
 		return
 	var road_z: float = -cam_bound + 1.5
 	var positions: Array[Vector3] = []
 	if level_idx == 1:
 		positions = [Vector3(-7.5, 0, road_z), Vector3(7.5, 0, road_z), Vector3(-7.5, 0, -road_z)]
+	elif level_idx == 2:
+		if is_elite:
+			positions = [Vector3(-1.8, 0, cam_bound - 3.0), Vector3(1.8, 0, cam_bound - 3.0), Vector3(13.0, 0, cam_bound - 3.0)]
+		else:
+			positions = [Vector3(-1.2, 0, cam_bound - 3.0), Vector3(1.2, 0, cam_bound - 3.0), Vector3(0.0, 0, cam_bound - 3.0)]
 	else:
 		positions = [Vector3(-1.2, 0, road_z), Vector3(1.2, 0, road_z)]
 
 	for p in positions:
 		var ff: VoxelFirefighter = FIREFIGHTER_SCENE.instantiate()
+		if is_elite:
+			ff.elite = true
 		units_root.add_child(ff)
 		ff.position = p
 		ff.home_pos = p
 
-	hint_requested.emit("FIREFIGHTERS DEPLOYED! High-pressure water hoses attacking flames.")
+	if is_elite:
+		hint_requested.emit("ELITE FIREFIGHTERS DEPLOYED! High-pressure blue squad reinforcing the defense!")
+	else:
+		hint_requested.emit("FIREFIGHTERS DEPLOYED! High-pressure water hoses attacking flames.")
 
 
 func _tick_shaman_ritual(elapsed: float, burning_count: int) -> void:

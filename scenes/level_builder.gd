@@ -12,7 +12,7 @@ const SHAMAN_SCENE := preload("res://scenes/shaman.tscn")
 const LEVELS := [
 	{"name": "VILLAGE", "sub": "Clusters & Bucket Brigades", "grid_half": 4, "spacing": 4.2, "villagers": 7},
 	{"name": "TOWN", "sub": "Canals, Explosive Barrels & Shaman", "grid_half": 5, "spacing": 4.0, "villagers": 9},
-	{"name": "CITY", "sub": "Firebreaks & Metropolitan Districts", "grid_half": 6, "spacing": 3.8, "villagers": 0},
+	{"name": "CITY", "sub": "Firebreaks & Metropolitan Districts", "grid_half": 6, "spacing": 3.8, "villagers": 14},
 ]
 
 const CAM_SIZES := [19.0, 22.0, 25.0]
@@ -46,7 +46,7 @@ static func build_level(level_idx: int, village_root: Node3D, units_root: Node3D
 		1:
 			_build_town(ctx, village_root, units_root)
 		_:
-			_build_city_stub(ctx, village_root, units_root)
+			_build_city(ctx, village_root, units_root)
 
 	_spawn_villagers(int(cfg.get("villagers", 0)), ctx.cam_bound, units_root)
 	return ctx
@@ -159,9 +159,29 @@ static func _build_ground(level_idx: int, cam_bound: float, village_root: Node3D
 			_add_voxel_box(ground, Vector3(w * 0.9, 0.06, 2.8), Vector3(0, 0.03, 8.5), road_col)
 			_add_voxel_box(ground, Vector3(w * 0.9, 0.06, 2.8), Vector3(0, 0.03, -8.5), road_col)
 		_:
-			_ground_slab(ground, Vector3(w, 1, w), Color(0.36, 0.44, 0.32))
-			_add_voxel_box(ground, Vector3(w, 0.08, 4.5), Vector3(0, 0.04, 0), Color(0.38, 0.36, 0.35))
-			_add_voxel_box(ground, Vector3(4.5, 0.08, w), Vector3(0, 0.04, 0), Color(0.38, 0.36, 0.35))
+			# City: Paved urban cobblestone with central boulevard, plazas, and stone sidewalks
+			_ground_slab(ground, Vector3(w, 1, w), Color(0.38, 0.38, 0.40))
+			var road_asphalt := Color(0.25, 0.25, 0.27)
+			var curb_col := Color(0.52, 0.50, 0.48)
+			var plaza_col := Color(0.45, 0.44, 0.43)
+
+			# Central Grand Boulevard (South to North through South Gate)
+			_add_voxel_box(ground, Vector3(5.2, 0.06, w), Vector3(0, 0.03, 0), road_asphalt)
+			_add_voxel_box(ground, Vector3(0.4, 0.12, w), Vector3(-2.8, 0.06, 0), curb_col)
+			_add_voxel_box(ground, Vector3(0.4, 0.12, w), Vector3(2.8, 0.06, 0), curb_col)
+
+			# East Merchant Lane (through East Gate)
+			_add_voxel_box(ground, Vector3(3.6, 0.06, w * 0.75), Vector3(13.0, 0.03, 1.0), road_asphalt)
+
+			# South Cross Boulevard (connecting SW District and SE District)
+			_add_voxel_box(ground, Vector3(w * 0.85, 0.06, 3.6), Vector3(0, 0.03, 7.5), road_asphalt)
+
+			# North Manor Promenade (connecting North Manors)
+			_add_voxel_box(ground, Vector3(w * 0.85, 0.06, 3.6), Vector3(0, 0.03, -7.5), road_asphalt)
+
+			# Central Citadel Plaza (in front of Stone Fortifications)
+			_add_voxel_box(ground, Vector3(22.0, 0.08, 8.0), Vector3(0, 0.04, -1.5), plaza_col)
+			_add_voxel_box(ground, Vector3(12.0, 0.08, 6.0), Vector3(13.0, 0.04, -1.5), plaza_col)
 
 
 # ---------- Level Specific Generators ----------
@@ -366,27 +386,214 @@ static func _build_town(ctx: LevelContext, village_root: Node3D, units_root: Nod
 		ctx.starter_house.set_starter(true)
 
 
-static func _build_city_stub(ctx: LevelContext, village_root: Node3D, _units_root: Node3D) -> void:
-	var wall_cols := [Color(0.85, 0.85, 0.85), Color(0.8, 0.78, 0.75)]
-	var roof_cols := [Color(0.3, 0.35, 0.45), Color(0.25, 0.25, 0.3)]
-	var spacing := 3.8
-	var half := 6
+static func _build_city(ctx: LevelContext, village_root: Node3D, _units_root: Node3D) -> void:
+	var wall_cols := [Color(0.86, 0.83, 0.78), Color(0.74, 0.65, 0.54), Color(0.88, 0.78, 0.65), Color(0.65, 0.58, 0.52)]
+	var roof_cols := [Color(0.72, 0.24, 0.16), Color(0.28, 0.35, 0.48), Color(0.52, 0.20, 0.18), Color(0.32, 0.28, 0.32)]
 	var idx := 0
 
-	for gx in range(-half, half + 1):
-		for gz in range(-half, half + 1):
-			if absi(gx) < 2 and absi(gz) < 2:
-				continue
-			if randf() < 0.25:
-				continue
-			var px := float(gx) * spacing
-			var pz := float(gz) * spacing
-			_place_house(Vector3(px, 0, pz), "house", randf_range(50.0, 65.0), Vector3(2.0, 1.8, 2.0), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()], village_root, ctx)
-			idx += 1
+	# 1. Great Stone Firebreak Wall & Fortifications
+	_build_city_firebreak(ctx, village_root)
 
+	# 2. Public Water Fountains / Cisterns for Bucket Carriers
+	_build_city_fountain(Vector3(-10.5, 0, 9.5), village_root)
+	_build_city_fountain(Vector3(10.5, 0, 9.5), village_root)
+	_build_city_fountain(Vector3(2.5, 0, -12.5), village_root)
+
+	# 3. District 1: Outer South-West District (10 combustible houses)
+	var sw_houses := [
+		Vector3(-14.5, 0, 13.5), # Starter house
+		Vector3(-10.5, 0, 13.5),
+		Vector3(-6.5, 0, 13.5),
+		Vector3(-14.5, 0, 9.5),
+		Vector3(-6.5, 0, 9.5),
+		Vector3(-14.5, 0, 5.5),
+		Vector3(-10.5, 0, 5.5),
+		Vector3(-6.5, 0, 5.5),
+		Vector3(-10.5, 0, 1.8),
+		Vector3(-2.8, 0, 3.8),   # South Gate approach
+	]
+	for pos in sw_houses:
+		_place_house(pos, "house", randf_range(52.0, 62.0), Vector3(randf_range(2.0, 2.3), randf_range(1.6, 2.0), randf_range(2.0, 2.3)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()], village_root, ctx)
+		idx += 1
+
+	# 4. District 2: Outer South-East District (8 combustible workshops & guildhalls)
+	var se_houses := [
+		Vector3(3.5, 0, 5.5),    # East side of South Gate boulevard
+		Vector3(7.5, 0, 5.5),
+		Vector3(12.0, 0, 5.5),
+		Vector3(15.8, 0, 5.5),
+		Vector3(7.5, 0, 9.8),
+		Vector3(12.0, 0, 9.8),
+		Vector3(15.8, 0, 9.8),
+		Vector3(13.0, 0, 1.8),   # Directly in front of East Merchant Gate!
+	]
+	for pos in se_houses:
+		_place_house(pos, "house", randf_range(52.0, 62.0), Vector3(randf_range(2.0, 2.3), randf_range(1.6, 2.0), randf_range(2.0, 2.3)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()], village_root, ctx)
+		idx += 1
+
+	# 5. District 3: Inner Northern Metropolitan District (12 combustible manors & merchant halls)
+	var n_houses := [
+		# North-West Manor Block (accessible directly via South Gate)
+		Vector3(-2.8, 0, -5.5),  # Immediately north of South Gate!
+		Vector3(-6.8, 0, -5.5),
+		Vector3(-11.0, 0, -5.5),
+		Vector3(-15.2, 0, -5.5),
+		Vector3(-2.8, 0, -9.8),
+		Vector3(-6.8, 0, -9.8),
+		Vector3(-11.0, 0, -9.8),
+		Vector3(-15.2, 0, -9.8),
+
+		# North-East Guild Block (accessible directly via East Gate)
+		Vector3(13.0, 0, -5.5),  # Immediately north of East Gate!
+		Vector3(9.0, 0, -5.5),
+		Vector3(13.0, 0, -9.8),
+		Vector3(9.0, 0, -9.8),
+	]
+	for pos in n_houses:
+		_place_house(pos, "house", randf_range(54.0, 66.0), Vector3(randf_range(2.1, 2.4), randf_range(1.8, 2.2), randf_range(2.1, 2.4)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()], village_root, ctx)
+		idx += 1
+
+	# 6. Strategic Explosive Barrels
+	# Barrel 1: Junction between SW residential and SE artisan district across the avenue
+	_place_barrel(Vector3(0.5, 0, 5.5), village_root, ctx)
+	# Barrel 2: Near approach to East Merchant Gate
+	_place_barrel(Vector3(10.5, 0, 3.8), village_root, ctx)
+	# Barrel 3: In North Manor alley
+	_place_barrel(Vector3(-6.8, 0, -12.5), village_root, ctx)
+
+	# 7. Courtyard Trees: Optional bridge between NW manors and NE guild block
+	_place_house(Vector3(2.0, 0, -7.5), "tree", 24.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25), village_root, ctx)
+	_place_house(Vector3(4.5, 0, -7.5), "tree", 24.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25), village_root, ctx)
+	_place_house(Vector3(7.0, 0, -7.5), "tree", 24.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25), village_root, ctx)
+
+	# 8. Perimeter framing trees
+	for x_pos in [-22.0, 22.0]:
+		for z_pos in [-18.0, -12.0, -6.0, 6.0, 12.0, 18.0]:
+			_place_house(Vector3(x_pos + randf_range(-0.5, 0.5), 0, z_pos + randf_range(-0.5, 0.5)), "tree", 24.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25), village_root, ctx)
+
+	# Set Starter House to SW District outer corner
 	if not ctx.mandatory_houses.is_empty():
 		ctx.starter_house = ctx.mandatory_houses[0]
 		ctx.starter_house.set_starter(true)
+
+
+static func _build_city_firebreak(ctx: LevelContext, village_root: Node3D) -> void:
+	var firebreak_root := Node3D.new()
+	firebreak_root.name = "StoneFirebreak"
+	village_root.add_child(firebreak_root)
+
+	var stone_wall_col := Color(0.46, 0.44, 0.42)
+	var stone_cap_col := Color(0.36, 0.35, 0.34)
+	var arch_beam_col := Color(0.50, 0.48, 0.46)
+	var banner_gold := Color(0.85, 0.72, 0.2)
+
+	# Static collision body for solid stone walls
+	var wall_body := StaticBody3D.new()
+	wall_body.name = "StoneWallCollision"
+	wall_body.collision_layer = 1
+	wall_body.collision_mask = 0
+	firebreak_root.add_child(wall_body)
+
+	# Helper to add wall section with collision and crenellations
+	var add_wall_segment := func(x1: float, x2: float, z_pos: float) -> void:
+		var seg_len := absf(x2 - x1)
+		var mid_x := (x1 + x2) * 0.5
+		# Base wall
+		_add_voxel_box(firebreak_root, Vector3(seg_len, 3.2, 1.6), Vector3(mid_x, 1.6, z_pos), stone_wall_col)
+		# Parapet cap
+		_add_voxel_box(firebreak_root, Vector3(seg_len + 0.3, 0.3, 1.9), Vector3(mid_x, 3.35, z_pos), stone_cap_col)
+		# Crenellations along top
+		var step := 1.6
+		var n_cren := int(seg_len / step)
+		for i in n_cren:
+			var cx := x1 + 0.8 + float(i) * step
+			_add_voxel_box(firebreak_root, Vector3(0.7, 0.45, 0.4), Vector3(cx, 3.7, z_pos + 0.7), stone_wall_col)
+			_add_voxel_box(firebreak_root, Vector3(0.7, 0.45, 0.4), Vector3(cx, 3.7, z_pos - 0.7), stone_wall_col)
+		# Physics collision shape
+		var c_shape := CollisionShape3D.new()
+		var b_shape := BoxShape3D.new()
+		b_shape.size = Vector3(seg_len, 3.6, 1.6)
+		c_shape.shape = b_shape
+		c_shape.position = Vector3(mid_x, 1.8, z_pos)
+		wall_body.add_child(c_shape)
+
+	# --- Wall Section 1: West Wall (from outer boundary to South Gate) ---
+	add_wall_segment.call(-22.0, -3.4, -1.5)
+
+	# --- Wall Section 2: Middle Wall (between South Gate and East Gate) ---
+	add_wall_segment.call(3.4, 10.6, -1.5)
+
+	# --- Wall Section 3: Far East Wall (from East Gate to outer boundary) ---
+	add_wall_segment.call(15.4, 22.0, -1.5)
+
+	# --- GATE 1: South Grand Gate (X = 0, Z = -1.5, open lane width 6.8m) ---
+	# Left Gate Tower
+	_add_voxel_box(firebreak_root, Vector3(2.4, 5.4, 2.6), Vector3(-3.8, 2.7, -1.5), stone_wall_col)
+	_add_voxel_box(firebreak_root, Vector3(2.6, 0.4, 2.8), Vector3(-3.8, 5.6, -1.5), stone_cap_col)
+	_add_voxel_box(firebreak_root, Vector3(0.4, 1.2, 0.4), Vector3(-3.8, 6.4, -1.5), stone_wall_col)
+	_add_voxel_box(firebreak_root, Vector3(0.8, 0.5, 0.1), Vector3(-3.8, 6.7, -1.5), banner_gold)
+	# Right Gate Tower
+	_add_voxel_box(firebreak_root, Vector3(2.4, 5.4, 2.6), Vector3(3.8, 2.7, -1.5), stone_wall_col)
+	_add_voxel_box(firebreak_root, Vector3(2.6, 0.4, 2.8), Vector3(3.8, 5.6, -1.5), stone_cap_col)
+	_add_voxel_box(firebreak_root, Vector3(0.4, 1.2, 0.4), Vector3(3.8, 6.4, -1.5), stone_wall_col)
+	_add_voxel_box(firebreak_root, Vector3(0.8, 0.5, 0.1), Vector3(3.8, 6.7, -1.5), banner_gold)
+	# Overhead Archway Beam
+	_add_voxel_box(firebreak_root, Vector3(5.6, 1.2, 2.0), Vector3(0, 4.6, -1.5), arch_beam_col)
+	_add_voxel_box(firebreak_root, Vector3(1.8, 0.8, 0.25), Vector3(0, 4.6, -0.4), banner_gold) # Gate crest
+
+	# --- GATE 2: East Merchant Gate (X = 13.0, Z = -1.5, open lane width 4.8m) ---
+	# Left Merchant Archpost
+	_add_voxel_box(firebreak_root, Vector3(1.8, 4.4, 2.0), Vector3(10.6, 2.2, -1.5), stone_wall_col)
+	_add_voxel_box(firebreak_root, Vector3(2.0, 0.35, 2.2), Vector3(10.6, 4.55, -1.5), stone_cap_col)
+	# Right Merchant Archpost
+	_add_voxel_box(firebreak_root, Vector3(1.8, 4.4, 2.0), Vector3(15.4, 2.2, -1.5), stone_wall_col)
+	_add_voxel_box(firebreak_root, Vector3(2.0, 0.35, 2.2), Vector3(15.4, 4.55, -1.5), stone_cap_col)
+	# Overhead Merchant Arch Beam
+	_add_voxel_box(firebreak_root, Vector3(3.8, 0.9, 1.6), Vector3(13.0, 3.8, -1.5), arch_beam_col)
+
+	# --- Stone Bastions & Wall Towers ---
+	_add_voxel_box(firebreak_root, Vector3(2.4, 4.8, 2.4), Vector3(-20.5, 2.4, -1.5), stone_wall_col)
+	_add_voxel_box(firebreak_root, Vector3(2.6, 0.4, 2.6), Vector3(-20.5, 5.0, -1.5), stone_cap_col)
+	_add_voxel_box(firebreak_root, Vector3(2.4, 4.8, 2.4), Vector3(20.5, 2.4, -1.5), stone_wall_col)
+	_add_voxel_box(firebreak_root, Vector3(2.6, 0.4, 2.6), Vector3(20.5, 5.0, -1.5), stone_cap_col)
+
+	# --- Non-combustible Stone Buildings (kind == "stone", excluded from mandatory completion) ---
+	# 1. Grand Stone Cathedral / Basilica
+	_place_house(Vector3(-7.5, 0, -1.5), "stone", 999.0, Vector3(4.8, 3.4, 4.2), Color(0.48, 0.46, 0.45), Color(0.24, 0.25, 0.28), village_root, ctx)
+	# 2. Royal Stone Treasury & Archives
+	_place_house(Vector3(-16.0, 0, -1.5), "stone", 999.0, Vector3(3.8, 2.6, 3.6), Color(0.48, 0.46, 0.45), Color(0.24, 0.25, 0.28), village_root, ctx)
+	# 3. City Guard Garrison & Armory
+	_place_house(Vector3(7.0, 0, -1.5), "stone", 999.0, Vector3(3.8, 2.6, 3.4), Color(0.48, 0.46, 0.45), Color(0.24, 0.25, 0.28), village_root, ctx)
+
+
+static func _build_city_fountain(pos: Vector3, village_root: Node3D) -> StaticBody3D:
+	var f := StaticBody3D.new()
+	f.name = "CityFountain"
+	f.position = pos
+	f.add_to_group("water_sources")
+	village_root.add_child(f)
+
+	var col := CollisionShape3D.new()
+	var shape := CylinderShape3D.new()
+	shape.radius = 1.2
+	shape.height = 1.0
+	col.shape = shape
+	col.position = Vector3(0, 0.5, 0)
+	f.add_child(col)
+
+	var stone_col := Color(0.48, 0.46, 0.45)
+	var water_col := Color(0.2, 0.55, 0.85)
+
+	# Octagonal/layered stone basin
+	_add_voxel_box(f, Vector3(2.4, 0.45, 2.4), Vector3(0, 0.225, 0), stone_col)
+	_add_voxel_box(f, Vector3(2.6, 0.12, 2.6), Vector3(0, 0.42, 0), stone_col)
+	# Water surface inside basin
+	_add_voxel_box(f, Vector3(2.0, 0.08, 2.0), Vector3(0, 0.38, 0), water_col)
+	# Central fountain spout pillar
+	_add_voxel_box(f, Vector3(0.6, 1.2, 0.6), Vector3(0, 0.8, 0), stone_col)
+	_add_voxel_box(f, Vector3(0.8, 0.15, 0.8), Vector3(0, 1.3, 0), stone_col)
+	_add_voxel_box(f, Vector3(0.2, 0.2, 0.2), Vector3(0, 1.45, 0), water_col)
+	return f
 
 
 static func _build_shaman_court(pos: Vector3, village_root: Node3D, units_root: Node3D) -> VoxelShaman:
