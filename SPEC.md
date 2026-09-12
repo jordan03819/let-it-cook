@@ -63,50 +63,288 @@ The opening should be tense and deliberate. The final minute may become visually
 7. Destroy all ordinary combustible settlement structures before the fire is fully extinguished.
 8. Review results and proceed to the next settlement.
 
-## 6. Player Resources and Abilities
+## 6. Tactical Design
 
-### 6.1 Embers
+### 6.1 Intended tactical feel
+
+Play should feel **deliberate, legible, tense, and increasingly chaotic**.
+
+- The player spends more time reading the settlement and anticipating reactions than rapidly clicking targets.
+- Every paid action should materially change the likely path of the fire.
+- Early fire is fragile, so positioning and restraint matter.
+- Late fire is powerful, but isolated pockets and advanced responders still require direction.
+- Chaos is the visible result of earlier planning rather than an uncontrollable random outcome.
+- The game must not feel idle, click-spammy, dependent on lucky spread rolls, or like a sequence of unrelated emergencies.
+
+The central tactical question is:
+
+> Where should the player establish the next sustainable fire front before defenders close that route?
+
+### 6.2 Decision cadence and level phases
+
+A meaningful decision should occur approximately every **10–20 seconds**. A decision may be an Ember expenditure, a route choice, a threat-priority change, or a deliberate choice to wait and preserve resources.
+
+The phases in Section 4 should produce different decisions:
+
+| Phase | Approximate target | Tactical focus |
+|---|---:|---|
+| Spark | 0–35 seconds | Choose the opening route, establish the first connection, and avoid wasting Embers. |
+| Alarm | 35–90 seconds | Read the bucket brigade, protect the fragile front, or begin a second front. |
+| Escalation | 90–150 seconds | Prioritize firefighters, shamans, rain, and environmental shortcuts. |
+| Inferno | 150–210 seconds | Maintain momentum while routing around suppression to reach remaining isolated buildings. |
+
+These are pacing targets, not hard timer scripts. Phase changes should primarily follow visible events and destruction progress. The director may delay a new threat when the player is already handling two urgent threats; difficulty should come from interacting systems rather than unreadable overload.
+
+### 6.3 Tactical topology and route design
+
+Each level is designed as an implicit **spread network**:
+
+- Ordinary combustible buildings are mandatory nodes.
+- Distance, material, wetness, and obstructions determine whether fire can cross between nodes.
+- Roads, canals, courtyards, and stone create breaks in the network.
+- Trees may form optional bridges.
+- Barrels may create optional shortcuts or area breakthroughs.
+- Defender routes intersect the spread network and can be attacked or avoided.
+
+Initial spatial tuning bands are:
+
+- **Connected:** under approximately 4 metres; ordinary fire can cross without assistance.
+- **Conditional:** approximately 4–6 metres; crossing requires favorable wind, combined heat from multiple fires, or an environmental chain.
+- **Broken:** over approximately 6 metres or divided by a hard firebreak; ordinary spread cannot cross.
+
+Exact distances are subject to playtesting, but every gap must visually communicate its category.
+
+Every generated level must provide:
+
+- at least two viable orders in which to clear mandatory buildings;
+- one relatively safe but slower route;
+- one faster or more rewarding route exposed to greater defender pressure;
+- no mandatory building that can be reached only through a tree or barrel;
+- no layout that becomes impossible because an optional prop failed to ignite;
+- guaranteed routes around City stone through visible gates or lanes.
+
+Because all ordinary combustible buildings are mandatory, the route decision concerns **order and front management**, not which buildings may be skipped.
+
+### 6.4 Predictable fire, limited uncertainty
+
+Fire spread uses accumulated **ignition pressure**, not repeated opaque all-or-nothing rolls.
+
+- Burning neighbors add heat to a target over time.
+- Wind, proximity, multiple burning neighbors, and dry material increase that rate.
+- Rain, wetness, distance, and active suppression reduce it.
+- A target ignites when its pressure reaches its threshold.
+- Small seeded variation may alter timings by no more than approximately 10%; it must not repeatedly invalidate a sound plan.
+
+The player receives progressive in-world feedback:
+
+1. Warm edge or faint smoke: receiving heat.
+2. Scorching and sparks: likely to ignite soon.
+3. Bright directional embers: actively transferring fire from a specific source.
+4. Wet sheen or droplets: currently resistant.
+5. Blocked feedback: unreachable because of stone, distance, or another explicit rule.
+
+Normal play should not display a dense graph or numeric probabilities. Hovering a structure or aiming Wind may reveal likely connections and concise states such as **Likely**, **Needs Wind**, **Wet**, or **Blocked**.
+
+If a Wind preview says a target will ignite, the action must produce enough pressure to do so unless a clearly visible defender intervenes. The player should be able to explain why a spread succeeded or failed.
+
+### 6.5 Ember economy and action value
+
+Initial balancing values for the core demo are:
+
+| Rule | Initial value |
+|---|---:|
+| Starting Embers | 2 |
+| Ember capacity | 5 |
+| Local Wind Gust | 1 Ember |
+| Manual ignition after the free starter | 3 Embers |
+| Wind cooldown | 6 seconds |
+| Expected paid actions per level | 8–12 |
+| Expected manual reignitions/new fronts | 1–2 |
+
+Economy rules:
+
+- Burning down an ordinary mandatory structure grants 1 Ember, subject to an 8-second reward cooldown so a chain reaction does not instantly fill the resource bar.
+- Defeating a shaman or firefighter with fire may grant 1 Ember.
+- A barrel chain may grant 1 Ember, but optional props must not be required for a viable economy.
+- No passive regeneration occurs while the player is safely accumulating resources.
+- If the player has zero Embers and still has an active but weak fire, an anti-stall Ember may be granted after 12 seconds without another Ember source.
+- Waiting for the anti-stall rule must always be worse than sustaining an effective front.
+
+Wind is the common tactical intervention. Manual ignition is expensive because it bypasses the spread network and creates a new front. A player should often want to keep one Ember available for Wind and should have to sacrifice several near-term gusts to afford a new ignition.
+
+These numbers are starting tuning values. They may change together after playtesting, but the relative relationship—**Wind is frequent, manual ignition is costly**—is normative.
+
+### 6.6 Wind as a local tactical tool
+
+The player's Wind ability is a localized gust, distinct from the level's prevailing ambient wind.
+
+- Right-mouse aiming begins on a burning structure or immediately adjacent flame.
+- The drag direction defines an approximately 60-degree cone extending about 8 metres.
+- The preview shows which heat-transfer connections will strengthen, remain unchanged, or stay blocked.
+- On release, the gust lasts approximately 4 seconds.
+- It strongly accelerates ignition pressure downwind within the cone.
+- It visibly redirects flames, smoke, and embers.
+- It cannot ignite a target without an existing connected flame source.
+- It cannot burn City stone or cross a hard firebreak without a gate.
+- It does not physically throw characters or directly damage them.
+
+This creates several uses for the same ability:
+
+- push the main front across a conditional gap;
+- redirect heat away from a wet or heavily defended target;
+- ignite a defender's route before they arrive;
+- accelerate a path toward a shaman or barrel;
+- recover momentum when a connection is close to failing.
+
+### 6.7 Readable defenders and threat priority
+
+Defenders must expose intent and remain committed long enough for the player to exploit it. They do not possess perfect knowledge of every new fire.
+
+| Threat | Telegraph and commitment | Consequence if ignored | Intended response |
+|---|---|---|---|
+| Bucket carrier | Notices smoke, runs to a visible water source, then displays a target; one trip at a time. | Can extinguish an isolated opening fire but cannot overpower an established cluster. | Protect the opening, cut the route with fire, or create more pressure than one bucket can remove. |
+| Firefighter | Arrival warning and visible target; commits to a target for at least 6 seconds unless it goes out. | Suppresses a lane and steadily damages an established front. | Overwhelm the lane, ignite their approach, or create a second front that forces inefficient travel. |
+| Shaman | Visible ritual site, map callout, and approximately 10-second cast. | Summons settlement-wide rain; severe but recoverable rather than an instant loss. | Route fire to the ritual site, kill or displace the shaman, or prepare multiple strong fronts to survive rain. |
+| Helicopter | Flight path and drop zone shown at least 5 seconds before impact. | Heavily wets one local cluster. | Stop investing in that cluster temporarily and push another lane. |
+
+AI response rules:
+
+- Civilians react only after seeing nearby fire or receiving an alarm.
+- Bucket carriers and firefighters choose from fires they plausibly know about.
+- Responders do not retarget every frame; target commitment makes feints possible.
+- World-space movement, carried equipment, aim lines, icons, and effects communicate intent without reducing people to abstract dots.
+- No single ignored response should erase a healthy inferno instantly.
+- Ignoring several overlapping responses should be fatal.
+
+### 6.8 Supported strategic approaches
+
+Each level must support at least two of these approaches, and the complete campaign should reward all four:
+
+#### Rolling front
+
+Keep one dense, connected edge moving through the settlement with frequent Wind use.
+
+- **Strength:** Ember-efficient and easy to sustain.
+- **Risk:** responders can concentrate on one predictable lane.
+
+#### Split fronts
+
+Save Embers for an expensive manual ignition and force defenders to travel between two areas.
+
+- **Strength:** divides bucket carriers and firefighters.
+- **Risk:** each front is weaker, and the player has fewer Embers available for Wind.
+
+#### Bait and redirect
+
+Allow or create a visible fire that attracts responders, wait for their commitment, then accelerate the true priority route.
+
+- **Strength:** exploits defender travel and commitment time.
+- **Risk:** the bait consumes fuel and may not contribute enough momentum.
+
+#### Environmental chain
+
+Route through optional vegetation or toward a barrel to accelerate a difficult section.
+
+- **Strength:** high tempo and area pressure without paying for another manual ignition.
+- **Risk:** requires setup, gives defenders time to react, and cannot be mandatory for completion.
+
+No approach should dominate every level. Layout, wind, water access, and defender placement should change which approach is attractive.
+
+### 6.9 Mistakes, recovery, and failure
+
+Mistakes have graduated consequences:
+
+- A poorly aimed Wind costs one resource cycle and several seconds but is normally recoverable.
+- Investing in a wet or defended lane may force a route change.
+- An unnecessary manual ignition is a major economic mistake because it consumes three Embers.
+- Ignoring a shaman causes a difficult rain period but does not automatically end the run.
+- Allowing every fire front to collapse is the principal run-ending strategic failure.
+
+Replace the prototype's opaque last-stand behavior with one visible **Last Spark** per level:
+
+- The HUD shows whether Last Spark remains available.
+- When the final active flame would be extinguished, its structure smolders for 8 seconds instead of going out immediately.
+- During this window, the player may reignite that structure for 1 Ember.
+- Last Spark is then consumed for the level.
+- If the player cannot or chooses not to recover before the timer ends, the level fails.
+
+This safety valve forgives one collapse while preserving resource consequences. It must not activate silently or restore global fire strength without player action.
+
+### 6.10 Level-specific tactical identity
+
+#### Village
+
+- Teach connected and conditional gaps with a small number of clear building clusters.
+- Present a safer route through closely spaced houses and a faster route using an exposed tree bridge.
+- Bucket carriers are the main positional threat.
+- The first firefighters arrive late enough for the player to understand the bucket response first.
+
+#### Town
+
+- Place the water source so bucket routes intersect useful fire lanes.
+- Offer a barrel shortcut that is powerful but not necessary.
+- Position the shaman so reaching the ritual competes with maintaining the main front.
+- Rain tests whether the player built one fragile front or several mutually supporting fires.
+
+#### City
+
+- Stone divides the map into readable combustible districts linked by at least two gates.
+- One gate offers a short route under heavy firefighter pressure; another is longer but less defended.
+- Helicopter drops punish over-investment in one cluster without affecting the entire map.
+- Elite responders increase pressure without violating normal targeting and commitment rules.
+
+### 6.11 Tactical validation criteria
+
+Playtesting must demonstrate that:
+
+- players can usually identify the next likely ignition target without consulting numeric UI;
+- players make at least six consequential route, threat, or resource decisions in a typical successful level;
+- unattended opening fires are normally contained;
+- a sound Wind preview is reliable unless visible suppression intervenes;
+- players use at least two distinct strategic approaches across repeated runs;
+- no mandatory route depends on random ignition of an optional prop;
+- no individual defender or random outcome decides a healthy run by itself;
+- experienced players improve primarily through prediction, timing, and route selection rather than faster clicking.
+
+## 7. Player Resources and Abilities
+
+### 7.1 Embers
 
 Embers are the player's limited action resource. They are represented in the top-left HUD by clearly recognizable fire/ember icons; the current bullet-like presentation must be replaced or relabeled so the resource is unambiguous.
 
-Embers are earned through active play, including:
+Embers are earned from ordinary mandatory structures burning down, selected defender defeats, optional barrel chains, and the strictly limited anti-stall rule in Section 6.5.
 
-- structures burning down;
-- defeating firefighters or ritualists with fire;
-- maintaining meaningful spread or combo milestones;
-- a slow anti-stall regeneration when the player has no viable action.
+The player must not be able to solve a level by repeatedly clicking every target. Costs and regeneration should reward sustaining intentional fire fronts and exploiting the settlement's spread network.
 
-The player must not be able to solve a level by repeatedly clicking every target. Costs and regeneration should reward maintaining one connected disaster.
-
-### 6.2 Ignite
+### 7.2 Ignite
 
 - The first ignition of a level is free.
 - It may target only a highlighted starter structure.
-- Later manual ignitions cost Embers.
+- Later manual ignitions cost 3 Embers under the initial demo balance.
 - Manual ignition is a recovery or tactical tool, not the primary way to burn the map.
 - Explosive barrels, fireproof structures, and protected objective actors cannot be manually ignited.
 
-### 6.3 Wind Gust
+### 7.3 Wind Gust
 
 Wind is the primary tool for shaping fire spread.
 
 A gust:
 
 - has a visible world-space direction and affected area;
-- temporarily increases spread probability downwind;
+- temporarily accelerates ignition pressure downwind;
 - visibly leans flames, smoke, embers, and foliage;
-- costs Embers and has a cooldown;
+- costs 1 Ember and has a 6-second cooldown under the initial demo balance;
 - cannot directly ignite an isolated target;
-- may temporarily heat or weaken designated barriers where level rules allow it.
+- cannot burn City stone or bypass a hard firebreak.
 
 The current unexplained central blue arrow/highlight is not acceptable. Wind direction must be communicated through an intentional compass/arrow treatment plus environmental motion. Any target highlight must state why the target is valid.
 
-### 6.4 Wind control
+### 7.4 Wind control
 
 Wind uses a desktop-native right-mouse aiming control:
 
-1. Press and hold the right mouse button anywhere over the world.
-2. Move the pointer to set the gust direction. A world-space arrow previews the direction and affected corridor.
+1. Press and hold the right mouse button on a burning structure or immediately adjacent flame.
+2. Move the pointer to set the gust direction. A world-space cone previews the direction, affected area, and strengthened fire connections.
 3. Release the right mouse button to cast the gust.
 4. Press Escape before release to cancel.
 
@@ -114,9 +352,9 @@ The gust has fixed gameplay strength; drag distance is used only to establish a 
 
 A dedicated Wind HUD button may enter the same aiming mode for discoverability, but touch and cross-platform gestures are outside the current scope.
 
-## 7. Fire Simulation
+## 8. Fire Simulation
 
-### 7.1 Structure states
+### 8.1 Structure states
 
 Every combustible structure has three visible states:
 
@@ -126,9 +364,9 @@ Every combustible structure has three visible states:
 
 Transitions must be gradual and readable. Scorching, flame intensity, smoke, collapse, and the final silhouette should communicate remaining fuel without requiring selection.
 
-### 7.2 Spread rules
+### 8.2 Spread rules
 
-Fire spreads only between nearby valid targets. Spread probability is influenced by:
+Fire spreads only between nearby valid targets. Ignition pressure accumulates according to:
 
 - distance;
 - wind direction and strength;
@@ -140,7 +378,7 @@ Fire spreads only between nearby valid targets. Spread probability is influenced
 
 Base spread must be slow enough that the player can observe and react. A single burning house should not normally produce an unstoppable cascade. Sustaining several connected fires should create momentum while still allowing defenders to recover.
 
-### 7.3 Fire strength
+### 8.3 Fire strength
 
 The global fire-strength meter represents the health and momentum of the overall disaster.
 
@@ -149,13 +387,13 @@ The global fire-strength meter represents the health and momentum of the overall
 - Burning characters alone cannot sustain the disaster.
 - At zero strength, active flames rapidly collapse and the run ends unless an explicitly communicated recovery effect is available.
 
-The system must avoid opaque emergency rules. If a last-stand recovery remains, its availability and effect must be visible to the player.
+The system must avoid opaque emergency rules. The only emergency recovery is the visible, player-activated Last Spark defined in Section 6.9.
 
-### 7.4 Wetness and water
+### 8.4 Wetness and water
 
 Water should reduce flames and apply temporary wetness. It must not paradoxically make a structure reach its burnt/destruction state faster. Wet targets resist ignition until they dry.
 
-### 7.5 Explosive barrels
+### 8.5 Explosive barrels
 
 Barrels are route-planning objectives rather than remote bombs.
 
@@ -164,11 +402,11 @@ Barrels are route-planning objectives rather than remote bombs.
 - The player should need to narrow or guide a flame path toward it.
 - Barrels telegraph danger before exploding.
 - Explosions ignite or heat nearby valid targets and can open a route through a defended area.
-- Explosion behavior against stone must match its feedback: either visibly heat/prime the stone or leave it unaffected.
+- City stone remains unaffected by explosions and must not display misleading heat or ignition feedback.
 
-## 8. Human Simulation and Counterplay
+## 9. Human Simulation and Counterplay
 
-### 8.1 Villagers
+### 9.1 Villagers
 
 Villagers make the settlement feel inhabited and expose the consequences of player actions.
 
@@ -185,7 +423,7 @@ Expected behavior:
 
 A human must not instantly swap from alive to corpse when touched by fire. Burning requires flame effects, movement, vocal/speech feedback, and a survivable interval during which water can save them.
 
-### 8.2 Bucket brigade
+### 9.2 Bucket brigade
 
 The bucket brigade is the first response tier and should appear before official firefighters.
 
@@ -195,7 +433,7 @@ The bucket brigade is the first response tier and should appear before official 
 - Their travel route creates strategic opportunities: the player can cut them off, redirect fire toward the water route, or overwhelm their chosen target.
 - Bucket carriers retreat when personal danger exceeds their courage threshold.
 
-### 8.3 Firefighters
+### 9.3 Firefighters
 
 Official firefighters arrive after the player has had time to establish the fire.
 
@@ -205,7 +443,7 @@ Official firefighters arrive after the player has had time to establish the fire
 - Burning firefighters stop fighting the fire and may spread it while fleeing.
 - Later levels may introduce elite responders with visibly distinct gear and stronger statistics.
 
-### 8.4 Shamans / ritualists
+### 9.4 Shamans / ritualists
 
 Shamans are high-priority mini-objectives.
 
@@ -216,9 +454,9 @@ Shamans are high-priority mini-objectives.
 - Killing or forcing the shaman to flee interrupts the ritual.
 - The HUD identifies the active ritual and remaining cast time without reducing the shaman to an abstract dot.
 
-## 9. Weather and Environmental Interaction
+## 10. Weather and Environmental Interaction
 
-### 9.1 Rain
+### 10.1 Rain
 
 Rain must have complete visual, audio, and gameplay feedback.
 
@@ -230,16 +468,16 @@ Rain must have complete visual, audio, and gameplay feedback.
 
 Town may introduce natural rain. Shaman-summoned rain can appear in any level that contains a shaman.
 
-### 9.2 Stone structures and firebreaks
+### 10.2 Stone structures and firebreaks
 
 Stone structures do not burn from ordinary spread and create natural routing difficulty in the City.
 
 - Stone must be visually distinct before the player attempts ignition.
 - City stone structures are excluded from the completion denominator.
-- Gaps, gates, vegetation, barrels, or temporarily heated sections provide intentional routes through a firebreak.
+- Guaranteed gates or lanes provide mandatory routes through a firebreak; vegetation and barrels may provide optional shortcuts but are never required.
 - Generated layouts must guarantee that at least one viable route exists.
 
-### 9.3 Helicopters
+### 10.3 Helicopters
 
 City helicopters provide late-game suppression through telegraphed water drops.
 
@@ -247,9 +485,9 @@ City helicopters provide late-game suppression through telegraphed water drops.
 - Drops strongly wet a local area rather than arbitrarily reducing an invisible global value.
 - The player should be able to redirect spread around a pending drop zone.
 
-## 10. Levels and Progression
+## 11. Levels and Progression
 
-### 10.1 Level 1 — Village
+### 11.1 Level 1 — Village
 
 Purpose: teach ignition, natural spread, wind, and the human response ladder.
 
@@ -260,7 +498,7 @@ Purpose: teach ignition, natural spread, wind, and the human response ladder.
 - No unavoidable rain or stone firebreaks.
 - Success requires destruction of every ordinary combustible settlement structure. Trees, barrels, and decorative props are optional.
 
-### 10.2 Level 2 — Town
+### 11.2 Level 2 — Town
 
 Purpose: introduce denser routing, water access, barrels, and ritual/weather pressure.
 
@@ -271,7 +509,7 @@ Purpose: introduce denser routing, water access, barrels, and ritual/weather pre
 - Faster official response than the Village.
 - Success requires destruction of every ordinary combustible settlement structure. Trees, barrels, and decorative props are optional.
 
-### 10.3 Level 3 — City
+### 11.3 Level 3 — City
 
 Purpose: test mastery against firebreaks and advanced suppression.
 
@@ -282,7 +520,7 @@ Purpose: test mastery against firebreaks and advanced suppression.
 - Barrels or other environmental tools placed to reward route planning.
 - Success requires destruction of every ordinary combustible settlement structure. City stone, trees, barrels, and decorative props are excluded.
 
-### 10.4 Completion and failure
+### 11.4 Completion and failure
 
 - The completion bar measures ordinary combustible settlement structures destroyed.
 - The goal is **100% of ordinary combustible settlement structures**, not the prototype's 70–80% thresholds.
@@ -290,7 +528,7 @@ Purpose: test mastery against firebreaks and advanced suppression.
 - The level fails when no viable player-controlled or naturally spreading flame remains and the player has no immediate recovery action.
 - Results freeze gameplay simulation before presenting statistics.
 
-## 11. Difficulty and Pacing
+## 12. Difficulty and Pacing
 
 Difficulty should come from competing systems, not faster burn rates alone.
 
@@ -313,7 +551,7 @@ Balancing targets:
 - A carefully guided fire should reach a self-sustaining inferno late in the run.
 - No single barrel or early spread roll should decide the whole level.
 
-## 12. Roguelike Upgrades
+## 13. Roguelike Upgrades
 
 The existing between-level upgrades are secondary to the core loop. They should remain disabled or minimal until all three levels reliably meet the pacing and challenge targets.
 
@@ -328,9 +566,9 @@ If retained for the demo:
 
 No persistent save-based progression is required for the initial demo.
 
-## 13. Controls
+## 14. Controls
 
-### 13.1 Desktop defaults
+### 14.1 Desktop defaults
 
 | Action | Input |
 |---|---|
@@ -353,14 +591,14 @@ Camera movement must follow screen expectations:
 
 The prototype behavior in which S moves the view upward is a defect. The implementation must be corrected if runtime validation reproduces it.
 
-### 13.2 Input requirements
+### 14.2 Input requirements
 
 - Define custom Godot input actions rather than relying solely on hard-coded key checks.
 - Input prompts match the configured desktop bindings.
 - Left-click ignition, right-mouse Wind aiming, camera movement, and UI controls must not conflict.
 - Every paid action previews its cost and validity before execution.
 
-## 14. Camera and Presentation
+## 15. Camera and Presentation
 
 - Fixed isometric-like orthographic perspective.
 - Camera pans and zooms but does not need free rotation.
@@ -368,15 +606,15 @@ The prototype behavior in which S moves the view upward is a defect. The impleme
 - Camera shake is reserved for major events and must have a reduced-motion option.
 - Edge panning is optional and disabled by default unless onboarding explains it.
 
-## 15. Visual Direction
+## 16. Visual Direction
 
-### 15.1 Style status
+### 16.1 Style status
 
 The final art direction is deliberately postponed. The current voxel presentation and the proposed Polytopia-like low-poly direction remain references rather than an approved target. No implementation should commit the project to either style until a separate art-direction decision is made.
 
 The isometric 3D/2.5D perspective remains approved independently of the asset style.
 
-### 15.2 Readability requirements
+### 16.2 Readability requirements
 
 - Wooden, wet, burning, burnt, explosive, and fireproof targets are distinguishable at gameplay zoom.
 - Villagers, bucket carriers, firefighters, elite firefighters, and shamans have distinct silhouettes and colors.
@@ -385,7 +623,7 @@ The isometric 3D/2.5D perspective remains approved independently of the asset st
 - Placeholder blue house overlays and the unexplained central blue wind marker must be removed or redesigned.
 - Fire, rain, water streams, explosions, and human burning states require complete effects rather than code-only state changes.
 
-### 15.3 Animation priorities
+### 16.3 Animation priorities
 
 1. Villager notice/alert/exit behavior.
 2. Bucket pickup, carry, throw, and refill.
@@ -394,7 +632,7 @@ The isometric 3D/2.5D perspective remains approved independently of the asset st
 5. Shaman ritual and interruption.
 6. Structure scorch and collapse.
 
-## 16. Audio
+## 17. Audio
 
 Audio must reinforce state without clipping or distortion.
 
@@ -415,9 +653,9 @@ Technical requirements:
 - Provide persistent volume controls.
 - Verify that default settings do not reproduce the prototype's distorted output.
 
-## 17. HUD and Menus
+## 18. HUD and Menus
 
-### 17.1 In-game HUD
+### 18.1 In-game HUD
 
 Display only information needed for immediate decisions:
 
@@ -430,7 +668,7 @@ Display only information needed for immediate decisions:
 
 The HUD may celebrate combos, but announcements must not obscure targets.
 
-### 17.2 Menus
+### 18.2 Menus
 
 - Main menu: New Run, unlocked level access for development/demo use, Options, Quit where supported.
 - Pause: Resume, controls, audio, reduced motion, edge pan, restart, main menu.
@@ -438,7 +676,7 @@ The HUD may celebrate combos, but announcements must not obscure targets.
 - Rank is based on fire continuity, Ember efficiency, environmental chain reactions, and optional objectives. Elapsed time is displayed for pacing analysis but does not grant a better rank merely for finishing faster.
 - Results and upgrade overlays pause all simulation.
 
-### 17.3 Persistence
+### 18.3 Persistence
 
 Persist locally:
 
@@ -448,7 +686,7 @@ Persist locally:
 
 Run-specific Embers and upgrades reset on New Run.
 
-## 18. Technical Direction
+## 19. Technical Direction
 
 The current project baseline is Godot 4.7, orthographic `Camera3D`, and runtime-generated low-poly geometry.
 
@@ -466,7 +704,7 @@ Level-specific behavior should be data-driven. A level definition must identify 
 
 Use named Godot input actions for all controls. All actor and simulation processing must stop when paused or after results are shown.
 
-## 19. Current Prototype Baseline
+## 20. Current Prototype Baseline
 
 The repository currently implements:
 
@@ -495,7 +733,7 @@ The following are prototype behavior, not target behavior:
 
 Known implementation defects to resolve include incorrect generated house dimensions, missing City firebreak gates, elite firefighters using regular visuals, incomplete burnt-tree visuals, barrel explosions failing to prime stone as described, and controls whose movement direction does not match the displayed expectation.
 
-## 20. Demo Acceptance Criteria
+## 21. Demo Acceptance Criteria
 
 The polished initial demo is complete when:
 
@@ -518,21 +756,21 @@ The polished initial demo is complete when:
 17. Already-owned upgrades cannot be selected again.
 18. Final art-style approval is not an acceptance criterion for this gameplay-design phase; functional gameplay states must still remain distinguishable.
 
-## 21. Resolved Decisions and Implementation Findings
+## 22. Resolved Decisions and Implementation Findings
 
-### 21.1 Initial ignition
+### 22.1 Initial ignition
 
 The player selects the initial ignition from a constrained set of clearly highlighted starter structures. The first valid ignition is free. Clicking any other structure before the level starts does nothing and explains the restriction.
 
-### 21.2 Completion targets
+### 22.2 Completion targets
 
 Success requires destroying every ordinary combustible settlement structure. City stone is permanently excluded. Trees, barrels, and decorative props are optional and do not contribute to the completion percentage.
 
-### 21.3 Desktop Wind control
+### 22.3 Desktop Wind control
 
-Wind is designed only for desktop input in the current scope. The player holds the right mouse button, moves the pointer to preview direction and affected area, and releases to cast. Escape or an aim below the minimum distance cancels without spending Embers. Left click remains dedicated to selection and ignition.
+Wind is designed only for desktop input in the current scope. The player holds the right mouse button on a burning structure or adjacent flame, moves the pointer to preview direction, affected area, and strengthened connections, and releases to cast. Escape or an aim below the minimum distance cancels without spending Embers. Left click remains dedicated to selection and ignition.
 
-### 21.4 Rain implementation finding
+### 22.4 Rain implementation finding
 
 Static code inspection confirms that prototype rain particles are implemented and connected to the Town rain event:
 
@@ -544,7 +782,7 @@ Static code inspection confirms that prototype rain particles are implemented an
 
 The particle portion is implemented as intended. The broader rain presentation is not yet complete against this specification: there is no dedicated rain sound, visible wet-ground treatment, or explicit reduction of flame and smoke effects. Runtime visual validation is still required when a Godot executable is available.
 
-### 21.5 Burning-human implementation finding
+### 22.5 Burning-human implementation finding
 
 Static code inspection confirms that the intended burn-before-corpse flow is implemented:
 
@@ -557,7 +795,7 @@ Static code inspection confirms that the intended burn-before-corpse flow is imp
 
 The mechanic and its prototype visuals are complete for the stated requirement that humans visibly burn rather than instantly becoming corpses. Runtime validation and later art polish remain necessary, but the flow does not need to be redesigned.
 
-### 21.6 Camera movement
+### 22.6 Camera movement
 
 Camera panning is screen-directional:
 
@@ -568,14 +806,14 @@ Camera panning is screen-directional:
 
 The reported S-to-up behavior is a defect. The camera-relative implementation must be corrected if it produces anything other than these screen-space results.
 
-### 21.7 Barrel ignition
+### 22.7 Barrel ignition
 
 Barrels cannot be manually ignited. They ignite only when reached by adjacent fire, a burning character, or another environmental chain reaction.
 
-### 21.8 Rank scoring
+### 22.8 Rank scoring
 
 The current faster-is-always-better time rank is rejected. Rank instead evaluates fire continuity, Ember efficiency, environmental chain reactions, and optional objectives. Completion time remains visible for pacing analysis but does not improve rank merely because it is shorter.
 
-### 21.9 Art direction
+### 22.9 Art direction
 
 The final choice between strict voxel art, Polytopia-like low-poly art, or another style is postponed. The isometric perspective and functional readability requirements remain in force, but the specification does not select an asset style.
