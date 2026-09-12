@@ -93,6 +93,7 @@ func _on_options_pressed() -> void:
 func _on_options_back_pressed() -> void:
 	options_panel.hide()
 	options_button.grab_focus()
+	SoundManager.save_settings()
 
 
 func _on_quit_pressed() -> void:
@@ -100,10 +101,4 @@ func _on_quit_pressed() -> void:
 
 
 func _on_volume_changed(value: float) -> void:
-	var master_idx := AudioServer.get_bus_index("Master")
-	# Avoid -inf when slider is at 0.
-	if value <= 0.001:
-		AudioServer.set_bus_mute(master_idx, true)
-	else:
-		AudioServer.set_bus_mute(master_idx, false)
-		AudioServer.set_bus_volume_db(master_idx, linear_to_db(value))
+	SoundManager.set_master_volume(value)

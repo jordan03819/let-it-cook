@@ -265,7 +265,7 @@ func _load_level() -> void:
 	_wind_timer = randf_range(WIND_SHIFT_MIN, WIND_SHIFT_MAX)
 
 	cam_bound = float(cfg["grid_half"]) * float(cfg["spacing"]) + 4.0
-	var cam_sizes := [19.0, 22.0, 25.0]
+	var cam_sizes := [21.0, 23.0, 26.0]
 	camera.size = cam_sizes[clampi(level_idx, 0, 2)]
 	rig.position = Vector3.ZERO
 
@@ -355,10 +355,17 @@ func _build_ground() -> void:
 	var w := extent * 2.0 - 2.0
 	match level_idx:
 		0:
-			_ground_slab(ground, Vector3(w, 1, w * 0.62), Color(0.42, 0.55, 0.28))
-			_add_voxel_box(ground, Vector3(w * 0.94, 0.06, 3.4), Vector3(0, 0.03, -4.4), Color(0.55, 0.42, 0.28))
-			_add_voxel_box(ground, Vector3(w * 0.94, 0.06, 3.4), Vector3(0, 0.03, 4.4), Color(0.55, 0.42, 0.28))
-			_add_voxel_box(ground, Vector3(w, 0.08, 3.0), Vector3(0, 0.04, 0), Color(0.32, 0.3, 0.3))
+			# Village: Soft pasture lawn + dirt lane connecting clusters + central well square
+			_ground_slab(ground, Vector3(w, 1, w), Color(0.42, 0.56, 0.26))
+			var road_col := Color(0.54, 0.42, 0.26)
+			# South dirt lane connecting Cluster 1 and Cluster 2
+			_add_voxel_box(ground, Vector3(w * 0.75, 0.06, 3.0), Vector3(0, 0.03, 6.0), road_col)
+			# North lane through Cluster 3
+			_add_voxel_box(ground, Vector3(w * 0.65, 0.06, 3.0), Vector3(0, 0.03, -7.5), road_col)
+			# Cross lane from South to North passing the central well
+			_add_voxel_box(ground, Vector3(3.0, 0.06, 16.0), Vector3(0, 0.03, -0.5), road_col)
+			# Cobblestone square around the central well
+			_add_voxel_box(ground, Vector3(4.2, 0.08, 4.2), Vector3(0, 0.04, 0.5), Color(0.45, 0.43, 0.42))
 		1:
 			# Town: Base lawn + central canal with water and stone quays + bridge crossways
 			_ground_slab(ground, Vector3(w, 1, w), Color(0.30, 0.48, 0.26))
@@ -529,6 +536,7 @@ func _start_rain(duration: float = 25.0) -> void:
 
 	rain_particles.global_position = rig.position + Vector3(0, 16.0, 0)
 	rain_particles.emitting = true
+	SoundManager.set_rain_ambience(true)
 	_flash_hint("TORRENTIAL RAIN SUMMONED! (25s) Spreading fire is severely dampened.")
 	_update_hud()
 
@@ -540,64 +548,83 @@ func _stop_rain() -> void:
 	rain_timer = 0.0
 	if rain_particles != null and is_instance_valid(rain_particles):
 		rain_particles.emitting = false
+	SoundManager.set_rain_ambience(false)
 	_flash_hint("Rainstorm cleared. Sky brightens.")
 	_update_hud()
 
 
 func _build_village() -> void:
-	var half: int = int(cfg["grid_half"])
-	var spacing: float = float(cfg["spacing"])
-	var wall_cols := [Color(0.92, 0.82, 0.66), Color(0.9, 0.72, 0.55), Color(0.95, 0.88, 0.72)]
-	var roof_cols := [Color(0.78, 0.28, 0.16), Color(0.55, 0.2, 0.14), Color(0.35, 0.45, 0.7)]
+	var wall_cols := [Color(0.92, 0.82, 0.66), Color(0.90, 0.74, 0.56), Color(0.95, 0.88, 0.72)]
+	var roof_cols := [Color(0.78, 0.28, 0.16), Color(0.60, 0.22, 0.15), Color(0.35, 0.48, 0.70)]
 	var idx := 0
 
-	for gx in range(-half, half + 1):
-		for gz in range(-half, half + 1):
-			var px := float(gx) * spacing + randf_range(-0.2, 0.2)
-			var pz := float(gz) * spacing + randf_range(-0.2, 0.2)
-			if absf(float(gx) * spacing) < spacing * 0.9:
-				continue
-			if gx == 0 and gz == 0:
-				continue
-			if randf() < 0.2:
-				continue
-			_place_house(Vector3(px, 0, pz), "house", randf_range(50.0, 65.0), Vector3(randf_range(1.8, 2.2), randf_range(1.4, 1.8), randf_range(1.8, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()])
-			idx += 1
+	# Cluster 1: Southwest Starter Cluster (6 houses, connected gaps ~3.5m)
+	var sw_houses := [
+		Vector3(-6.4, 0, 8.0), # House 0: Starter House
+		Vector3(-2.8, 0, 4.5),
+		Vector3(-6.2, 0, 4.2),
+		Vector3(-2.8, 0, 8.2),
+		Vector3(-9.6, 0, 5.8),
+		Vector3(-9.6, 0, 9.6),
+	]
+	for pos in sw_houses:
+		_place_house(pos, "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()])
+		idx += 1
 
-	# Forest fuse belt (optional bridges - excluded from mandatory completion)
-	var belt_half := float(half) * spacing
-	var z := -belt_half
-	while z <= belt_half:
-		var jx := randf_range(-0.8, 0.8)
-		_place_house(Vector3(jx, 0, z + randf_range(-0.5, 0.5)), "tree", 25.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
-		z += 2.8
+	# South Lane Connector House (1 house, creates safe stepping route to Cluster 2)
+	_place_house(Vector3(0.6, 0, 6.2), "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()])
+	idx += 1
 
-	# Water well for bucket carriers (SPEC Section 6.7 & 9.2)
-	_build_water_well(Vector3(-1.2, 0, 1.2))
+	# Cluster 2: Southeast Farmstead Cluster (5 houses, connected gaps ~3.6m)
+	var se_houses := [
+		Vector3(4.2, 0, 4.5),
+		Vector3(7.8, 0, 4.2),
+		Vector3(11.2, 0, 5.0),
+		Vector3(4.5, 0, 8.2),
+		Vector3(8.5, 0, 8.4),
+	]
+	for pos in se_houses:
+		_place_house(pos, "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()])
+		idx += 1
 
+	# Cluster 3: North Hillside Cluster (6 houses, connected gaps ~3.6m)
+	var n_houses := [
+		Vector3(-4.5, 0, -6.0),
+		Vector3(-0.8, 0, -6.0),
+		Vector3(3.8, 0, -6.0),
+		Vector3(-4.5, 0, -9.8),
+		Vector3(-0.8, 0, -9.8),
+		Vector3(3.8, 0, -9.8),
+	]
+	for pos in n_houses:
+		_place_house(pos, "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()])
+		idx += 1
+
+	# Exposed Tree Bridge: 3 pine trees spanning the clearing between Cluster 1 and Cluster 3
+	# (Route B: Fast exposed shortcut across the clearing near the water well)
+	_place_house(Vector3(-3.2, 0, 1.8), "tree", 22.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
+	_place_house(Vector3(-3.5, 0, -0.8), "tree", 22.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
+	_place_house(Vector3(-3.8, 0, -3.4), "tree", 22.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
+
+	# Water well for bucket carriers (SPEC Section 6.7 & 9.2) - centrally positioned beside the clearing
+	_build_water_well(Vector3(0.0, 0, 0.5))
+
+	# Perimeter trees framing the village
 	for side in [-1.0, 1.0]:
-		for k in 3:
-			var ox: float = float(side) * (spacing * 0.9 + float(k) * 1.6)
-			var oz: float = randf_range(-belt_half * 0.7, belt_half * 0.7)
-			_place_house(Vector3(ox + randf_range(-0.4, 0.4), 0, oz), "tree", 25.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
+		for k in 4:
+			var ox: float = float(side) * (14.0 + float(k) * 1.5)
+			var oz: float = randf_range(-12.0, 12.0)
+			_place_house(Vector3(ox, 0, oz), "tree", 24.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
 
-	for i in 6:
-		var ang := TAU * float(i) / 6.0
-		var r := cam_bound * 0.85
-		_place_house(Vector3(cos(ang) * r, 0, sin(ang) * r), "tree", 25.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
+	for i in 8:
+		var ang := TAU * float(i) / 8.0
+		var r := cam_bound * 0.88
+		_place_house(Vector3(cos(ang) * r, 0, sin(ang) * r), "tree", 24.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
 
-	# Pick starter structure prominently framed in the opening camera view
-	if not mandatory_houses.is_empty():
-		var best_starter := mandatory_houses[0]
-		var best_dist := 1e9
-		for h in mandatory_houses:
-			var d := h.position.length()
-			if d < best_dist:
-				best_dist = d
-				best_starter = h
-		starter_house = best_starter
-		starter_house.set_starter(true)
-		starter_ignited = false
+	# Pick starter structure: House 0 in Cluster 1 (SW), prominently framed
+	starter_house = mandatory_houses[0]
+	starter_house.set_starter(true)
+	starter_ignited = false
 
 
 func _build_town() -> void:
@@ -798,6 +825,10 @@ func _process(delta: float) -> void:
 	_tick_alarm(delta)
 	_tick_buckets(delta)
 
+	var burning_count := _count_burning()
+	var smoldering_count := _count_smoldering()
+	SoundManager.update_fire_crackle(burning_count)
+
 	# Firefighter Escalation Wave (SPEC Section 6.2, 9.3, 11.1 & 11.2)
 	if starter_ignited and not game_over:
 		var warn_time := 45.0 if level_idx == 1 else 80.0
@@ -807,6 +838,7 @@ func _process(delta: float) -> void:
 		if not firefighter_warning and not firefighter_wave_spawned:
 			if elapsed >= warn_time or (alarm >= alarm_threshold and elapsed >= warn_time - 15.0):
 				firefighter_warning = true
+				SoundManager.play_sfx("siren")
 				_flash_hint("SIRENS! Official firefighters dispatched — arriving on the road in 5s!")
 		elif firefighter_warning and not firefighter_wave_spawned:
 			if elapsed >= spawn_time or (alarm >= alarm_threshold and elapsed >= warn_time - 10.0):
@@ -819,9 +851,6 @@ func _process(delta: float) -> void:
 				shaman_ritual_triggered = true
 				shaman.start_ritual()
 				_flash_hint("RITUAL ALARM! Shaman in the Northeast court is summoning rain!")
-
-	var burning_count := _count_burning()
-	var smoldering_count := _count_smoldering()
 
 	# Anti-stall Ember rule (SPEC Section 6.5)
 	if embers == 0 and burning_count > 0:
@@ -1359,6 +1388,7 @@ func _cast_wind_gust(origin: Vector3, dir: Vector3) -> void:
 	active_gust_dir = dir
 	active_gust_timer = WIND_GUST_DURATION
 	_spawn_gust_visual(origin, dir)
+	SoundManager.play_sfx("wind_gust")
 
 
 func _spawn_gust_visual(origin: Vector3, dir: Vector3) -> void:

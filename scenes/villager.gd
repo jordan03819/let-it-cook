@@ -367,6 +367,7 @@ func _physics_bucket(delta: float) -> void:
 			velocity = Vector3.ZERO
 			var h := bucket_target as VoxelHouse
 			h.apply_water(2.2, 1.0)
+			SoundManager.play_sfx("splash")
 
 			# Also rescue nearby burning characters
 			for c in get_tree().get_nodes_in_group("burning_chars"):

@@ -144,6 +144,7 @@ func prime(custom_timer: float = 2.0) -> void:
 
 	# Spurt of sparks and smoke from top
 	_spawn_fuse_particles()
+	SoundManager.play_sfx("last_spark", 1.4)
 	primed.emit(self)
 
 
@@ -217,6 +218,7 @@ func explode() -> void:
 
 	# Spawn explosive effects
 	_spawn_explosion_vfx()
+	SoundManager.play_sfx("explosion")
 
 	# Affect nearby structures and actors
 	_detonate_blast()

@@ -277,6 +277,7 @@ func extinguish() -> void:
 		_light.visible = false
 	_flash = 0.6
 	_spawn_steam()
+	SoundManager.play_sfx("splash")
 	extinguished.emit(self)
 
 
@@ -341,13 +342,13 @@ func set_starter(active: bool) -> void:
 		if _starter_marker == null or not is_instance_valid(_starter_marker):
 			_starter_marker = Node3D.new()
 			_starter_marker.name = "StarterMarker"
-			_starter_marker.position = Vector3(0, house_size.y + 1.2, 0)
+			_starter_marker.position = Vector3(0, house_size.y + 0.8, 0)
 			add_child(_starter_marker)
 
 			var lab := Label3D.new()
 			lab.text = "STARTER\n[CLICK TO IGNITE - FREE]"
-			lab.font_size = 56
-			lab.pixel_size = 0.009
+			lab.font_size = 46
+			lab.pixel_size = 0.0075
 			lab.modulate = Color(1.0, 0.88, 0.2)
 			lab.outline_size = 12
 			lab.outline_modulate = Color(0.15, 0.05, 0.0)
@@ -402,6 +403,7 @@ func start_smolder(duration: float = 8.0) -> void:
 	_smolder_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_smolder_label.position = Vector3(0, house_size.y + 2.2, 0)
 	add_child(_smolder_label)
+	SoundManager.play_sfx("last_spark")
 
 
 func reignite(new_fuel: float = 35.0) -> bool:
@@ -417,6 +419,7 @@ func reignite(new_fuel: float = 35.0) -> bool:
 	_set_fire_visible(true)
 	_flash = 1.0
 	_pop(1.3)
+	SoundManager.play_sfx("ignite")
 	ignited.emit(self)
 	return true
 
@@ -436,6 +439,7 @@ func ignite() -> bool:
 	_set_fire_visible(true)
 	_flash = 1.0
 	_pop(1.2)
+	SoundManager.play_sfx("ignite")
 	ignited.emit(self)
 	return true
 
@@ -472,6 +476,7 @@ func _burn_out() -> void:
 		var tw := _visual_root.create_tween()
 		tw.tween_property(_visual_root, "scale", Vector3(1.18, 0.55, 1.18), 0.16)
 		tw.tween_property(_visual_root, "scale", Vector3(1.1, 0.7, 1.1), 0.25)
+	SoundManager.play_sfx("collapse")
 	burned_out.emit(self)
 
 

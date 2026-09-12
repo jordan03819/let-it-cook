@@ -211,6 +211,7 @@ func start_ritual() -> void:
 	if _ritual_vfx != null:
 		_ritual_vfx.show()
 	_show_bubble("RITUAL!", Color(0.3, 0.85, 1.0))
+	SoundManager.play_sfx("shaman_cue")
 	ritual_started.emit(self)
 
 
@@ -221,6 +222,7 @@ func interrupt_ritual() -> void:
 	if _ritual_vfx != null:
 		_ritual_vfx.hide()
 	_show_bubble("CURSE IT!!", Color(1.0, 0.2, 0.1))
+	SoundManager.play_sfx("splash")
 	ritual_interrupted.emit(self)
 	defeated.emit(self)
 
