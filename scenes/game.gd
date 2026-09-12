@@ -860,6 +860,8 @@ func _update_hud() -> void:
 			objective_label.text = "CRITICAL: LAST SPARK SMOLDERING (%.1fs)! Click house to save (1 Ember)!" % maxf(0.0, last_spark_timer)
 		elif shaman != null and is_instance_valid(shaman) and shaman.state == VoxelShaman.State.CASTING:
 			objective_label.text = "THREAT: SHAMAN RITUAL! Rain in %.1fs — Route fire to ritual court to interrupt!" % shaman.cast_time_remaining
+		elif director != null and director.helicopter_active:
+			objective_label.text = "THREAT: HELICOPTER WATER DROP in %.1fs! Divert spread away from drop zone!" % maxf(0.0, director.helicopter_timer)
 		elif weather.rain_active:
 			objective_label.text = "WEATHER: Torrential Rain (%.1fs) — Spread dampened! Burn %d/%d houses." % [weather.rain_timer, burnt_mandatory, mandatory_houses.size()]
 		else:

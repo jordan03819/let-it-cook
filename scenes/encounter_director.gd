@@ -6,9 +6,12 @@ extends Node
 signal firefighter_warning_triggered()
 signal firefighter_wave_deployed()
 signal shaman_ritual_alert_triggered()
+signal helicopter_drop_warning(target_pos: Vector3, duration: float)
+signal helicopter_drop_executed(target_pos: Vector3, radius: float)
 signal hint_requested(text: String)
 
 const FIREFIGHTER_SCENE := preload("res://scenes/firefighter.tscn")
+const HELICOPTER_SCENE := preload("res://scenes/helicopter.tscn")
 const BUCKET_MAX: int = 3
 const HOUSE_RADIUS: float = 4.8
 
@@ -27,6 +30,11 @@ var elite_warned: bool = false
 var elite_spawned: bool = false
 var shaman_ritual_triggered: bool = false
 
+var helicopter_active: bool = false
+var helicopter_timer: float = 0.0
+var helicopter_cooldown: float = 48.0
+var helicopter_target_pos: Vector3 = Vector3.ZERO
+
 
 func setup(p_level_idx: int, p_units_root: Node3D, p_houses: Array[VoxelHouse], p_cam_bound: float, p_shaman: VoxelShaman) -> void:
 	level_idx = p_level_idx
@@ -43,6 +51,10 @@ func setup(p_level_idx: int, p_units_root: Node3D, p_houses: Array[VoxelHouse], 
 	elite_warned = false
 	elite_spawned = false
 	shaman_ritual_triggered = false
+	helicopter_active = false
+	helicopter_timer = 0.0
+	helicopter_cooldown = 48.0
+	helicopter_target_pos = Vector3.ZERO
 
 
 func tick(delta: float, elapsed: float, starter_ignited: bool, burning_count: int, game_over: bool) -> void:
@@ -55,6 +67,7 @@ func tick(delta: float, elapsed: float, starter_ignited: bool, burning_count: in
 	if starter_ignited and not game_over:
 		_tick_firefighter_escalation(elapsed)
 		_tick_shaman_ritual(elapsed, burning_count)
+		_tick_helicopter(delta, elapsed, burning_count)
 
 
 func _tick_alarm(delta: float, burning_count: int) -> void:
@@ -222,3 +235,72 @@ func _tick_shaman_ritual(elapsed: float, burning_count: int) -> void:
 			shaman.start_ritual()
 			hint_requested.emit("RITUAL ALARM! Shaman in the Northeast court is summoning rain!")
 			shaman_ritual_alert_triggered.emit()
+
+
+# ---------- City Helicopter Water Drop (SPEC Section 6.7, 10.3 & 11.3) ----------
+func _tick_helicopter(delta: float, elapsed: float, burning_count: int) -> void:
+	if level_idx != 2:
+		return
+
+	if helicopter_active:
+		helicopter_timer = maxf(0.0, helicopter_timer - delta)
+		return
+
+	if helicopter_cooldown > 0.0:
+		helicopter_cooldown = maxf(0.0, helicopter_cooldown - delta)
+		return
+
+	# Trigger condition: City level, elapsed >= 48s, at least 2 burning houses
+	if elapsed >= 48.0 and burning_count >= 2:
+		var target := _pick_helicopter_target()
+		if target != null:
+			_launch_helicopter_drop(target.global_position)
+
+
+func _pick_helicopter_target() -> VoxelHouse:
+	var best: VoxelHouse = null
+	var best_score := -1
+	for src in houses:
+		if not is_instance_valid(src) or src.state != VoxelHouse.State.BURNING or src.kind == "stone":
+			continue
+		var score := 0
+		for other in houses:
+			if not is_instance_valid(other) or other.kind == "stone":
+				continue
+			if src.global_position.distance_to(other.global_position) <= 6.5:
+				if other.state == VoxelHouse.State.BURNING:
+					score += 3
+				elif other.state == VoxelHouse.State.UNBURNED and other.heat > 0.1:
+					score += 1
+		if score > best_score:
+			best_score = score
+			best = src
+	return best
+
+
+func _launch_helicopter_drop(drop_pos: Vector3) -> void:
+	if units_root == null:
+		return
+
+	helicopter_active = true
+	helicopter_timer = 5.0
+	helicopter_cooldown = 55.0
+	helicopter_target_pos = drop_pos
+
+	var flight_dir := Vector3(1.0, 0.0, -1.0).normalized() # Screen-space horizontal pass
+	var start_pos := drop_pos - flight_dir * 32.0 + Vector3(0, 6.8, 0)
+	var exit_pos := drop_pos + flight_dir * 34.0 + Vector3(0, 6.8, 0)
+
+	var heli: VoxelHelicopter = HELICOPTER_SCENE.instantiate()
+	units_root.add_child(heli)
+	heli.setup(start_pos, drop_pos, exit_pos, 5.0, 6.5)
+
+	heli.drop_executed.connect(func(pos: Vector3, rad: float) -> void:
+		helicopter_active = false
+		helicopter_drop_executed.emit(pos, rad)
+		hint_requested.emit("AERIAL WATER IMPACT! Local fire cluster doused!")
+	)
+
+	SoundManager.play_sfx("helicopter")
+	hint_requested.emit("AERIAL THREAT! City helicopter incoming — 5s warning on highlighted cluster!")
+	helicopter_drop_warning.emit(drop_pos, 5.0)

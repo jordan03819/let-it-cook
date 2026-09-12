@@ -236,6 +236,7 @@ func _synth_all_streams() -> void:
 	_streams["splash"] = _synth_splash()
 	_streams["siren"] = _synth_siren()
 	_streams["shaman_cue"] = _synth_shaman_cue()
+	_streams["helicopter"] = _synth_helicopter()
 	_streams["last_spark"] = _synth_last_spark()
 	_streams["crackle"] = _synth_crackle_loop()
 	_streams["rain"] = _synth_rain_loop()
@@ -281,6 +282,26 @@ func _synth_wind() -> AudioStreamWAV:
 		var noise := randf_range(-1.0, 1.0)
 		f_val = lerpf(f_val, noise, 0.15 + env * 0.22)
 		var val := f_val * env * 0.7
+		data.encode_s16(i * 2, clampi(int(val * 32767.0), -32768, 32767))
+	s.data = data
+	return s
+
+
+func _synth_helicopter() -> AudioStreamWAV:
+	var count := int(SAMPLE_RATE * 2.0)
+	var s := _create_stream(count)
+	var data := PackedByteArray()
+	data.resize(count * 2)
+	var lfo_freq := 11.5 # 11.5 Hz rotor blade chop
+	for i in count:
+		var t := float(i) / float(SAMPLE_RATE)
+		var chop := maxf(0.0, sin(t * lfo_freq * TAU))
+		chop = pow(chop, 2.6) # sharp aerodynamic pulse
+		var low_hum := sin(t * 64.0 * TAU) * 0.45
+		var mid_hum := sin(t * 128.0 * TAU) * 0.25
+		var noise := randf_range(-0.5, 0.5) * 0.4
+		var env := sin(t / 2.0 * PI)
+		var val := (low_hum + mid_hum + noise) * chop * env * 0.85
 		data.encode_s16(i * 2, clampi(int(val * 32767.0), -32768, 32767))
 	s.data = data
 	return s
