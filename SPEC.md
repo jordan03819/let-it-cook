@@ -69,6 +69,8 @@ The opening should be tense and deliberate. The final minute may become visually
 
 Play should feel **deliberate, legible, tense, and increasingly chaotic**.
 
+The idea is to protect fire + manage ur resources + opportunistically spread / reach flammable things.
+
 - The player spends more time reading the settlement and anticipating reactions than rapidly clicking targets.
 - Every paid action should materially change the likely path of the fire.
 - Early fire is fragile, so positioning and restraint matter.
