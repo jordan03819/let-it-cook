@@ -5,10 +5,12 @@ extends Node3D
 const HOUSE_SCENE := preload("res://scenes/house.tscn")
 const VILLAGER_SCENE := preload("res://scenes/villager.tscn")
 const FIREFIGHTER_SCENE := preload("res://scenes/firefighter.tscn")
+const BARREL_SCENE := preload("res://scenes/barrel.tscn")
+const SHAMAN_SCENE := preload("res://scenes/shaman.tscn")
 
 const LEVELS := [
 	{"name": "VILLAGE", "sub": "Clusters & Bucket Brigades", "grid_half": 4, "spacing": 4.2, "villagers": 7},
-	{"name": "TOWN", "sub": "Denser Streets & Water Channels", "grid_half": 5, "spacing": 4.0, "villagers": 0},
+	{"name": "TOWN", "sub": "Canals, Explosive Barrels & Shaman", "grid_half": 5, "spacing": 4.0, "villagers": 9},
 	{"name": "CITY", "sub": "Firebreaks & Metropolitan Districts", "grid_half": 6, "spacing": 3.8, "villagers": 0},
 ]
 
@@ -51,6 +53,7 @@ var level_idx: int = 0
 
 var houses: Array[VoxelHouse] = []
 var mandatory_houses: Array[VoxelHouse] = []
+var barrels: Array[VoxelBarrel] = []
 var burnt_mandatory: int = 0
 var burn_percent: float = 0.0
 
@@ -60,6 +63,14 @@ var ember_reward_timer: float = 0.0
 var anti_stall_timer: float = 0.0
 var starter_ignited: bool = false
 var starter_house: VoxelHouse = null
+
+# Shaman & Weather (SPEC Section 6.7, 9.4, 10.1)
+var shaman: VoxelShaman = null
+var shaman_ritual_triggered: bool = false
+var rain_active: bool = false
+var rain_timer: float = 0.0
+var rain_particles: GPUParticles3D = null
+var camera_shake_trauma: float = 0.0
 
 # Wind Gust state
 var wind_cooldown: float = 0.0
@@ -259,8 +270,11 @@ func _load_level() -> void:
 	rig.position = Vector3.ZERO
 
 	_build_ground()
-	_build_village()
-	_spawn_villagers(int(cfg.get("villagers", 7 if level_idx == 0 else 0)))
+	if level_idx == 1:
+		_build_town()
+	else:
+		_build_village()
+	_spawn_villagers(int(cfg.get("villagers", 7 if level_idx == 0 else 9)))
 
 	msg_panel.hide()
 	pause_panel.hide()
@@ -271,6 +285,7 @@ func _load_level() -> void:
 
 
 func _clear_level() -> void:
+	_stop_rain()
 	_hide_wind_cone_preview()
 	if active_gust_visual != null and is_instance_valid(active_gust_visual):
 		active_gust_visual.queue_free()
@@ -279,6 +294,8 @@ func _clear_level() -> void:
 	starter_house = null
 	starter_ignited = false
 	last_spark_house = null
+	shaman = null
+	shaman_ritual_triggered = false
 
 	for c in village_root.get_children():
 		if is_instance_valid(c) and not c.is_queued_for_deletion():
@@ -289,8 +306,12 @@ func _clear_level() -> void:
 
 	houses.clear()
 	mandatory_houses.clear()
+	barrels.clear()
 	burnt_mandatory = 0
 	burn_percent = 0.0
+	camera_shake_trauma = 0.0
+	camera.h_offset = 0.0
+	camera.v_offset = 0.0
 
 
 # ---------- builders ----------
@@ -339,9 +360,69 @@ func _build_ground() -> void:
 			_add_voxel_box(ground, Vector3(w * 0.94, 0.06, 3.4), Vector3(0, 0.03, 4.4), Color(0.55, 0.42, 0.28))
 			_add_voxel_box(ground, Vector3(w, 0.08, 3.0), Vector3(0, 0.04, 0), Color(0.32, 0.3, 0.3))
 		1:
-			_ground_slab(ground, Vector3(w, 1, w), Color(0.30, 0.50, 0.28))
-			_add_voxel_box(ground, Vector3(w, 0.08, 3.0), Vector3(0, 0.04, 0), Color(0.32, 0.3, 0.3))
-			_add_voxel_box(ground, Vector3(3.0, 0.08, w), Vector3(0, 0.04, 0), Color(0.32, 0.3, 0.3))
+			# Town: Base lawn + central canal with water and stone quays + bridge crossways
+			_ground_slab(ground, Vector3(w, 1, w), Color(0.30, 0.48, 0.26))
+			var canal_w := w + 4.0
+			var canal_z_width := 4.6
+			# Water surface
+			_add_voxel_box(ground, Vector3(canal_w, 0.2, canal_z_width), Vector3(0, -0.05, 0), Color(0.18, 0.45, 0.78))
+			# Water body for bucket interaction
+			var canal_water_body := StaticBody3D.new()
+			canal_water_body.name = "CanalWaterSource"
+			canal_water_body.position = Vector3(0, 0, 0)
+			canal_water_body.add_to_group("water_sources")
+			var cw_col := CollisionShape3D.new()
+			var cw_shape := BoxShape3D.new()
+			cw_shape.size = Vector3(canal_w, 1.0, canal_z_width)
+			cw_col.shape = cw_shape
+			canal_water_body.add_child(cw_col)
+			village_root.add_child(canal_water_body)
+
+			# Stone Quays / Embankments
+			var quay_col := Color(0.44, 0.42, 0.40)
+			_add_voxel_box(ground, Vector3(canal_w, 0.28, 0.4), Vector3(0, 0.1, -canal_z_width * 0.5 - 0.2), quay_col)
+			_add_voxel_box(ground, Vector3(canal_w, 0.28, 0.4), Vector3(0, 0.1, canal_z_width * 0.5 + 0.2), quay_col)
+
+			# Canal barriers (prevent walking into deep water, leave bridge openings at -7.5 and +7.5)
+			var segs := [
+				Vector2(-w * 0.5, -9.4),
+				Vector2(-5.6, 5.6),
+				Vector2(9.4, w * 0.5)
+			]
+			for seg in segs:
+				var seg_len: float = seg.y - seg.x
+				var seg_mid: float = (seg.x + seg.y) * 0.5
+				for qz in [-canal_z_width * 0.5 - 0.2, canal_z_width * 0.5 + 0.2]:
+					var q_col := CollisionShape3D.new()
+					var q_shape := BoxShape3D.new()
+					q_shape.size = Vector3(seg_len, 1.2, 0.5)
+					q_col.shape = q_shape
+					q_col.position = Vector3(seg_mid, 0.6, qz)
+					ground.add_child(q_col)
+
+			# Water access points along the quays for bucket carriers
+			for wx in [-12.0, -4.0, 4.0, 12.0]:
+				for wz in [-2.5, 2.5]:
+					var wp := Node3D.new()
+					wp.name = "QuayWaterPoint"
+					wp.position = Vector3(wx, 0.1, wz)
+					wp.add_to_group("water_sources")
+					village_root.add_child(wp)
+
+			# Bridges crossing the canal
+			var plank_col := Color(0.48, 0.32, 0.18)
+			var rail_col := Color(0.36, 0.22, 0.12)
+			for bx in [-7.5, 7.5]:
+				_add_voxel_box(ground, Vector3(3.2, 0.22, canal_z_width + 0.8), Vector3(bx, 0.11, 0), plank_col)
+				_add_voxel_box(ground, Vector3(0.2, 0.5, canal_z_width + 0.8), Vector3(bx - 1.5, 0.35, 0), rail_col)
+				_add_voxel_box(ground, Vector3(0.2, 0.5, canal_z_width + 0.8), Vector3(bx + 1.5, 0.35, 0), rail_col)
+
+			# Cobblestone streets
+			var road_col := Color(0.34, 0.33, 0.32)
+			_add_voxel_box(ground, Vector3(3.2, 0.06, w), Vector3(-7.5, 0.03, 0), road_col)
+			_add_voxel_box(ground, Vector3(3.2, 0.06, w), Vector3(7.5, 0.03, 0), road_col)
+			_add_voxel_box(ground, Vector3(w * 0.9, 0.06, 2.8), Vector3(0, 0.03, 8.5), road_col)
+			_add_voxel_box(ground, Vector3(w * 0.9, 0.06, 2.8), Vector3(0, 0.03, -8.5), road_col)
 		_:
 			_ground_slab(ground, Vector3(w, 1, w), Color(0.36, 0.44, 0.32))
 			_add_voxel_box(ground, Vector3(w, 0.08, 4.5), Vector3(0, 0.04, 0), Color(0.38, 0.36, 0.35))
@@ -361,6 +442,106 @@ func _place_house(pos: Vector3, kind: String, fuel: float, size: Vector3, c1: Co
 	if kind == "house":
 		mandatory_houses.append(h)
 	return h
+
+
+func _place_barrel(pos: Vector3) -> VoxelBarrel:
+	var b: VoxelBarrel = BARREL_SCENE.instantiate()
+	village_root.add_child(b)
+	b.position = pos
+	b.exploded.connect(_on_barrel_exploded)
+	barrels.append(b)
+	return b
+
+
+func _spawn_shaman(pos: Vector3) -> VoxelShaman:
+	shaman = SHAMAN_SCENE.instantiate()
+	units_root.add_child(shaman)
+	shaman.position = pos
+	shaman.ritual_completed.connect(_on_shaman_ritual_completed)
+	shaman.ritual_interrupted.connect(_on_shaman_ritual_interrupted)
+	shaman.defeated.connect(_on_shaman_defeated)
+	return shaman
+
+
+func _on_barrel_exploded(_b: VoxelBarrel) -> void:
+	camera_shake_trauma = minf(1.0, camera_shake_trauma + 0.65)
+	if embers < EMBER_MAX:
+		embers = mini(embers + 1, EMBER_MAX)
+		_flash_hint("BOOM! Explosive barrel detonated (+1 Ember, %d/%d)!" % [embers, EMBER_MAX])
+	else:
+		_flash_hint("BOOM! Explosive barrel detonated!")
+	_update_hud()
+
+
+func _on_shaman_ritual_completed(_s: VoxelShaman) -> void:
+	_start_rain(25.0)
+
+
+func _on_shaman_ritual_interrupted(_s: VoxelShaman) -> void:
+	_flash_hint("RITUAL INTERRUPTED! Shaman caught fire and fled!")
+	_update_hud()
+
+
+func _on_shaman_defeated(_s: VoxelShaman) -> void:
+	if embers < EMBER_MAX:
+		embers = mini(embers + 1, EMBER_MAX)
+		_flash_hint("Shaman defeated with fire! +1 Ember (%d/%d)" % [embers, EMBER_MAX])
+	else:
+		_flash_hint("Shaman defeated with fire!")
+	_update_hud()
+
+
+func _start_rain(duration: float = 25.0) -> void:
+	rain_active = true
+	rain_timer = duration
+
+	if rain_particles == null or not is_instance_valid(rain_particles):
+		rain_particles = GPUParticles3D.new()
+		rain_particles.name = "RainStormParticles"
+		rain_particles.amount = 260
+		rain_particles.lifetime = 1.0
+		rain_particles.preprocess = 0.5
+		rain_particles.local_coords = false
+		rain_particles.visibility_aabb = AABB(Vector3(-25, -15, -25), Vector3(50, 30, 50))
+
+		var pm := ParticleProcessMaterial.new()
+		pm.direction = Vector3(0.08, -1.0, 0.04).normalized()
+		pm.spread = 4.0
+		pm.initial_velocity_min = 22.0
+		pm.initial_velocity_max = 28.0
+		pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+		pm.emission_box_extents = Vector3(cam_bound * 1.4, 0.5, cam_bound * 1.4)
+		pm.scale_min = 0.8
+		pm.scale_max = 1.4
+		pm.color = Color(0.65, 0.82, 0.98, 0.75)
+		rain_particles.process_material = pm
+
+		var streak := BoxMesh.new()
+		streak.size = Vector3(0.04, 0.55, 0.04)
+		var sm := StandardMaterial3D.new()
+		sm.albedo_color = Color(0.65, 0.82, 0.98, 0.7)
+		sm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		sm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		streak.material = sm
+		rain_particles.draw_pass_1 = streak
+
+		add_child(rain_particles)
+
+	rain_particles.global_position = rig.position + Vector3(0, 16.0, 0)
+	rain_particles.emitting = true
+	_flash_hint("TORRENTIAL RAIN SUMMONED! (25s) Spreading fire is severely dampened.")
+	_update_hud()
+
+
+func _stop_rain() -> void:
+	if not rain_active:
+		return
+	rain_active = false
+	rain_timer = 0.0
+	if rain_particles != null and is_instance_valid(rain_particles):
+		rain_particles.emitting = false
+	_flash_hint("Rainstorm cleared. Sky brightens.")
+	_update_hud()
 
 
 func _build_village() -> void:
@@ -417,6 +598,112 @@ func _build_village() -> void:
 		starter_house = best_starter
 		starter_house.set_starter(true)
 		starter_ignited = false
+
+
+func _build_town() -> void:
+	var wall_cols := [Color(0.90, 0.80, 0.65), Color(0.88, 0.72, 0.54), Color(0.92, 0.85, 0.70)]
+	var roof_cols := [Color(0.75, 0.26, 0.16), Color(0.58, 0.20, 0.15), Color(0.30, 0.42, 0.65)]
+	var idx := 0
+
+	# 1. South Residential District (Z > 0)
+	# Southwest Block (6 houses)
+	var sw_houses := [
+		Vector3(-14.0, 0, 4.8), Vector3(-10.2, 0, 4.8), Vector3(-4.8, 0, 4.8),
+		Vector3(-14.0, 0, 12.2), Vector3(-10.2, 0, 12.2), Vector3(-4.8, 0, 12.2),
+	]
+	for pos in sw_houses:
+		_place_house(pos, "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()])
+		idx += 1
+
+	# Southeast Block (6 houses)
+	var se_houses := [
+		Vector3(4.8, 0, 4.8), Vector3(10.2, 0, 4.8), Vector3(14.0, 0, 4.8),
+		Vector3(4.8, 0, 12.2), Vector3(10.2, 0, 12.2), Vector3(14.0, 0, 12.2),
+	]
+	for pos in se_houses:
+		_place_house(pos, "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()])
+		idx += 1
+
+	# Barrel 1: Strategic bridge across central residential street
+	_place_barrel(Vector3(0.0, 0, 4.8))
+
+	# 2. North Commercial & Guild District (Z < 0)
+	# Northwest Block (6 houses)
+	var nw_houses := [
+		Vector3(-14.0, 0, -4.8), Vector3(-10.2, 0, -4.8), Vector3(-4.8, 0, -4.8),
+		Vector3(-14.0, 0, -12.2), Vector3(-10.2, 0, -12.2), Vector3(-4.8, 0, -12.2),
+	]
+	for pos in nw_houses:
+		_place_house(pos, "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()])
+		idx += 1
+
+	# Barrel 2: Near West Bridge approach
+	_place_barrel(Vector3(-7.5, 0, -3.2))
+
+	# Northeast Block (5 houses)
+	var ne_houses := [
+		Vector3(4.8, 0, -4.8), Vector3(8.8, 0, -4.8),
+		Vector3(4.8, 0, -12.2), Vector3(8.8, 0, -12.2),
+		Vector3(2.6, 0, -8.5),
+	]
+	for pos in ne_houses:
+		_place_house(pos, "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()])
+		idx += 1
+
+	# Barrel 3: In the alley leading toward the Shaman
+	_place_barrel(Vector3(10.8, 0, -8.5))
+
+	# 3. Shaman Ritual Court (Northeast corner)
+	_build_shaman_court(Vector3(14.5, 0, -8.5))
+
+	# Flammable tree bridge connecting Northeast houses to Ritual Court
+	_place_house(Vector3(11.2, 0, -6.5), "tree", 24.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
+	_place_house(Vector3(12.8, 0, -7.2), "tree", 24.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
+
+	# Perimeter trees
+	for x_pos in [-16.0, 16.0]:
+		for z_pos in [-14.0, -9.0, -4.0, 4.0, 9.0, 14.0]:
+			_place_house(Vector3(x_pos + randf_range(-0.4, 0.4), 0, z_pos + randf_range(-0.4, 0.4)), "tree", 24.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25))
+
+	# Pick Starter House: prominently framed in the opening camera view
+	if not mandatory_houses.is_empty():
+		var best_starter := mandatory_houses[0]
+		var best_dist := 1e9
+		for h in mandatory_houses:
+			# Favor south district houses close to center
+			if h.position.z > 2.0:
+				var d := h.position.length()
+				if d < best_dist:
+					best_dist = d
+					best_starter = h
+		starter_house = best_starter
+		starter_house.set_starter(true)
+		starter_ignited = false
+
+
+func _build_shaman_court(pos: Vector3) -> void:
+	var court := Node3D.new()
+	court.name = "ShamanRitualCourt"
+	court.position = pos
+	village_root.add_child(court)
+
+	var stone_mat := _mat(Color(0.48, 0.46, 0.44))
+	var rune_mat := _mat(Color(0.2, 0.8, 0.95))
+
+	# Raised stone platform
+	_add_voxel_box(court, Vector3(5.6, 0.3, 5.6), Vector3(0, 0.15, 0), stone_mat.albedo_color)
+	# Corner pillars
+	for px in [-2.4, 2.4]:
+		for pz in [-2.4, 2.4]:
+			_add_voxel_box(court, Vector3(0.5, 2.4, 0.5), Vector3(px, 1.2, pz), stone_mat.albedo_color)
+			_add_voxel_box(court, Vector3(0.3, 0.3, 0.3), Vector3(px, 2.5, pz), rune_mat.albedo_color)
+
+	# Altar in front of shaman
+	_add_voxel_box(court, Vector3(1.2, 0.6, 0.8), Vector3(0, 0.45, 1.2), stone_mat.albedo_color)
+	_add_voxel_box(court, Vector3(0.8, 0.15, 0.5), Vector3(0, 0.75, 1.2), rune_mat.albedo_color)
+
+	# Spawn Shaman
+	_spawn_shaman(pos + Vector3(0, 0.3, 0))
 
 
 func _build_water_well(pos: Vector3) -> StaticBody3D:
@@ -482,21 +769,56 @@ func _process(delta: float) -> void:
 			active_gust_visual.queue_free()
 			active_gust_visual = null
 
+	# Rain weather management
+	if rain_active:
+		rain_timer = maxf(0.0, rain_timer - delta)
+		if rain_particles != null and is_instance_valid(rain_particles):
+			rain_particles.global_position = rig.position + Vector3(0, 16.0, 0)
+		for h in houses:
+			if is_instance_valid(h):
+				h.apply_water(0.24, delta)
+		for b in barrels:
+			if is_instance_valid(b):
+				b.apply_water(0.18, delta)
+		fire_strength = move_toward(fire_strength, 18.0, 7.0 * delta)
+		if rain_timer <= 0.0:
+			_stop_rain()
+
+	# Camera trauma shake decay
+	if camera_shake_trauma > 0.0:
+		camera_shake_trauma = maxf(0.0, camera_shake_trauma - delta * 2.2)
+		camera.h_offset = randf_range(-1.0, 1.0) * camera_shake_trauma * 0.45
+		camera.v_offset = randf_range(-1.0, 1.0) * camera_shake_trauma * 0.45
+	else:
+		camera.h_offset = 0.0
+		camera.v_offset = 0.0
+
 	_update_wind(delta)
 	_tick_heat(delta)
 	_tick_alarm(delta)
 	_tick_buckets(delta)
 
-	# Firefighter Escalation Wave (SPEC Section 6.2, 9.3, 11.1)
+	# Firefighter Escalation Wave (SPEC Section 6.2, 9.3, 11.1 & 11.2)
 	if starter_ignited and not game_over:
+		var warn_time := 45.0 if level_idx == 1 else 80.0
+		var spawn_time := 50.0 if level_idx == 1 else 85.0
+		var alarm_threshold := 50.0 if level_idx == 1 else 70.0
+
 		if not firefighter_warning and not firefighter_wave_spawned:
-			if elapsed >= 80.0 or (alarm >= 70.0 and elapsed >= 60.0):
+			if elapsed >= warn_time or (alarm >= alarm_threshold and elapsed >= warn_time - 15.0):
 				firefighter_warning = true
 				_flash_hint("SIRENS! Official firefighters dispatched — arriving on the road in 5s!")
 		elif firefighter_warning and not firefighter_wave_spawned:
-			if elapsed >= 85.0 or (alarm >= 70.0 and elapsed >= 65.0):
+			if elapsed >= spawn_time or (alarm >= alarm_threshold and elapsed >= warn_time - 10.0):
 				firefighter_wave_spawned = true
 				_spawn_firefighter_wave()
+
+		# Shaman Ritual Trigger (Town - SPEC Section 6.7 & 9.4)
+		if level_idx == 1 and shaman != null and is_instance_valid(shaman) and not shaman_ritual_triggered:
+			if alarm >= 30.0 or elapsed >= 38.0 or _count_burning() >= 2:
+				shaman_ritual_triggered = true
+				shaman.start_ritual()
+				_flash_hint("RITUAL ALARM! Shaman in the Northeast court is summoning rain!")
 
 	var burning_count := _count_burning()
 	var smoldering_count := _count_smoldering()
@@ -552,7 +874,11 @@ func _process(delta: float) -> void:
 
 func _spawn_firefighter_wave() -> void:
 	var road_z: float = -cam_bound + 1.5
-	var positions := [Vector3(-1.2, 0, road_z), Vector3(1.2, 0, road_z)]
+	var positions: Array[Vector3] = []
+	if level_idx == 1:
+		positions = [Vector3(-7.5, 0, road_z), Vector3(7.5, 0, road_z), Vector3(-7.5, 0, -road_z)]
+	else:
+		positions = [Vector3(-1.2, 0, road_z), Vector3(1.2, 0, road_z)]
 	for p in positions:
 		var ff: VoxelFirefighter = FIREFIGHTER_SCENE.instantiate()
 		units_root.add_child(ff)
@@ -683,6 +1009,8 @@ func _tick_heat(delta: float) -> void:
 		# Wetness suppresses incoming heat (SPEC Section 6.4 & 8.4)
 		if dst.wetness > 0.05:
 			power *= maxf(0.08, 1.0 - dst.wetness * 0.9)
+		if rain_active:
+			power *= 0.42
 
 		if power > 0.0:
 			dst.heat = minf(1.0, dst.heat + rate * power * delta)
@@ -690,6 +1018,38 @@ func _tick_heat(delta: float) -> void:
 				dst.ignite()
 		elif dst.heat > 0.0:
 			dst.heat = maxf(0.0, dst.heat - HEAT_DECAY * delta)
+
+	# Heat propagation to explosive barrels (SPEC Section 8.5)
+	for b in barrels:
+		if not is_instance_valid(b) or b.state != VoxelBarrel.State.UNBURNED:
+			continue
+		var b_power := 0.0
+		for src in burning_nodes:
+			var to_b := b.global_position - src.global_position
+			var dist := to_b.length()
+			if dist > HOUSE_RADIUS or dist < 0.01:
+				continue
+			var align: float = (to_b / dist).dot(wind_dir)
+			var w: float = maxf(0.2, 1.0 + align * wind_strength * WIND_BIAS)
+
+			# Active Local Wind Gust acceleration
+			if active_gust_timer > 0.0:
+				var to_dst: Vector3 = b.global_position - active_gust_origin
+				to_dst.y = 0.0
+				var dst_dist := to_dst.length()
+				if dst_dist <= WIND_GUST_RANGE:
+					var gust_align := (to_dst / maxf(0.01, dst_dist)).dot(active_gust_dir)
+					if gust_align >= cos(WIND_GUST_HALF_ANGLE):
+						w *= 3.5
+
+			b_power += w
+			if b_power >= 3.0:
+				break
+
+		if rain_active:
+			b_power *= 0.45
+		if b_power > 0.0:
+			b.add_heat(b_power * delta * 0.35)
 
 
 # ---------- Bucket Response (Village) ----------
@@ -875,9 +1235,22 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _handle_left_click(screen_pos: Vector2) -> void:
-	var house := _pick_house(screen_pos)
-	if house == null:
+	var obj := _pick_object(screen_pos)
+	if obj == null:
 		return
+
+	if obj is VoxelBarrel:
+		_flash_hint("Barrels cannot be ignited manually! Route fire to them to detonate.")
+		return
+
+	if obj is VoxelShaman:
+		_flash_hint("Shaman is immune to direct clicks! Route fire to the ritual court to interrupt.")
+		return
+
+	if not (obj is VoxelHouse):
+		return
+
+	var house: VoxelHouse = obj as VoxelHouse
 
 	if not starter_ignited:
 		if house == starter_house:
@@ -913,7 +1286,8 @@ func _handle_left_click(screen_pos: Vector2) -> void:
 
 
 func _start_wind_aim(screen_pos: Vector2) -> void:
-	var house := _pick_house(screen_pos)
+	var obj := _pick_object(screen_pos)
+	var house: VoxelHouse = obj as VoxelHouse if obj is VoxelHouse else null
 	var origin := Vector3.ZERO
 	var found := false
 
@@ -1081,6 +1455,12 @@ func _update_wind_cone_preview(origin: Vector3, dir: Vector3, valid: bool) -> vo
 				to_h.y = 0.0
 				if to_h.length() <= radius and to_h.normalized().dot(dir) >= cos(half_angle):
 					h._flash = maxf(h._flash, 0.4)
+		for b in barrels:
+			if is_instance_valid(b) and b.state == VoxelBarrel.State.UNBURNED:
+				var to_b := b.global_position - origin
+				to_b.y = 0.0
+				if to_b.length() <= radius and to_b.normalized().dot(dir) >= cos(half_angle):
+					b.add_heat(0.04)
 
 
 func _hide_wind_cone_preview() -> void:
@@ -1089,7 +1469,7 @@ func _hide_wind_cone_preview() -> void:
 
 
 # ---------- Raycast helpers ----------
-func _pick_house(screen_pos: Vector2) -> VoxelHouse:
+func _pick_object(screen_pos: Vector2) -> Object:
 	if camera == null:
 		return null
 	var from := camera.project_ray_origin(screen_pos)
@@ -1099,9 +1479,13 @@ func _pick_house(screen_pos: Vector2) -> VoxelHouse:
 	var hit := get_world_3d().direct_space_state.intersect_ray(q)
 	if hit.is_empty():
 		return null
-	var collider: Object = hit.get("collider")
-	if collider is VoxelHouse:
-		return collider
+	return hit.get("collider")
+
+
+func _pick_house(screen_pos: Vector2) -> VoxelHouse:
+	var obj := _pick_object(screen_pos)
+	if obj is VoxelHouse:
+		return obj as VoxelHouse
 	return null
 
 
@@ -1148,7 +1532,8 @@ func _update_hud() -> void:
 			gust_str = "CD %.1fs" % wind_cooldown
 		else:
 			gust_str = "Ready (1 Ember, RMB)"
-		wind_label.text = "Wind: %s %s | Gust: %s" % [_wind_arrow(), _wind_word(), gust_str]
+		var rain_str := " | RAIN: %ds" % int(ceil(rain_timer)) if rain_active else ""
+		wind_label.text = "Wind: %s %s | Gust: %s%s" % [_wind_arrow(), _wind_word(), gust_str, rain_str]
 
 	if objective_label != null and not game_over:
 		var spark_status := "READY"
@@ -1161,6 +1546,10 @@ func _update_hud() -> void:
 			objective_label.text = "SPARK PHASE: Click the highlighted STARTER house to begin"
 		elif last_spark_active:
 			objective_label.text = "CRITICAL: LAST SPARK SMOLDERING (%.1fs)! Click house to save (1 Ember)!" % maxf(0.0, last_spark_timer)
+		elif shaman != null and is_instance_valid(shaman) and shaman.state == VoxelShaman.State.CASTING:
+			objective_label.text = "THREAT: SHAMAN RITUAL! Rain in %.1fs — Route fire to ritual court to interrupt!" % shaman.cast_time_remaining
+		elif rain_active:
+			objective_label.text = "WEATHER: Torrential Rain (%.1fs) — Spread dampened! Burn %d/%d houses." % [rain_timer, burnt_mandatory, mandatory_houses.size()]
 		else:
 			objective_label.text = "Lv%d %s: Burn 100%% of settlement houses (%d/%d) · Last Spark: %s" % [level_idx + 1, str(cfg["name"]), burnt_mandatory, mandatory_houses.size(), spark_status]
 
@@ -1203,6 +1592,7 @@ func _toggle_pause() -> void:
 func _end_game(did_win: bool) -> void:
 	game_over = true
 	won = did_win
+	get_tree().paused = true
 	msg_panel.show()
 
 	if did_win:
