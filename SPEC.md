@@ -27,7 +27,6 @@ The intended player fantasy is **a god observing and manipulating a living disas
 ## 3. Non-Goals
 
 - Hades-level character detail, animation count, or production scope.
-- A realistic fire simulation.
 - Long-form city building or population management.
 - Direct control of a player avatar.
 - Persistent metagame progression for the initial polished demo.
@@ -373,7 +372,7 @@ The prototype behavior in which S moves the view upward is a defect.
 
 ### 15.1 Style
 
-Use **The Battle of Polytopia** as the practical visual benchmark:
+Use **The Battle of Polytopia** as a practical visual benchmark:
 
 - vibrant, deliberate palette;
 - sharp silhouettes;
@@ -456,7 +455,7 @@ Run-specific Embers and upgrades reset on New Run.
 
 ## 18. Technical Direction
 
-The current project baseline is Godot 4.7 using the GL Compatibility renderer, orthographic `Camera3D`, and runtime-generated low-poly geometry.
+The current project baseline is Godot 4.7, orthographic `Camera3D`, and runtime-generated low-poly geometry.
 
 The implementation should preserve the simple scene model while separating responsibilities currently concentrated in `scenes/game.gd`:
 
