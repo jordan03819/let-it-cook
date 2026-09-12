@@ -1,41 +1,30 @@
 extends CharacterBody3D
 class_name VoxelVillager
-## Voxel villager: wanders, panics near fire, may drop lantern.
-## FLAMMABLE: catches fire near flames, runs screaming while burning,
-## spreads fire to houses + other characters, dies into charred voxels.
+## Lookout villager (L1): NOT flammable, never burns, never spreads.
+## Wanders between houses. If a burning house is in sight -> spots it (! bubble).
+## If fire is close -> panics and flees away. Game polls has_spotted() for Alarm/demo.
 
-signal toasted(v: VoxelVillager)
-
-const CharBurnScript := preload("res://scenes/char_burn.gd")
-
-var speed_wander: float = 1.6
-var speed_panic: float = 4.0
-var speed_burning: float = 3.4
+var speed_wander: float = 1.8
+var speed_panic: float = 4.2
+var speed_bucket: float = 3.6
+var sight_radius: float = 11.0
 var panic_radius: float = 7.0
-var catch_house_radius: float = 3.4
-var catch_char_radius: float = 2.2
+var role: String = "lookout" # lookout | bucket (brave, approaches fire)
+var bucket_target: Node3D = null
 
-var burn: CharBurn = null
 var _visual: Node3D = null
-var _panic: bool = false
-var _dead: bool = false
+var _bubble: Label3D = null
 var _dir: Vector3 = Vector3.FORWARD
 var _think_t: float = 0.0
-var _spread_t: float = 0.0
-var catch_cd: float = 0.0
-var _dropped: bool = false
+var _bubble_t: float = 0.0
+var _panicking: bool = false
+var _spotted: bool = false
 
 
 func _ready() -> void:
 	add_to_group("villagers")
-	add_to_group("flammable")
 	_build()
-	burn = CharBurnScript.new()
-	add_child(burn)
-	burn.configure(self, _visual, 1.7, randf_range(10.0, 13.0))
-	_build_scream_bubble()
-	burn.ignited.connect(_on_ignite)
-	burn.died.connect(_on_burn_death)
+	_build_bubble()
 
 
 func _mat(c: Color) -> StandardMaterial3D:
@@ -74,198 +63,144 @@ func _build() -> void:
 	_box(Vector3(0.46, 0.14, 0.46), Vector3(0, 1.55, 0), _mat(Color(0.2 + randf() * 0.6, 0.15, 0.1)))
 
 
-func ignite() -> bool:
-	if burn == null or _dead:
-		return false
-	return burn.ignite()
+func _build_bubble() -> void:
+	_bubble = Label3D.new()
+	_bubble.text = "!"
+	_bubble.font_size = 128
+	_bubble.pixel_size = 0.012
+	_bubble.modulate = Color(1.0, 0.85, 0.2)
+	_bubble.outline_size = 16
+	_bubble.outline_modulate = Color(0.1, 0.05, 0.05)
+	_bubble.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_bubble.position = Vector3(0, 2.4, 0)
+	_bubble.visible = false
+	add_child(_bubble)
 
 
-func apply_water(amount: float, delta: float) -> void:
-	if burn != null:
-		burn.apply_water(amount, delta)
+func has_spotted() -> bool:
+	return _spotted
 
 
-func is_burning() -> bool:
-	return burn != null and burn.is_burning
+func set_bucket(t: Node3D) -> void:
+	role = "bucket"
+	bucket_target = t
+	_build_bucket()
+	_show_bubble("~", Color(0.4, 0.7, 1.0))
+
+
+func clear_bucket() -> void:
+	role = "lookout"
+	bucket_target = null
+	var b := get_node_or_null("Bucket")
+	if b != null:
+		b.queue_free()
+
+
+func is_bucket() -> bool:
+	return role == "bucket"
+
+
+func _build_bucket() -> void:
+	if get_node_or_null("Bucket") != null or _visual == null:
+		return
+	var mi := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = Vector3(0.3, 0.35, 0.3)
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(0.3, 0.55, 0.95)
+	m.roughness = 1.0
+	bm.material = m
+	mi.mesh = bm
+	mi.name = "Bucket"
+	mi.position = Vector3(0.4, 0.9, 0.2)
+	_visual.add_child(mi)
+
+
+func is_panicking() -> bool:
+	return _panicking
 
 
 func _physics_process(delta: float) -> void:
-	if _dead:
-		return
-	catch_cd = maxf(0.0, catch_cd - delta)
-	if is_burning():
-		_physics_burning(delta)
+	if role == "bucket":
+		_physics_bucket(delta)
 		return
 	_think_t -= delta
-	# Nearest burning house for panic
+	if _bubble_t > 0.0:
+		_bubble_t -= delta
+		if _bubble_t <= 0.0 and _bubble != null:
+			_bubble.visible = false
+	# Nearest burning building.
 	var nearest_d := 1e9
 	var nearest_pos := Vector3.ZERO
 	for h in get_tree().get_nodes_in_group("houses"):
 		if h is VoxelHouse and h.state == VoxelHouse.State.BURNING:
-			var d := global_position.distance_to(h.global_position)
+			var d := global_position.distance_to((h as Node3D).global_position)
 			if d < nearest_d:
 				nearest_d = d
-				nearest_pos = h.global_position
-	# Burning characters are scary too
-	for c in get_tree().get_nodes_in_group("burning_chars"):
-		if c is Node3D and c != self:
-			var d := global_position.distance_to((c as Node3D).global_position)
-			if d < nearest_d:
-				nearest_d = d
-				nearest_pos = (c as Node3D).global_position
-	_panic = nearest_d < panic_radius
-	var spd := speed_panic if _panic else speed_wander
+				nearest_pos = (h as Node3D).global_position
+	if nearest_d < sight_radius:
+		if not _spotted:
+			_spotted = true
+			_show_bubble("!")
+		elif nearest_d < sight_radius * 0.6:
+			_show_bubble("!")
+	_panicking = nearest_d < panic_radius
+	var spd := speed_panic if _panicking else speed_wander
 	if _think_t <= 0.0:
-		_think_t = randf_range(0.8, 2.0) if not _panic else 0.4
-		if _panic:
+		_think_t = 0.35 if _panicking else randf_range(1.0, 2.2)
+		if _panicking:
 			var away: Vector3 = global_position - nearest_pos
 			away.y = 0.0
 			_dir = away.normalized() if away.length() > 0.01 else Vector3(randf_range(-1, 1), 0, randf_range(-1, 1)).normalized()
-			if not _dropped and randf() < 0.12:
-				_dropped = true
-				_try_ignite_neighbor()
 		else:
-			_dir = Vector3(randf_range(-1, 1), 0, randf_range(-1, 1)).normalized()
-		_check_catch_fire()
-	if absf(global_position.x) > 14.0 or absf(global_position.z) > 14.0:
+			# Drift toward village center-ish so they stay around houses.
+			if randf() < 0.3:
+				var home: Vector3 = -global_position
+				home.y = 0.0
+				_dir = home.normalized() if home.length() > 1.0 else Vector3(randf_range(-1, 1), 0, randf_range(-1, 1)).normalized()
+			else:
+				_dir = Vector3(randf_range(-1, 1), 0, randf_range(-1, 1)).normalized()
+	# Keep inside bounds.
+	if absf(global_position.x) > 16.0 or absf(global_position.z) > 16.0:
 		_dir = (-global_position.normalized())
+		_think_t = 1.0
 	velocity = _dir * spd
 	if _dir.length_squared() > 0.01:
 		_visual.rotation.y = atan2(_dir.x, _dir.z)
-	_visual.position.y = absf(sin(Time.get_ticks_msec() * (0.02 if _panic else 0.008))) * (0.12 if _panic else 0.05)
+	_visual.position.y = absf(sin(Time.get_ticks_msec() * (0.02 if _panicking else 0.008))) * (0.12 if _panicking else 0.05)
 	move_and_slide()
 
 
-func _physics_burning(delta: float) -> void:
-	# Screaming + stumbling zigzag; half the time charges TOWARD fresh houses
-	# (arson run) so burning villagers visibly spread the fire.
+func _physics_bucket(delta: float) -> void:
+	# Brave: walk to the assigned burning house, stand ~3m off and hold.
+	# Splash effect itself is applied by game.gd (single authority).
 	_think_t -= delta
-	_spread_t -= delta
-	if _think_t <= 0.0:
-		_think_t = randf_range(0.4, 0.8)
-		var goal := _away_from_flames()
-		if randf() < 0.5:
-			var charge := _toward_fresh_house()
-			if charge.length_squared() > 0.01:
-				goal = charge
-		var jitter := Vector3(randf_range(-1.0, 1.0), 0, randf_range(-1.0, 1.0))
-		_dir = (goal + jitter).normalized() if (goal + jitter).length() > 0.01 else _dir
-		if absf(global_position.x) > 14.0 or absf(global_position.z) > 14.0:
-			_dir = (-global_position.normalized())
-	if _spread_t <= 0.0:
-		_spread_t = 0.9
-		_spread_fire()
-	velocity = _dir * speed_burning
+	if _bubble_t > 0.0:
+		_bubble_t -= delta
+		if _bubble_t <= 0.0 and _bubble != null:
+			_bubble.visible = false
+	if bucket_target == null or not is_instance_valid(bucket_target):
+		velocity = Vector3.ZERO
+		move_and_slide()
+		return
+	var to: Vector3 = (bucket_target as Node3D).global_position - global_position
+	to.y = 0.0
+	var d := to.length()
+	if d > 3.2:
+		_dir = to.normalized() if d > 0.01 else _dir
+		velocity = _dir * speed_bucket
+	else:
+		velocity = Vector3.ZERO
 	if _dir.length_squared() > 0.01:
 		_visual.rotation.y = atan2(_dir.x, _dir.z)
-	_visual.position.y = absf(sin(Time.get_ticks_msec() * 0.03)) * 0.16
+	_visual.position.y = absf(sin(Time.get_ticks_msec() * 0.014)) * 0.08
 	move_and_slide()
 
 
-func _toward_fresh_house() -> Vector3:
-	var best := Vector3.ZERO
-	var best_d := 9.0
-	for h in get_tree().get_nodes_in_group("houses"):
-		if h is VoxelHouse and h.state == VoxelHouse.State.UNBURNED:
-			var to: Vector3 = (h as Node3D).global_position - global_position
-			to.y = 0.0
-			var d := to.length()
-			if d < best_d and d > 0.01:
-				best_d = d
-			best = to.normalized()
-	return best
-
-
-func _away_from_flames() -> Vector3:
-	var away := Vector3.ZERO
-	for h in get_tree().get_nodes_in_group("houses"):
-		if h is VoxelHouse and h.state == VoxelHouse.State.BURNING:
-			var to: Vector3 = global_position - h.global_position
-			to.y = 0.0
-			var d := to.length()
-			if d < 8.0 and d > 0.01:
-				away += to.normalized() * (1.0 - d / 8.0)
-	return away.normalized() if away.length() > 0.01 else Vector3(randf_range(-1, 1), 0, randf_range(-1, 1)).normalized()
-
-
-func _check_catch_fire() -> void:
-	# Clumsy villagers: hang around fire and WILL catch (0.38 + 0.3s CD).
-	if catch_cd > 0.0:
+func _show_bubble(txt: String, col: Color = Color(1.0, 0.85, 0.2)) -> void:
+	if _bubble == null:
 		return
-	for h in get_tree().get_nodes_in_group("houses"):
-		if h is VoxelHouse and h.state == VoxelHouse.State.BURNING:
-			if global_position.distance_to(h.global_position) < catch_house_radius:
-				if randf() < 0.38:
-					catch_cd = 0.3
-					ignite()
-					return
-	for c in get_tree().get_nodes_in_group("burning_chars"):
-		if c is Node3D and c != self:
-			if global_position.distance_to((c as Node3D).global_position) < catch_char_radius:
-				if randf() < 0.35:
-					catch_cd = 0.3
-					ignite()
-					return
-
-
-func _spread_fire() -> void:
-	# Burning villager ignites nearby houses (0.30 / 3.0m / 0.9s) + chars.
-	for h in get_tree().get_nodes_in_group("houses"):
-		if h is VoxelHouse and h.state == VoxelHouse.State.UNBURNED:
-			if global_position.distance_to(h.global_position) < 3.0:
-				if randf() < 0.30:
-					if h.ignite():
-						break
-	for c in get_tree().get_nodes_in_group("villagers"):
-		if c != self and c is VoxelVillager and not (c as VoxelVillager).is_burning():
-			if global_position.distance_to((c as Node3D).global_position) < 1.5:
-				if randf() < 0.20:
-					(c as VoxelVillager).ignite()
-	for c in get_tree().get_nodes_in_group("firefighters"):
-		if c is VoxelFirefighter and not (c as VoxelFirefighter).is_burning():
-			if global_position.distance_to((c as Node3D).global_position) < 1.5:
-				if randf() < 0.20:
-					(c as VoxelFirefighter).ignite()
-
-
-func _try_ignite_neighbor() -> void:
-	for h in get_tree().get_nodes_in_group("houses"):
-		if h is VoxelHouse and h.state == VoxelHouse.State.UNBURNED:
-			if global_position.distance_to(h.global_position) < 4.0:
-				h.ignite()
-				break
-
-
-func _build_scream_bubble() -> void:
-	var lab := Label3D.new()
-	lab.name = "ScreamBubble"
-	lab.text = "AAA!!"
-	lab.font_size = 96
-	lab.pixel_size = 0.011
-	lab.modulate = Color(1.0, 0.85, 0.2)
-	lab.outline_size = 16
-	lab.outline_modulate = Color(0.1, 0.05, 0.05)
-	lab.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	lab.position = Vector3(0, 2.7, 0)
-	lab.visible = false
-	add_child(lab)
-
-
-func _on_ignite() -> void:
-	_think_t = 0.0
-	_spread_t = 0.3
-	var bubble := get_node_or_null("ScreamBubble")
-	if bubble is Label3D:
-		(bubble as Label3D).visible = true
-
-
-func _on_burn_death() -> void:
-	if _dead:
-		return
-	_dead = true
-	if is_in_group("villagers"):
-		remove_from_group("villagers")
-	if is_in_group("flammable"):
-		remove_from_group("flammable")
-	toasted.emit(self)
-	queue_free()
+	_bubble.text = txt
+	_bubble.modulate = col
+	_bubble.visible = true
+	_bubble_t = 1.6

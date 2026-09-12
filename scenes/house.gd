@@ -1,19 +1,20 @@
 extends StaticBody3D
 class_name VoxelHouse
-## REFORMED VoxelHouse — minimal burn state, no sim.
-## States: UNBURNED -> BURNING -> BURNT. Once lit it always burns out.
-## No wetness, no fireproof, no wind, no water, no spread hooks.
-## Visuals only: voxel body + flame cubes + particles + light.
+## REFORMED VoxelHouse — burn + demolish.
+## States: UNBURNED -> BURNING -> BURNT. DEMOLISHED is a villager firebreak:
+## flattened rubble, never burns, never spreads, never counts as burnt.
 
 signal burned_out(house: VoxelHouse)
 signal ignited(house: VoxelHouse)
+signal demolished(house: VoxelHouse)
 
-enum State { UNBURNED, BURNING, BURNT }
+enum State { UNBURNED, BURNING, BURNT, DEMOLISHED }
 
 var state: int = State.UNBURNED
 var fuel_max: float = 22.0
 var fuel: float = 22.0
-var kind: String = "house" # house | tree (visual variety only, same rules)
+var heat: float = 0.0 # 0..1 warming from nearby burning buildings. 1 = catches.
+var kind: String = "house" # house | tree (different heat rates, same states)
 var house_size: Vector3 = Vector3(2.0, 1.6, 2.0)
 var base_color: Color = Color(0.9, 0.8, 0.65)
 var roof_color: Color = Color(0.75, 0.25, 0.15)
@@ -42,6 +43,7 @@ func setup(p_base_color: Color, p_roof_color: Color, p_fuel: float, p_size: Vect
 	roof_color = p_roof_color
 	fuel_max = p_fuel
 	fuel = p_fuel
+	heat = 0.0
 	house_size = p_size
 	kind = p_kind
 	if is_node_ready():
@@ -233,10 +235,34 @@ func _set_fire_visible(v: bool) -> void:
 
 
 # --- core verb: lighting. No conditions besides state. ---
+func is_burnable() -> bool:
+	return state == State.UNBURNED
+
+
+func demolish() -> bool:
+	if state != State.UNBURNED:
+		return false
+	state = State.DEMOLISHED
+	heat = 0.0
+	_set_fire_visible(false)
+	if _light != null:
+		_light.visible = false
+	if _mat_base != null:
+		_mat_base.albedo_color = Color(0.45, 0.43, 0.4)
+		_mat_base.emission_energy_multiplier = 0.0
+	if _mat_roof != null:
+		_mat_roof.albedo_color = Color(0.35, 0.34, 0.33)
+	if _visual_root != null:
+		_visual_root.scale = Vector3(1.15, 0.3, 1.15)
+	demolished.emit(self)
+	return true
+
+
 func ignite() -> bool:
 	if state != State.UNBURNED:
 		return false
 	state = State.BURNING
+	heat = 0.0
 	_set_fire_visible(true)
 	_flash = 1.0
 	_pop(1.2)
@@ -290,6 +316,10 @@ func _process(delta: float) -> void:
 			elif _flash > 0.0:
 				_mat_base.emission = Color(1.0, 0.5, 0.1)
 				_mat_base.emission_energy_multiplier = _flash * 1.6
+			elif state == State.UNBURNED and heat > 0.02:
+				# Warming forecast: hotter = brighter orange rim. This IS the UI.
+				_mat_base.emission = Color(1.0, 0.45, 0.1)
+				_mat_base.emission_energy_multiplier = heat * 1.2
 			else:
 				_mat_base.emission_energy_multiplier = 0.0
 		return
