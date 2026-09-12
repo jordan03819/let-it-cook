@@ -21,12 +21,12 @@ The intended player fantasy is **a god observing and manipulating a living disas
 3. Support a complete three-level session in approximately **ten minutes**, excluding menus.
 4. Make human reactions legible and entertaining at the isometric gameplay scale.
 5. Give each level a distinct escalation in density, defenses, and counterplay.
-6. Establish a vibrant, sharp, authored low-poly style inspired by **The Battle of Polytopia**, viewed from an isometric 3D/2.5D perspective.
-7. Support mouse and keyboard as a first-class control scheme. Touch gestures may be supported, but no core action may depend on swiping alone.
+6. Preserve a readable isometric 3D/2.5D perspective while the final art direction is evaluated separately.
+7. Design controls specifically for mouse and keyboard desktop play.
 
 ## 3. Non-Goals
 
-- Hades-level character detail, animation count, or production scope.
+- Finalizing the game's visual style during the current gameplay-design phase.
 - Long-form city building or population management.
 - Direct control of a player avatar.
 - Persistent metagame progression for the initial polished demo.
@@ -41,7 +41,7 @@ A level should move through four phases:
 1. **Spark** — One structure catches fire. The fire is vulnerable and the player has limited influence.
 2. **Alarm** — Nearby inhabitants notice the fire, leave buildings, and form an improvised bucket response.
 3. **Escalation** — The fire reaches multiple structures while organized defenders and environmental hazards appear.
-4. **Inferno** — The player executes a route through the remaining defenses and destroys every required combustible target before the fire is contained.
+4. **Inferno** — The player executes a route through the remaining defenses and destroys every ordinary combustible settlement structure before the fire is contained.
 
 The opening should be tense and deliberate. The final minute may become visually chaotic, but it must remain readable and require decisions.
 
@@ -60,7 +60,7 @@ The opening should be tense and deliberate. The final minute may become visually
 4. Spend accumulated **Embers** to influence the disaster.
 5. Counter inhabitants and responders by redirecting fire toward them or their support targets.
 6. Create a path through flammable structures to reach barrels and other chain-reaction targets.
-7. Destroy all required combustible structures before the fire is fully extinguished.
+7. Destroy all ordinary combustible settlement structures before the fire is fully extinguished.
 8. Review results and proceed to the next settlement.
 
 ## 6. Player Resources and Abilities
@@ -101,14 +101,18 @@ A gust:
 
 The current unexplained central blue arrow/highlight is not acceptable. Wind direction must be communicated through an intentional compass/arrow treatment plus environmental motion. Any target highlight must state why the target is valid.
 
-### 6.4 Ability controls across platforms
+### 6.4 Wind control
 
-Core abilities must not require a touch-only swipe gesture.
+Wind uses a desktop-native right-mouse aiming control:
 
-- **Desktop:** select the Wind ability using a HUD button or keyboard shortcut, then point and drag/click in the world to choose direction. The existing direct mouse-drag gesture may remain as a shortcut.
-- **Touch:** select Wind and swipe or drag in the world.
-- Both schemes must show an aiming preview before the ability is committed.
-- Releasing an invalid or too-short gesture must cancel without spending Embers.
+1. Press and hold the right mouse button anywhere over the world.
+2. Move the pointer to set the gust direction. A world-space arrow previews the direction and affected corridor.
+3. Release the right mouse button to cast the gust.
+4. Press Escape before release to cancel.
+
+The gust has fixed gameplay strength; drag distance is used only to establish a clear direction. Releasing below the minimum aiming distance cancels without spending Embers. The HUD displays the Ember cost and cooldown while aiming. Using the right mouse button keeps Wind distinct from left-click selection and ignition.
+
+A dedicated Wind HUD button may enter the same aiming mode for discoverability, but touch and cross-platform gestures are outside the current scope.
 
 ## 7. Fire Simulation
 
@@ -218,7 +222,7 @@ Shamans are high-priority mini-objectives.
 
 Rain must have complete visual, audio, and gameplay feedback.
 
-- Visible rainfall across the affected play area.
+- Visible rain particles across the affected play area.
 - Wet ground/structure feedback where feasible.
 - Hissing and reduced flame/smoke intensity.
 - Reduced spread and increased wetness.
@@ -231,7 +235,7 @@ Town may introduce natural rain. Shaman-summoned rain can appear in any level th
 Stone structures do not burn from ordinary spread and create natural routing difficulty in the City.
 
 - Stone must be visually distinct before the player attempts ignition.
-- Stone structures are excluded from the combustible-destruction completion denominator unless a level explicitly gives them a destructible state.
+- City stone structures are excluded from the completion denominator.
 - Gaps, gates, vegetation, barrels, or temporarily heated sections provide intentional routes through a firebreak.
 - Generated layouts must guarantee that at least one viable route exists.
 
@@ -254,7 +258,7 @@ Purpose: teach ignition, natural spread, wind, and the human response ladder.
 - Villagers first attempt a bucket brigade.
 - Firefighters arrive only after the bucket response has had time to act.
 - No unavoidable rain or stone firebreaks.
-- Success requires destruction of every required combustible structure.
+- Success requires destruction of every ordinary combustible settlement structure. Trees, barrels, and decorative props are optional.
 
 ### 10.2 Level 2 — Town
 
@@ -265,7 +269,7 @@ Purpose: introduce denser routing, water access, barrels, and ritual/weather pre
 - Barrels positioned as optional but valuable chain-reaction routes.
 - At least one shaman or natural rain event.
 - Faster official response than the Village.
-- Success requires destruction of every required combustible structure.
+- Success requires destruction of every ordinary combustible settlement structure. Trees, barrels, and decorative props are optional.
 
 ### 10.3 Level 3 — City
 
@@ -276,13 +280,13 @@ Purpose: test mastery against firebreaks and advanced suppression.
 - Guaranteed gates or routes through the stone boundary.
 - Elite firefighters and telegraphed helicopter drops.
 - Barrels or other environmental tools placed to reward route planning.
-- Success requires destruction of every required combustible structure; permanent fireproof scenery is excluded.
+- Success requires destruction of every ordinary combustible settlement structure. City stone, trees, barrels, and decorative props are excluded.
 
 ### 10.4 Completion and failure
 
-- The completion bar measures required combustible structures destroyed.
-- The goal is **100% of required targets**, not the prototype's 70–80% thresholds.
-- Decorative props and permanently fireproof scenery do not count.
+- The completion bar measures ordinary combustible settlement structures destroyed.
+- The goal is **100% of ordinary combustible settlement structures**, not the prototype's 70–80% thresholds.
+- City stone, trees, barrels, and decorative props do not count toward completion.
 - The level fails when no viable player-controlled or naturally spreading flame remains and the player has no immediate recovery action.
 - Results freeze gameplay simulation before presenting statistics.
 
@@ -331,11 +335,14 @@ No persistent save-based progression is required for the initial demo.
 | Action | Input |
 |---|---|
 | Select / ignite target | Left click |
-| Aim and use selected ability | Left click/drag in world |
-| Quick Wind shortcut | Dedicated key plus pointer aim |
+| Aim Wind | Hold right mouse button and move pointer |
+| Cast Wind | Release right mouse button after a valid aim |
+| Cancel Wind | Escape before release |
 | Pan camera | WASD or arrow keys |
 | Zoom | Mouse wheel, Q/E, or -/+ |
 | Pause | Escape or P |
+
+While Wind aiming is active, Escape cancels the aim instead of opening pause. A second Escape may then pause normally.
 
 Camera movement must follow screen expectations:
 
@@ -344,20 +351,13 @@ Camera movement must follow screen expectations:
 - A / Left moves left/west.
 - D / Right moves right/east.
 
-The prototype behavior in which S moves the view upward is a defect.
+The prototype behavior in which S moves the view upward is a defect. The implementation must be corrected if runtime validation reproduces it.
 
-### 13.2 Touch defaults
-
-- Tap to select or ignite.
-- Select Wind, then drag to aim and release to commit.
-- Pinch to zoom if implemented.
-- Dragging for camera movement must not accidentally spend an ability.
-
-### 13.3 Input requirements
+### 13.2 Input requirements
 
 - Define custom Godot input actions rather than relying solely on hard-coded key checks.
-- Input prompts change to match the active input device.
-- UI controls and world gestures must not conflict.
+- Input prompts match the configured desktop bindings.
+- Left-click ignition, right-mouse Wind aiming, camera movement, and UI controls must not conflict.
 - Every paid action previews its cost and validity before execution.
 
 ## 14. Camera and Presentation
@@ -370,17 +370,11 @@ The prototype behavior in which S moves the view upward is a defect.
 
 ## 15. Visual Direction
 
-### 15.1 Style
+### 15.1 Style status
 
-Use **The Battle of Polytopia** as a practical visual benchmark:
+The final art direction is deliberately postponed. The current voxel presentation and the proposed Polytopia-like low-poly direction remain references rather than an approved target. No implementation should commit the project to either style until a separate art-direction decision is made.
 
-- vibrant, deliberate palette;
-- sharp silhouettes;
-- clean low-poly geometry;
-- strong separation between terrain, buildings, units, fire, and water;
-- authored visual identity rather than generic voxel primitives.
-
-Retain the isometric 3D/2.5D viewpoint associated with games such as Polytopia or Clash of Clans. Do not pursue Hades-level detail within this scope.
+The isometric 3D/2.5D perspective remains approved independently of the asset style.
 
 ### 15.2 Readability requirements
 
@@ -441,6 +435,7 @@ The HUD may celebrate combos, but announcements must not obscure targets.
 - Main menu: New Run, unlocked level access for development/demo use, Options, Quit where supported.
 - Pause: Resume, controls, audio, reduced motion, edge pan, restart, main menu.
 - Results: duration, destruction percentage, villagers affected, responders defeated, best combo, peak simultaneous fires, and rank.
+- Rank is based on fire continuity, Ember efficiency, environmental chain reactions, and optional objectives. Elapsed time is displayed for pacing analysis but does not grant a better rank merely for finishing faster.
 - Results and upgrade overlays pause all simulation.
 
 ### 17.3 Persistence
@@ -467,7 +462,7 @@ The implementation should preserve the simple scene model while separating respo
 - audio generation/playback;
 - run progression.
 
-Level-specific behavior should be data-driven. A level definition must identify required combustible targets separately from decorative props and permanent fireproof scenery.
+Level-specific behavior should be data-driven. A level definition must identify ordinary combustible settlement structures separately from optional trees, optional barrels, decorative props, and excluded City stone.
 
 Use named Godot input actions for all controls. All actor and simulation processing must stop when paused or after results are shown.
 
@@ -489,10 +484,10 @@ The following are prototype behavior, not target behavior:
 - rapid burn/spread pacing and early level wipes;
 - unrestricted first ignition;
 - direct manual barrel ignition;
-- touch input without a functional Wind gesture;
+- left-mouse drag Wind control that conflicts with desktop ignition input;
 - ambiguous blue highlights and wind marker;
-- rain logic without sufficient presentation;
-- generic flat voxel visuals;
+- rain without dedicated audio, wet-ground feedback, or explicit flame/smoke suppression;
+- placeholder visuals pending a separate art-direction decision;
 - distorted procedural audio;
 - repeatable already-owned upgrades;
 - game simulation continuing behind results;
@@ -508,11 +503,11 @@ The polished initial demo is complete when:
 2. A representative successful run of each level lasts 2:30–3:30.
 3. Leaving the initial fire unattended usually leads to containment rather than a level wipe.
 4. The first ignition is restricted to an indicated starter structure.
-5. Every required structure must be destroyed; excluded scenery is clearly identified and not counted.
+5. Every ordinary combustible settlement structure must be destroyed; City stone, trees, barrels, and decorative props are clearly excluded from the counter.
 6. Villagers notice the initial fire and attempt a visible bucket response before official firefighters arrive.
 7. At least one level contains a shaman whose interruptible ritual summons fully presented rain.
 8. Barrels cannot be manually ignited and must be reached through fire spread.
-9. Desktop players can aim Wind without using a touch-style swipe as the only interaction.
+9. Holding the right mouse button previews Wind direction and area; releasing casts it, while an invalid aim or Escape cancels without spending Embers.
 10. WASD and arrow camera movement match their screen directions.
 11. Humans visibly burn for a period before death and can be rescued by water.
 12. City stone creates a firebreak with at least one generated viable route.
@@ -521,72 +516,66 @@ The polished initial demo is complete when:
 15. Audio is free of audible clipping at default settings and volume preferences persist.
 16. Results and pause screens stop gameplay simulation.
 17. Already-owned upgrades cannot be selected again.
-18. The art pass demonstrates the approved vibrant, sharp low-poly direction with distinct silhouettes for all gameplay roles.
+18. Final art-style approval is not an acceptance criterion for this gameplay-design phase; functional gameplay states must still remain distinguishable.
 
-## 21. Open Questions and Information Conflicts
-
-The following differences between the discussion and current implementation require confirmation or runtime validation.
+## 21. Resolved Decisions and Implementation Findings
 
 ### 21.1 Initial ignition
 
-The discussion describes a fire initially sparking inside one house, which may imply an automatic scripted event. The prototype and this specification instead give the player a free choice among highlighted starter structures.
+The player selects the initial ignition from a constrained set of clearly highlighted starter structures. The first valid ignition is free. Clicking any other structure before the level starts does nothing and explains the restriction.
 
-**Decision required:** choose between automatic ignition and constrained player-selected ignition.
+### 21.2 Completion targets
 
-### 21.2 Complete destruction and stone structures
+Success requires destroying every ordinary combustible settlement structure. City stone is permanently excluded. Trees, barrels, and decorative props are optional and do not contribute to the completion percentage.
 
-The desired completion condition is to burn everything, while City stone blocks ordinary fire. A literal 100% requirement may therefore be impossible without a special way to destroy stone.
+### 21.3 Desktop Wind control
 
-This specification currently defines success as destroying 100% of required combustible structures and excludes permanent stone scenery.
+Wind is designed only for desktop input in the current scope. The player holds the right mouse button, moves the pointer to preview direction and affected area, and releases to cast. Escape or an aim below the minimum distance cancels without spending Embers. Left click remains dedicated to selection and ignition.
 
-**Decision required:** confirm that exclusion or define how stone becomes destructible.
+### 21.4 Rain implementation finding
 
-### 21.3 Swipe implementation
+Static code inspection confirms that prototype rain particles are implemented and connected to the Town rain event:
 
-The discussion describes Wind as a touch-swipe mechanic and questions its usefulness outside mobile. The current code implements mouse dragging for Wind, while touch dragging does not activate it. The implementation is effectively the reverse of the description.
+- `_build_rain_fx()` creates a 120-particle `GPUParticles3D` system over the settlement;
+- entering the active rain phase enables particle emission;
+- leaving the phase or ending the game disables emission;
+- rain dims ambient and directional lighting;
+- active rain wets burning structures and characters, reduces spread, and damages global fire strength.
 
-**Decision required:** retain the cross-platform select-and-aim design in this specification and treat direct mouse/touch dragging as optional shortcuts.
+The particle portion is implemented as intended. The broader rain presentation is not yet complete against this specification: there is no dedicated rain sound, visible wet-ground treatment, or explicit reduction of flame and smoke effects. Runtime visual validation is still required when a Godot executable is available.
 
-### 21.4 Rain presentation
+### 21.5 Burning-human implementation finding
 
-The discussion says rain logic exists without visual effects. The current code generates blue cube rain particles. These may have been added after the discussion or may be too unclear to count as adequate feedback.
+Static code inspection confirms that the intended burn-before-corpse flow is implemented:
 
-**Validation required:** inspect rain in a running build and determine whether it needs replacement or only refinement.
+- villagers and firefighters share the `CharBurn` component;
+- ignition enables three animated voxel flame meshes, ember particles, smoke particles, and an orange light;
+- villagers display an `AAA!!` world-space label and run while burning;
+- villagers burn for approximately 10–13 seconds and firefighters for approximately 5–6 seconds;
+- water accumulates wetness and can extinguish them before death;
+- death occurs only when burn duration expires, then spawns charred voxel remains and a smoke puff.
 
-### 21.5 Burning-human presentation
+The mechanic and its prototype visuals are complete for the stated requirement that humans visibly burn rather than instantly becoming corpses. Runtime validation and later art polish remain necessary, but the flow does not need to be redesigned.
 
-The discussion presents visible burning instead of instant corpse replacement as intended work. The code already implements a burning duration, flame effects, movement, an `AAA!!` bubble, water rescue, and eventual death.
+### 21.6 Camera movement
 
-**Validation required:** determine whether the mechanic is functionally complete but visually inadequate.
+Camera panning is screen-directional:
 
-### 21.6 Camera inversion
+- W and Up move the view upward.
+- S and Down move the view downward.
+- A and Left move the view left.
+- D and Right move the view right.
 
-The observed build reportedly moves upward when S is pressed. The source assigns conventional W/S input signs but converts movement through camera-relative forward vectors, which may invert the resulting screen-space motion.
-
-**Validation required:** test all pan directions in a running build. The observed behavior takes precedence over the apparent source-level intent.
+The reported S-to-up behavior is a defect. The camera-relative implementation must be corrected if it produces anything other than these screen-space results.
 
 ### 21.7 Barrel ignition
 
-The current code allows direct manual barrel ignition. The desired design requires fire to spread naturally to barrels so that reaching one is a route-planning challenge.
+Barrels cannot be manually ignited. They ignite only when reached by adjacent fire, a burning character, or another environmental chain reaction.
 
-This specification treats natural-spread-only barrel ignition as authoritative.
+### 21.8 Rank scoring
 
-### 21.8 Completion denominator
+The current faster-is-always-better time rank is rejected. Rank instead evaluates fire continuity, Ember efficiency, environmental chain reactions, and optional objectives. Completion time remains visible for pacing analysis but does not improve rank merely because it is shorter.
 
-The current completion calculation counts houses, trees, barrels, and stone together. This specification introduces an explicit set of required combustible targets.
+### 21.9 Art direction
 
-**Decision required:** determine whether trees and barrels are mandatory completion targets or optional environmental props.
-
-### 21.9 Pacing and rank scoring
-
-The target run duration is approximately three minutes, but the current rank system awards three stars below 100 seconds, two below 180 seconds, and one thereafter. It therefore rewards the overly fast pacing the redesign is intended to remove.
-
-**Decision required:** replace time-only ranks with target-window scoring or rebalance thresholds after pacing is finalized.
-
-### 21.10 Voxel and Polytopia art direction
-
-The discussion supports voxels while also selecting Polytopia as the visual benchmark. Polytopia uses stylized low-poly forms rather than a strict voxel presentation.
-
-This specification interprets the direction as retaining an isometric low-poly presentation while replacing generic cube-built visuals with authored silhouettes, palette, and materials.
-
-**Decision required:** confirm that this low-poly compromise supersedes strict voxel art.
+The final choice between strict voxel art, Polytopia-like low-poly art, or another style is postponed. The isometric perspective and functional readability requirements remain in force, but the specification does not select an asset style.
