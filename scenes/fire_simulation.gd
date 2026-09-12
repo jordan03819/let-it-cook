@@ -101,13 +101,18 @@ func _tick_heat(delta: float, rain_active: bool) -> void:
 				h.heat = maxf(0.0, h.heat - HEAT_DECAY * delta)
 		return
 
-	# Apply gust visual tilt to flames within active gust
-	if active_gust_timer > 0.0:
-		for src in burning_nodes:
-			var to_src := src.global_position - active_gust_origin
-			to_src.y = 0.0
-			if to_src.length() <= WIND_GUST_RANGE + 1.0:
-				src.apply_gust_tilt(active_gust_dir)
+	# Apply ambient wind and local gust tilt to settlement houses, flames, and foliage (SPEC Section 7.3)
+	for h in houses:
+		if is_instance_valid(h):
+			h.apply_ambient_wind(wind_dir, wind_strength)
+			if active_gust_timer > 0.0:
+				var to_h: Vector3 = h.global_position - active_gust_origin
+				to_h.y = 0.0
+				var d := to_h.length()
+				if d <= WIND_GUST_RANGE + 1.0 and d > 0.01:
+					var align := (to_h / d).dot(active_gust_dir)
+					if align >= cos(WIND_GUST_HALF_ANGLE):
+						h.apply_gust_tilt(active_gust_dir)
 
 	for dst in houses:
 		if not is_instance_valid(dst) or dst.state != VoxelHouse.State.UNBURNED or dst.kind == "stone":

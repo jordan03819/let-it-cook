@@ -52,6 +52,12 @@ var _warmth_root: Node3D = null
 var _smoke_warmth: GPUParticles3D = null
 var _sparks_warmth: GPUParticles3D = null
 
+# Environmental wind & foliage sway (SPEC Section 7.3)
+var _ambient_wind_dir: Vector3 = Vector3.ZERO
+var _ambient_wind_strength: float = 1.0
+var _tree_mesh_mid: MeshInstance3D = null
+var _tree_mesh_top: MeshInstance3D = null
+
 
 func setup(p_base_color: Color, p_roof_color: Color, p_fuel: float, p_size: Vector3, p_kind: String = "house") -> void:
 	base_color = p_base_color
@@ -173,9 +179,9 @@ func _build_tree_visuals() -> void:
 	_tree_foliage_mats.append(mat_top)
 
 	_add_box(_visual_root, Vector3(0.35, 1.1, 0.35), Vector3(0, 0.55, 0), _mat_base)
-	_add_box(_visual_root, Vector3(1.6, 0.9, 1.6), Vector3(0, 1.4, 0), _mat_roof)
-	_add_box(_visual_root, Vector3(1.15, 0.8, 1.15), Vector3(0, 2.1, 0), mat_mid)
-	_add_box(_visual_root, Vector3(0.65, 0.5, 0.65), Vector3(0, 2.7, 0), mat_top)
+	_roof_box = _add_box(_visual_root, Vector3(1.6, 0.9, 1.6), Vector3(0, 1.4, 0), _mat_roof)
+	_tree_mesh_mid = _add_box(_visual_root, Vector3(1.15, 0.8, 1.15), Vector3(0, 2.1, 0), mat_mid)
+	_tree_mesh_top = _add_box(_visual_root, Vector3(0.65, 0.5, 0.65), Vector3(0, 2.7, 0), mat_top)
 
 
 func _build_stone_visuals() -> void:
@@ -329,6 +335,11 @@ func _set_fire_visible(v: bool) -> void:
 # --- core verb: lighting. No conditions besides state. ---
 func is_burnable() -> bool:
 	return state == State.UNBURNED and kind != "stone"
+
+
+func apply_ambient_wind(dir: Vector3, strength: float) -> void:
+	_ambient_wind_dir = dir
+	_ambient_wind_strength = strength
 
 
 func apply_water(amount: float, delta: float) -> void:
@@ -576,6 +587,17 @@ func _process(delta: float) -> void:
 	if _flash > 0.0:
 		_flash = maxf(0.0, _flash - delta * 1.2)
 
+	# Tree foliage wind sway and downwind lean (SPEC Section 7.3)
+	if kind == "tree" and _tree_mesh_top != null and state != State.BURNT:
+		var sway_phase := float(get_instance_id() % 100) * 0.12
+		var sway := sin(float(Time.get_ticks_msec()) * 0.003 + sway_phase) * 0.08 * _ambient_wind_strength
+		var tree_lean := _ambient_wind_dir * (_ambient_wind_strength * 0.14) + _gust_tilt * 0.4
+		if _roof_box != null:
+			_roof_box.position = Vector3(tree_lean.x * 0.25, 1.4, tree_lean.z * 0.25)
+		if _tree_mesh_mid != null:
+			_tree_mesh_mid.position = Vector3(tree_lean.x * 0.55 + sway * 0.5, 2.1, tree_lean.z * 0.55 + sway * 0.25)
+		_tree_mesh_top.position = Vector3(tree_lean.x * 0.9 + sway, 2.7, tree_lean.z * 0.9 + sway * 0.5)
+
 	# Evaporation: drying over time (SPEC 6.7 & 8.4)
 	if wetness > 0.0:
 		var dry_rate := 0.065 if state == State.BURNING else 0.035
@@ -670,7 +692,7 @@ func _process(delta: float) -> void:
 		for m in _tree_foliage_mats:
 			m.albedo_color = m.albedo_color * 0.55
 
-	var lean := _gust_tilt * 0.2
+	var total_lean := _ambient_wind_dir * (_ambient_wind_strength * 0.22) + _gust_tilt * 0.45
 	_gust_tilt = _gust_tilt.lerp(Vector3.ZERO, delta * 3.0)
 
 	for i in _flames.size():
@@ -678,10 +700,18 @@ func _process(delta: float) -> void:
 		var s := 1.0 + sin(t + float(i) * 2.1) * 0.18 + randf_range(-0.06, 0.06)
 		f.scale = Vector3(s, 1.0 + sin(t * 1.3 + float(i)) * 0.22, s)
 		f.rotation.y += delta * (1.5 + float(i) * 0.7)
-		f.position = Vector3(lean.x * float(i + 1), 0.3 + float(i) * 0.45, lean.z * float(i + 1))
+		f.position = Vector3(total_lean.x * float(i + 1), 0.3 + float(i) * 0.45, total_lean.z * float(i + 1))
 	if _light:
 		_light.light_energy = 1.4 + sin(t * 1.7) * 0.4 + randf_range(-0.15, 0.15)
-		_light.position = Vector3(lean.x, 1.0, lean.z)
+		_light.position = Vector3(total_lean.x, 1.0, total_lean.z)
+	if _smoke_particles != null:
+		var pm := _smoke_particles.process_material as ParticleProcessMaterial
+		if pm != null:
+			pm.direction = (Vector3(0, 1.4, 0) + total_lean * 1.8).normalized()
+	if _fire_particles != null:
+		var pm_f := _fire_particles.process_material as ParticleProcessMaterial
+		if pm_f != null:
+			pm_f.direction = (Vector3(0, 1.2, 0) + total_lean * 1.2).normalized()
 	if _mat_base != null:
 		if _flash > 0.0:
 			_mat_base.emission = Color(1.0, 0.5, 0.1)

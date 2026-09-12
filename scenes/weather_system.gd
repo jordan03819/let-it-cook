@@ -75,13 +75,17 @@ func stop_rain() -> void:
 	rain_stopped.emit()
 
 
-func tick(delta: float, camera_pos: Vector3) -> void:
+func tick(delta: float, camera_pos: Vector3, wind_dir: Vector3 = Vector3.ZERO, wind_strength: float = 1.0) -> void:
 	if not rain_active:
 		return
 
 	rain_timer = maxf(0.0, rain_timer - delta)
 	if rain_particles != null and is_instance_valid(rain_particles):
 		rain_particles.global_position = camera_pos + Vector3(0, 16.0, 0)
+		if wind_dir != Vector3.ZERO:
+			var pm := rain_particles.process_material as ParticleProcessMaterial
+			if pm != null:
+				pm.direction = (Vector3(0.04, -1.0, 0.02) + wind_dir * wind_strength * 0.28).normalized()
 
 	for h in houses:
 		if is_instance_valid(h):

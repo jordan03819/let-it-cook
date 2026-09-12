@@ -77,6 +77,10 @@ var heat_links_preview: MeshInstance3D = null
 var heat_links_mesh: ImmediateMesh = null
 var heat_links_mat: StandardMaterial3D = null
 
+# Wind Compass & Ambient Environment Motion (SPEC Section 7.3)
+var compass_widget: CompassWidget = null
+var ambient_drift_particles: GPUParticles3D = null
+
 # Fire strength & Last Spark (SPEC Section 6.9 & 8.3)
 var fire_strength: float = 60.0
 var last_spark_available: bool = true
@@ -190,6 +194,12 @@ func _setup_hud() -> void:
 		fl.text = "FIRE"
 	if wind_label != null:
 		wind_label.show()
+		var hbox := wind_label.get_parent()
+		if hbox != null and (compass_widget == null or not is_instance_valid(compass_widget)):
+			compass_widget = CompassWidget.new()
+			compass_widget.name = "WindCompass"
+			hbox.add_child(compass_widget)
+			hbox.move_child(compass_widget, wind_label.get_index())
 	if combo_label != null:
 		combo_label.hide()
 	msg_panel.hide()
@@ -277,6 +287,39 @@ func _setup_tactical_feedback() -> void:
 	heat_links_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	heat_links_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	add_child(heat_links_preview)
+
+	# 5. Ambient Wind Drift Particles (leaves and air streaks across view, SPEC Section 7.3)
+	ambient_drift_particles = GPUParticles3D.new()
+	ambient_drift_particles.name = "AmbientWindDrift"
+	ambient_drift_particles.amount = 75
+	ambient_drift_particles.lifetime = 3.5
+	ambient_drift_particles.preprocess = 1.5
+	ambient_drift_particles.local_coords = false
+	ambient_drift_particles.visibility_aabb = AABB(Vector3(-35, -8, -35), Vector3(70, 20, 70))
+
+	var pm_drift := ParticleProcessMaterial.new()
+	pm_drift.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	pm_drift.emission_box_extents = Vector3(cam_bound * 1.35, 3.0, cam_bound * 1.35)
+	pm_drift.direction = fire_sim.wind_dir
+	pm_drift.spread = 15.0
+	pm_drift.initial_velocity_min = 4.0 * fire_sim.wind_strength
+	pm_drift.initial_velocity_max = 7.0 * fire_sim.wind_strength
+	pm_drift.gravity = Vector3(0, -0.22, 0)
+	pm_drift.scale_min = 0.6
+	pm_drift.scale_max = 1.3
+	pm_drift.color = Color(0.85, 0.72, 0.38, 0.6)
+	ambient_drift_particles.process_material = pm_drift
+
+	var bm_drift := BoxMesh.new()
+	bm_drift.size = Vector3(0.14, 0.05, 0.14)
+	var mat_drift := StandardMaterial3D.new()
+	mat_drift.albedo_color = Color(0.88, 0.74, 0.40, 0.65)
+	mat_drift.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat_drift.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	bm_drift.material = mat_drift
+	ambient_drift_particles.draw_pass_1 = bm_drift
+
+	add_child(ambient_drift_particles)
 
 
 # ---------- Level Loading & Lifecycle ----------
@@ -425,7 +468,21 @@ func _process(delta: float) -> void:
 
 	# Subsystems tick
 	fire_sim.tick(delta, weather.rain_active)
-	weather.tick(delta, rig.position)
+	weather.tick(delta, rig.position, fire_sim.wind_dir, fire_sim.wind_strength)
+
+	# Update Ambient Wind Drift Particles position & velocity (SPEC Section 7.3)
+	if ambient_drift_particles != null and is_instance_valid(ambient_drift_particles):
+		ambient_drift_particles.global_position = rig.position + Vector3(0, 3.5, 0)
+		var pm_d := ambient_drift_particles.process_material as ParticleProcessMaterial
+		if pm_d != null:
+			if active_gust_timer > 0.0:
+				pm_d.direction = active_gust_dir
+				pm_d.initial_velocity_min = 12.0
+				pm_d.initial_velocity_max = 17.0
+			else:
+				pm_d.direction = fire_sim.wind_dir
+				pm_d.initial_velocity_min = 3.5 * fire_sim.wind_strength
+				pm_d.initial_velocity_max = 6.5 * fire_sim.wind_strength
 
 	var burning_count := fire_sim.count_burning()
 	var smoldering_count := fire_sim.count_smoldering()
@@ -1135,7 +1192,26 @@ func _update_hud() -> void:
 		else:
 			gust_str = "Ready (1 Ember, RMB)"
 		var rain_str := " | RAIN: %ds" % int(ceil(weather.rain_timer)) if weather.rain_active else ""
-		wind_label.text = "Wind: %s %s | Gust: %s%s" % [fire_sim.get_wind_arrow(), fire_sim.get_wind_word(), gust_str, rain_str]
+		wind_label.text = "%s %s (x%.1f) | Gust: %s%s" % [fire_sim.get_wind_arrow(), fire_sim.get_wind_word().to_upper(), fire_sim.wind_strength, gust_str, rain_str]
+
+	# Update Tactical Compass Widget (SPEC Section 7.3)
+	if compass_widget != null and is_instance_valid(compass_widget):
+		var sx := fire_sim.wind_dir.dot(camera.global_transform.basis.x)
+		var sy := -fire_sim.wind_dir.dot(camera.global_transform.basis.y)
+		var w_ang := atan2(sy, sx)
+
+		var stx := fire_sim._wind_target.dot(camera.global_transform.basis.x)
+		var sty := -fire_sim._wind_target.dot(camera.global_transform.basis.y)
+		var target_ang := atan2(sty, stx)
+
+		compass_widget.update_wind(w_ang, target_ang, fire_sim.wind_strength, camera.global_transform.basis)
+
+		if active_gust_timer > 0.0:
+			compass_widget.update_gust("active", 0.0, WIND_COOLDOWN_MAX, active_gust_timer, WIND_GUST_DURATION)
+		elif wind_cooldown > 0.0:
+			compass_widget.update_gust("cooldown", wind_cooldown, WIND_COOLDOWN_MAX, 0.0, WIND_GUST_DURATION)
+		else:
+			compass_widget.update_gust("ready", 0.0, WIND_COOLDOWN_MAX, 0.0, WIND_GUST_DURATION)
 
 	if objective_label != null and not game_over:
 		var spark_status := "READY"
