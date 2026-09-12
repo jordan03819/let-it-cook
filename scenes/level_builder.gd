@@ -99,6 +99,8 @@ static func _build_ground(level_idx: int, cam_bound: float, village_root: Node3D
 			_add_voxel_box(ground, Vector3(w * 0.75, 0.06, 3.0), Vector3(0, 0.03, 6.0), road_col)
 			_add_voxel_box(ground, Vector3(w * 0.65, 0.06, 3.0), Vector3(0, 0.03, -7.5), road_col)
 			_add_voxel_box(ground, Vector3(3.0, 0.06, 16.0), Vector3(0, 0.03, -0.5), road_col)
+			# East lane connecting SE Farmstead to North Hillside
+			_add_voxel_box(ground, Vector3(3.0, 0.06, 12.0), Vector3(6.8, 0.03, -1.0), road_col)
 			_add_voxel_box(ground, Vector3(4.2, 0.08, 4.2), Vector3(0, 0.04, 0.5), Color(0.45, 0.43, 0.42))
 		1:
 			# Town: Base lawn + central canal with water and stone quays + bridge crossways
@@ -156,8 +158,9 @@ static func _build_ground(level_idx: int, cam_bound: float, village_root: Node3D
 			var road_col := Color(0.34, 0.33, 0.32)
 			_add_voxel_box(ground, Vector3(3.2, 0.06, w), Vector3(-7.5, 0.03, 0), road_col)
 			_add_voxel_box(ground, Vector3(3.2, 0.06, w), Vector3(7.5, 0.03, 0), road_col)
-			_add_voxel_box(ground, Vector3(w * 0.9, 0.06, 2.8), Vector3(0, 0.03, 8.5), road_col)
-			_add_voxel_box(ground, Vector3(w * 0.9, 0.06, 2.8), Vector3(0, 0.03, -8.5), road_col)
+			_add_voxel_box(ground, Vector3(3.2, 0.06, w * 0.75), Vector3(0, 0.03, 0), road_col) # Central avenue
+			_add_voxel_box(ground, Vector3(w * 0.9, 0.06, 2.8), Vector3(0, 0.03, 6.9), road_col) # South cross street
+			_add_voxel_box(ground, Vector3(w * 0.9, 0.06, 2.8), Vector3(0, 0.03, -6.9), road_col) # North cross street
 		_:
 			# City: Paved urban cobblestone with central boulevard, plazas, and stone sidewalks
 			_ground_slab(ground, Vector3(w, 1, w), Color(0.38, 0.38, 0.40))
@@ -273,6 +276,15 @@ static func _build_village(ctx: LevelContext, village_root: Node3D, _units_root:
 		_place_house(pos, "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()], village_root, ctx)
 		idx += 1
 
+	# East Lane Connector (Guaranteed safe house route linking SE Farmsteads to North Hillside, SPEC 6.3 & 6.10)
+	var east_houses := [
+		Vector3(7.2, 0, 0.8),
+		Vector3(6.5, 0, -2.8),
+	]
+	for pos in east_houses:
+		_place_house(pos, "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()], village_root, ctx)
+		idx += 1
+
 	# Cluster 3: North Hillside Cluster (6 houses)
 	var n_houses := [
 		Vector3(-4.5, 0, -6.0),
@@ -316,51 +328,57 @@ static func _build_town(ctx: LevelContext, village_root: Node3D, units_root: Nod
 	var roof_cols := [Color(0.75, 0.26, 0.16), Color(0.58, 0.20, 0.15), Color(0.30, 0.42, 0.65)]
 	var idx := 0
 
-	# 1. South Residential District (Z > 0)
+	# 1. South-West Residential District (8 houses + 1 bridgehead)
 	var sw_houses := [
-		Vector3(-14.0, 0, 4.8), Vector3(-10.2, 0, 4.8), Vector3(-4.8, 0, 4.8),
-		Vector3(-14.0, 0, 12.2), Vector3(-10.2, 0, 12.2), Vector3(-4.8, 0, 12.2),
+		Vector3(-14.0, 0, 5.0), Vector3(-10.0, 0, 5.0), Vector3(-6.0, 0, 5.0), Vector3(-2.4, 0, 5.0),
+		Vector3(-14.0, 0, 8.8), Vector3(-10.0, 0, 8.8), Vector3(-6.0, 0, 8.8), Vector3(-2.4, 0, 8.8),
+		Vector3(-7.5, 0, 2.5), # West Bridgehead South
 	]
 	for pos in sw_houses:
 		_place_house(pos, "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()], village_root, ctx)
 		idx += 1
 
+	# 2. South-East Residential District (8 houses + 1 bridgehead)
 	var se_houses := [
-		Vector3(4.8, 0, 4.8), Vector3(10.2, 0, 4.8), Vector3(14.0, 0, 4.8),
-		Vector3(4.8, 0, 12.2), Vector3(10.2, 0, 12.2), Vector3(14.0, 0, 12.2),
+		Vector3(2.4, 0, 5.0), Vector3(6.0, 0, 5.0), Vector3(10.0, 0, 5.0), Vector3(14.0, 0, 5.0),
+		Vector3(2.4, 0, 8.8), Vector3(6.0, 0, 8.8), Vector3(10.0, 0, 8.8), Vector3(14.0, 0, 8.8),
+		Vector3(7.5, 0, 2.5), # East Bridgehead South
 	]
 	for pos in se_houses:
 		_place_house(pos, "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()], village_root, ctx)
 		idx += 1
 
-	# Barrel 1: Strategic bridge across central residential street
-	_place_barrel(Vector3(0.0, 0, 4.8), village_root, ctx)
+	# Barrel 1: Strategic bridge across central residential street (SPEC 6.10 & 8.5)
+	_place_barrel(Vector3(0.0, 0, 5.0), village_root, ctx)
 
-	# 2. North Commercial & Guild District (Z < 0)
+	# 3. North-West Commercial District (8 houses + 1 bridgehead)
 	var nw_houses := [
-		Vector3(-14.0, 0, -4.8), Vector3(-10.2, 0, -4.8), Vector3(-4.8, 0, -4.8),
-		Vector3(-14.0, 0, -12.2), Vector3(-10.2, 0, -12.2), Vector3(-4.8, 0, -12.2),
+		Vector3(-14.0, 0, -5.0), Vector3(-10.0, 0, -5.0), Vector3(-6.0, 0, -5.0), Vector3(-2.4, 0, -5.0),
+		Vector3(-14.0, 0, -8.8), Vector3(-10.0, 0, -8.8), Vector3(-6.0, 0, -8.8), Vector3(-2.4, 0, -8.8),
+		Vector3(-7.5, 0, -2.5), # West Bridgehead North (5.0m across canal bridge from South Bridgehead)
 	]
 	for pos in nw_houses:
 		_place_house(pos, "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()], village_root, ctx)
 		idx += 1
 
 	# Barrel 2: Near West Bridge approach
-	_place_barrel(Vector3(-7.5, 0, -3.2), village_root, ctx)
+	_place_barrel(Vector3(-7.5, 0, -3.8), village_root, ctx)
 
+	# 4. North-East Commercial & Shaman Approach District (7 houses + 1 bridgehead)
 	var ne_houses := [
-		Vector3(4.8, 0, -4.8), Vector3(8.8, 0, -4.8),
-		Vector3(4.8, 0, -12.2), Vector3(8.8, 0, -12.2),
-		Vector3(2.6, 0, -8.5),
+		Vector3(2.4, 0, -5.0), Vector3(6.0, 0, -5.0), Vector3(10.0, 0, -5.0),
+		Vector3(2.4, 0, -8.8), Vector3(6.0, 0, -8.8), Vector3(10.0, 0, -8.8),
+		Vector3(13.2, 0, -6.8), # Shaman alley house (guarantees mandatory route without trees)
+		Vector3(7.5, 0, -2.5),  # East Bridgehead North (5.0m across canal bridge from South Bridgehead)
 	]
 	for pos in ne_houses:
 		_place_house(pos, "house", randf_range(48.0, 58.0), Vector3(randf_range(1.9, 2.2), randf_range(1.4, 1.8), randf_range(1.9, 2.2)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()], village_root, ctx)
 		idx += 1
 
 	# Barrel 3: In the alley leading toward the Shaman
-	_place_barrel(Vector3(10.8, 0, -8.5), village_root, ctx)
+	_place_barrel(Vector3(11.5, 0, -8.5), village_root, ctx)
 
-	# 3. Shaman Ritual Court (Northeast corner)
+	# 5. Shaman Ritual Court (Northeast corner)
 	ctx.shaman = _build_shaman_court(Vector3(14.5, 0, -8.5), village_root, units_root)
 
 	# Flammable tree bridge connecting Northeast houses to Ritual Court
@@ -377,8 +395,8 @@ static func _build_town(ctx: LevelContext, village_root: Node3D, units_root: Nod
 		var best_starter := ctx.mandatory_houses[0]
 		var best_dist := 1e9
 		for h in ctx.mandatory_houses:
-			if h.position.z > 2.0:
-				var d := h.position.length()
+			if h.position.z > 4.0:
+				var d := h.position.distance_to(Vector3(-2.4, 0, 5.0))
 				if d < best_dist:
 					best_dist = d
 					best_starter = h
@@ -399,18 +417,19 @@ static func _build_city(ctx: LevelContext, village_root: Node3D, _units_root: No
 	_build_city_fountain(Vector3(10.5, 0, 9.5), village_root)
 	_build_city_fountain(Vector3(2.5, 0, -12.5), village_root)
 
-	# 3. District 1: Outer South-West District (10 combustible houses)
+	# 3. District 1: Outer South-West District (11 combustible houses)
 	var sw_houses := [
 		Vector3(-14.5, 0, 13.5), # Starter house
 		Vector3(-10.5, 0, 13.5),
 		Vector3(-6.5, 0, 13.5),
 		Vector3(-14.5, 0, 9.5),
+		Vector3(-10.5, 0, 9.5),
 		Vector3(-6.5, 0, 9.5),
 		Vector3(-14.5, 0, 5.5),
 		Vector3(-10.5, 0, 5.5),
 		Vector3(-6.5, 0, 5.5),
-		Vector3(-10.5, 0, 1.8),
-		Vector3(-2.8, 0, 3.8),   # South Gate approach
+		Vector3(-2.2, 0, 5.5),   # Boulevard approach
+		Vector3(-2.2, 0, 1.4),   # South Grand Gate South approach (5.4m through gate)
 	]
 	for pos in sw_houses:
 		_place_house(pos, "house", randf_range(52.0, 62.0), Vector3(randf_range(2.0, 2.3), randf_range(1.6, 2.0), randf_range(2.0, 2.3)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()], village_root, ctx)
@@ -418,48 +437,54 @@ static func _build_city(ctx: LevelContext, village_root: Node3D, _units_root: No
 
 	# 4. District 2: Outer South-East District (8 combustible workshops & guildhalls)
 	var se_houses := [
-		Vector3(3.5, 0, 5.5),    # East side of South Gate boulevard
-		Vector3(7.5, 0, 5.5),
-		Vector3(12.0, 0, 5.5),
-		Vector3(15.8, 0, 5.5),
-		Vector3(7.5, 0, 9.8),
-		Vector3(12.0, 0, 9.8),
-		Vector3(15.8, 0, 9.8),
-		Vector3(13.0, 0, 1.8),   # Directly in front of East Merchant Gate!
+		Vector3(2.2, 0, 5.5),    # East side of South Gate boulevard (4.4m from SW approach)
+		Vector3(6.0, 0, 5.5),
+		Vector3(10.0, 0, 5.5),
+		Vector3(14.0, 0, 5.5),
+		Vector3(6.0, 0, 9.5),
+		Vector3(10.0, 0, 9.5),
+		Vector3(14.0, 0, 9.5),
+		Vector3(13.0, 0, 1.4),   # East Merchant Gate South approach (5.4m through gate)
 	]
 	for pos in se_houses:
 		_place_house(pos, "house", randf_range(52.0, 62.0), Vector3(randf_range(2.0, 2.3), randf_range(1.6, 2.0), randf_range(2.0, 2.3)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()], village_root, ctx)
 		idx += 1
 
-	# 5. District 3: Inner Northern Metropolitan District (12 combustible manors & merchant halls)
+	# 5. District 3: Inner Northern Metropolitan District (15 combustible manors & merchant halls)
 	var n_houses := [
+		# South Gate North Approach (5.4m across South Gate arch from -2.2, 0, 1.4)
+		Vector3(-2.2, 0, -4.0),
+		# East Gate North Approach (5.4m across East Gate arch from 13.0, 0, 1.4)
+		Vector3(13.0, 0, -4.0),
+
 		# North-West Manor Block (accessible directly via South Gate)
-		Vector3(-2.8, 0, -5.5),  # Immediately north of South Gate!
-		Vector3(-6.8, 0, -5.5),
-		Vector3(-11.0, 0, -5.5),
-		Vector3(-15.2, 0, -5.5),
-		Vector3(-2.8, 0, -9.8),
-		Vector3(-6.8, 0, -9.8),
-		Vector3(-11.0, 0, -9.8),
-		Vector3(-15.2, 0, -9.8),
+		Vector3(-6.0, 0, -4.0),
+		Vector3(-10.0, 0, -4.0),
+		Vector3(-14.0, 0, -4.0),
+		Vector3(-2.2, 0, -8.0),
+		Vector3(-6.0, 0, -8.0),
+		Vector3(-10.0, 0, -8.0),
+		Vector3(-14.0, 0, -8.0),
 
 		# North-East Guild Block (accessible directly via East Gate)
-		Vector3(13.0, 0, -5.5),  # Immediately north of East Gate!
-		Vector3(9.0, 0, -5.5),
-		Vector3(13.0, 0, -9.8),
-		Vector3(9.0, 0, -9.8),
+		Vector3(9.5, 0, -4.0),
+		Vector3(6.0, 0, -4.0),
+		Vector3(2.2, 0, -4.0),
+		Vector3(13.0, 0, -8.0),
+		Vector3(9.5, 0, -8.0),
+		Vector3(6.0, 0, -8.0),
 	]
 	for pos in n_houses:
 		_place_house(pos, "house", randf_range(54.0, 66.0), Vector3(randf_range(2.1, 2.4), randf_range(1.8, 2.2), randf_range(2.1, 2.4)), wall_cols[idx % wall_cols.size()], roof_cols[idx % roof_cols.size()], village_root, ctx)
 		idx += 1
 
-	# 6. Strategic Explosive Barrels
+	# 6. Strategic Explosive Barrels (SPEC 8.5 & 11.3)
 	# Barrel 1: Junction between SW residential and SE artisan district across the avenue
-	_place_barrel(Vector3(0.5, 0, 5.5), village_root, ctx)
+	_place_barrel(Vector3(0.0, 0, 5.5), village_root, ctx)
 	# Barrel 2: Near approach to East Merchant Gate
-	_place_barrel(Vector3(10.5, 0, 3.8), village_root, ctx)
+	_place_barrel(Vector3(11.5, 0, 3.5), village_root, ctx)
 	# Barrel 3: In North Manor alley
-	_place_barrel(Vector3(-6.8, 0, -12.5), village_root, ctx)
+	_place_barrel(Vector3(-6.0, 0, -10.5), village_root, ctx)
 
 	# 7. Courtyard Trees: Optional bridge between NW manors and NE guild block
 	_place_house(Vector3(2.0, 0, -7.5), "tree", 24.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25), village_root, ctx)

@@ -6,9 +6,13 @@ extends RefCounted
 
 signal wind_shifted(new_dir: Vector3)
 
-const HOUSE_RADIUS: float = 4.8
+# Spatial tuning bands (SPEC Section 6.3)
+# Connected: <= 4.2m, Conditional: 4.2m–6.0m, Broken: > 6.0m (crossable by Wind Gust up to 8.5m)
+const HOUSE_CONNECTED_RADIUS: float = 4.2
+const HOUSE_CONDITIONAL_RADIUS: float = 6.0
+const HOUSE_RADIUS: float = HOUSE_CONDITIONAL_RADIUS
 const TREE_RADIUS: float = 4.5
-const HOUSE_HEAT: float = 0.030
+const HOUSE_HEAT: float = 0.035
 const TREE_HEAT: float = 0.13
 const HEAT_DECAY: float = 0.025
 
@@ -104,22 +108,17 @@ func _tick_heat(delta: float, rain_active: bool) -> void:
 		if not is_instance_valid(dst) or dst.state != VoxelHouse.State.UNBURNED or dst.kind == "stone":
 			continue
 
-		var radius := TREE_RADIUS if dst.kind == "tree" else HOUSE_RADIUS
 		var rate := TREE_HEAT if dst.kind == "tree" else HOUSE_HEAT
 		var power := 0.0
 
 		for src in burning_nodes:
 			var to: Vector3 = dst.global_position - src.global_position
 			var dist := to.length()
-			if dist > radius or dist < 0.01:
+			if dist < 0.01:
 				continue
 
-			var align: float = (to / dist).dot(wind_dir)
-			var w: float = maxf(0.2, 1.0 + align * wind_strength * WIND_BIAS)
-			if dst.kind == "house" and src.kind == "tree":
-				w *= 0.5
-
-			# Active Local Wind Gust acceleration (SPEC Section 6.6)
+			# Check if target structure lies within active player Wind Gust cone
+			var inside_active_gust := false
 			if active_gust_timer > 0.0:
 				var to_dst: Vector3 = dst.global_position - active_gust_origin
 				to_dst.y = 0.0
@@ -127,9 +126,29 @@ func _tick_heat(delta: float, rain_active: bool) -> void:
 				if dst_dist <= WIND_GUST_RANGE:
 					var gust_align := (to_dst / maxf(0.01, dst_dist)).dot(active_gust_dir)
 					if gust_align >= cos(WIND_GUST_HALF_ANGLE):
-						w *= 3.5
+						inside_active_gust = true
 
-			power += w
+			# Max effective distance: Wind Gust reaches up to 8.5m; ambient spread reaches conditional 6.0m
+			var max_dist := WIND_GUST_RANGE if inside_active_gust else (TREE_RADIUS if dst.kind == "tree" else HOUSE_CONDITIONAL_RADIUS)
+			if dist > max_dist:
+				continue
+
+			var align: float = (to / dist).dot(wind_dir)
+			var w: float = maxf(0.2, 1.0 + align * wind_strength * WIND_BIAS)
+
+			# If in conditional band (> 4.2m) without active gust, spread requires favorable wind
+			if not inside_active_gust and dist > HOUSE_CONNECTED_RADIUS:
+				var falloff: float = 1.0 - (dist - HOUSE_CONNECTED_RADIUS) / (HOUSE_CONDITIONAL_RADIUS - HOUSE_CONNECTED_RADIUS)
+				w *= maxf(0.0, falloff * (0.3 + align * 0.7))
+
+			if dst.kind == "house" and src.kind == "tree":
+				w *= 0.5
+
+			# Active Local Wind Gust acceleration (SPEC Section 6.6)
+			if inside_active_gust:
+				w *= 3.5
+
+			power += maxf(0.0, w)
 			if power >= 3.5:
 				break
 
@@ -154,12 +173,10 @@ func _tick_heat(delta: float, rain_active: bool) -> void:
 		for src in burning_nodes:
 			var to_b := b.global_position - src.global_position
 			var dist := to_b.length()
-			if dist > HOUSE_RADIUS or dist < 0.01:
+			if dist < 0.01:
 				continue
-			var align: float = (to_b / dist).dot(wind_dir)
-			var w: float = maxf(0.2, 1.0 + align * wind_strength * WIND_BIAS)
 
-			# Active Local Wind Gust acceleration
+			var inside_active_gust := false
 			if active_gust_timer > 0.0:
 				var to_dst: Vector3 = b.global_position - active_gust_origin
 				to_dst.y = 0.0
@@ -167,9 +184,24 @@ func _tick_heat(delta: float, rain_active: bool) -> void:
 				if dst_dist <= WIND_GUST_RANGE:
 					var gust_align := (to_dst / maxf(0.01, dst_dist)).dot(active_gust_dir)
 					if gust_align >= cos(WIND_GUST_HALF_ANGLE):
-						w *= 3.5
+						inside_active_gust = true
 
-			b_power += w
+			var max_dist := WIND_GUST_RANGE if inside_active_gust else HOUSE_CONDITIONAL_RADIUS
+			if dist > max_dist:
+				continue
+
+			var align: float = (to_b / dist).dot(wind_dir)
+			var w: float = maxf(0.2, 1.0 + align * wind_strength * WIND_BIAS)
+
+			if not inside_active_gust and dist > HOUSE_CONNECTED_RADIUS:
+				var falloff: float = 1.0 - (dist - HOUSE_CONNECTED_RADIUS) / (HOUSE_CONDITIONAL_RADIUS - HOUSE_CONNECTED_RADIUS)
+				w *= maxf(0.0, falloff * (0.3 + align * 0.7))
+
+			# Active Local Wind Gust acceleration
+			if inside_active_gust:
+				w *= 3.5
+
+			b_power += maxf(0.0, w)
 			if b_power >= 3.0:
 				break
 
