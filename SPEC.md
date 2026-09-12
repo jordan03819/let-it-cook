@@ -716,7 +716,12 @@ The repository currently implements:
 - HUD, pause, results, level unlock, and upgrade panels;
 - runtime-generated voxel geometry, particles, music, and sound effects.
 
-The following are prototype behavior, not target behavior:
+Verified implementation details:
+
+- Town rain creates and toggles a 120-particle `GPUParticles3D` effect, dims scene lighting, wets burning structures and characters, reduces spread, and damages global fire strength. The particle mechanic is present; its wider presentation remains incomplete.
+- Villagers and firefighters visibly burn through the shared `CharBurn` component before becoming remains. It provides animated flame meshes, ember and smoke particles, firelight, water extinguishing, and delayed death. Villagers burn for approximately 10–13 seconds, firefighters for approximately 5–6 seconds, and villagers display `AAA!!` while fleeing.
+
+Known gaps between the current prototype and the target design:
 
 - 70%, 75%, and 80% completion thresholds;
 - rapid burn/spread pacing and early level wipes;
@@ -755,65 +760,3 @@ The polished initial demo is complete when:
 16. Results and pause screens stop gameplay simulation.
 17. Already-owned upgrades cannot be selected again.
 18. Final art-style approval is not an acceptance criterion for this gameplay-design phase; functional gameplay states must still remain distinguishable.
-
-## 22. Resolved Decisions and Implementation Findings
-
-### 22.1 Initial ignition
-
-The player selects the initial ignition from a constrained set of clearly highlighted starter structures. The first valid ignition is free. Clicking any other structure before the level starts does nothing and explains the restriction.
-
-### 22.2 Completion targets
-
-Success requires destroying every ordinary combustible settlement structure. City stone is permanently excluded. Trees, barrels, and decorative props are optional and do not contribute to the completion percentage.
-
-### 22.3 Desktop Wind control
-
-Wind is designed only for desktop input in the current scope. The player holds the right mouse button on a burning structure or adjacent flame, moves the pointer to preview direction, affected area, and strengthened connections, and releases to cast. Escape or an aim below the minimum distance cancels without spending Embers. Left click remains dedicated to selection and ignition.
-
-### 22.4 Rain implementation finding
-
-Static code inspection confirms that prototype rain particles are implemented and connected to the Town rain event:
-
-- `_build_rain_fx()` creates a 120-particle `GPUParticles3D` system over the settlement;
-- entering the active rain phase enables particle emission;
-- leaving the phase or ending the game disables emission;
-- rain dims ambient and directional lighting;
-- active rain wets burning structures and characters, reduces spread, and damages global fire strength.
-
-The particle portion is implemented as intended. The broader rain presentation is not yet complete against this specification: there is no dedicated rain sound, visible wet-ground treatment, or explicit reduction of flame and smoke effects. Runtime visual validation is still required when a Godot executable is available.
-
-### 22.5 Burning-human implementation finding
-
-Static code inspection confirms that the intended burn-before-corpse flow is implemented:
-
-- villagers and firefighters share the `CharBurn` component;
-- ignition enables three animated voxel flame meshes, ember particles, smoke particles, and an orange light;
-- villagers display an `AAA!!` world-space label and run while burning;
-- villagers burn for approximately 10–13 seconds and firefighters for approximately 5–6 seconds;
-- water accumulates wetness and can extinguish them before death;
-- death occurs only when burn duration expires, then spawns charred voxel remains and a smoke puff.
-
-The mechanic and its prototype visuals are complete for the stated requirement that humans visibly burn rather than instantly becoming corpses. Runtime validation and later art polish remain necessary, but the flow does not need to be redesigned.
-
-### 22.6 Camera movement
-
-Camera panning is screen-directional:
-
-- W and Up move the view upward.
-- S and Down move the view downward.
-- A and Left move the view left.
-- D and Right move the view right.
-
-The reported S-to-up behavior is a defect. The camera-relative implementation must be corrected if it produces anything other than these screen-space results.
-
-### 22.7 Barrel ignition
-
-Barrels cannot be manually ignited. They ignite only when reached by adjacent fire, a burning character, or another environmental chain reaction.
-
-### 22.8 Rank scoring
-
-The current faster-is-always-better time rank is rejected. Rank instead evaluates fire continuity, Ember efficiency, environmental chain reactions, and optional objectives. Completion time remains visible for pacing analysis but does not improve rank merely because it is shorter.
-
-### 22.9 Art direction
-
-The final choice between strict voxel art, Polytopia-like low-poly art, or another style is postponed. The isometric perspective and functional readability requirements remain in force, but the specification does not select an asset style.
