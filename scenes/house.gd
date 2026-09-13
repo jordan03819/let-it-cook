@@ -642,25 +642,36 @@ func _burn_out() -> void:
 	_set_fire_visible(false)
 	if _scorch_tween != null and _scorch_tween.is_valid():
 		_scorch_tween.kill()
-	_mat_base.albedo_color = Color(0.12, 0.1, 0.1)
-	_mat_roof.albedo_color = Color(0.08, 0.07, 0.07)
-	if kind == "tree":
-		for m in _tree_foliage_mats:
+	# Only voxel buildings own these two materials; a kit model chars through
+	# its own set (see _sync_model_look), so every write here has to be guarded.
+	if _mat_base != null:
+		_mat_base.albedo_color = Color(0.12, 0.1, 0.1)
+		_mat_base.emission = Color(1.0, 0.3, 0.05)
+	if _mat_roof != null:
+		_mat_roof.albedo_color = Color(0.08, 0.07, 0.07)
+	for m in _tree_foliage_mats:
+		if m != null:
 			m.albedo_color = Color(0.08, 0.07, 0.07)
-	_mat_base.emission = Color(1.0, 0.3, 0.05)
 	_flash = 0.8
+	if visual_style == "model":
+		_sync_model_look()
 	if _light != null:
 		_light.visible = false
 	if _roof_box != null and is_instance_valid(_roof_box) and kind != "tree":
 		_roof_box.scale = Vector3(1.0, 0.35, 1.0)
 		_roof_box.position.y = house_size.y + 0.15
-	if _visual_root != null and is_inside_tree():
+	# Collapse the shape that is actually on screen: the placeholder boxes for a
+	# voxel building, the kit model for a scene-authored one. A kit model is
+	# scaled off its model root, so keep its own scale as the base.
+	var shape: Node3D = _model_root if visual_style == "model" else _visual_root
+	if shape != null and is_inside_tree():
 		if _pop_tween != null and _pop_tween.is_valid():
 			_pop_tween.kill()
-		_visual_root.scale = Vector3.ONE
-		var tw := _visual_root.create_tween()
-		tw.tween_property(_visual_root, "scale", Vector3(1.18, 0.55, 1.18), 0.16)
-		tw.tween_property(_visual_root, "scale", Vector3(1.1, 0.7, 1.1), 0.25)
+		var base: Vector3 = shape.scale
+		shape.scale = base
+		var tw := shape.create_tween()
+		tw.tween_property(shape, "scale", Vector3(base.x * 1.18, base.y * 0.55, base.z * 1.18), 0.16)
+		tw.tween_property(shape, "scale", Vector3(base.x * 1.1, base.y * 0.7, base.z * 1.1), 0.25)
 	SoundManager.play_sfx("collapse")
 	burned_out.emit(self)
 

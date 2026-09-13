@@ -1021,7 +1021,10 @@ func _update_wind_cone_preview(origin: Vector3, dir: Vector3, valid: bool) -> vo
 			wind_lines_preview.hide()
 		return
 
-	# Draw connection lines and forecast badges for structures inside cone (SPEC Section 6.4)
+	# Draw connection lines and forecast badges for structures inside cone (SPEC
+	# Section 6.4). The surface is only opened if something lands in the cone:
+	# aiming at empty ground has to be a normal, quiet state, not an error.
+	var lines_open := false
 	if wind_lines_mesh != null:
 		wind_lines_mesh.surface_begin(Mesh.PRIMITIVE_LINES, wind_lines_mat)
 
@@ -1044,6 +1047,8 @@ func _update_wind_cone_preview(origin: Vector3, dir: Vector3, valid: bool) -> vo
 		var tgt_pos := tgt.global_position + Vector3(0, 1.2, 0)
 		var line_col: Color = eval.color
 		line_col.a = 0.92
+		# First target in the cone: the surface now has vertices to close.
+		lines_open = true
 
 		# Draw connection ray (with small parallel offset for thickness)
 		var ray_dir := (tgt_pos - p_src).normalized()
@@ -1088,7 +1093,13 @@ func _update_wind_cone_preview(origin: Vector3, dir: Vector3, valid: bool) -> vo
 			tgt._flash = maxf(tgt._flash, 0.45)
 
 	if wind_lines_mesh != null:
-		wind_lines_mesh.surface_end()
+		if lines_open:
+			wind_lines_mesh.surface_end()
+		else:
+			# Nothing in the cone: leave no surface behind and hide the layer.
+			wind_lines_mesh.clear_surfaces()
+			wind_lines_preview.hide()
+			return
 		wind_lines_preview.show()
 
 
@@ -1173,6 +1184,10 @@ func _update_directional_embers(_delta: float) -> void:
 		return
 
 	heat_links_mesh.surface_begin(Mesh.PRIMITIVE_LINES, heat_links_mat)
+	# A link can be skipped (its endpoints freed mid-frame, or it is too short to
+	# draw), so this tracks whether the surface actually got any vertices: an
+	# ImmediateMesh refuses to close an empty surface.
+	var drew_any := false
 	var t_cycle := fmod(elapsed * 2.2, 1.0)
 
 	for link in fire_sim.active_heat_links:
@@ -1193,6 +1208,7 @@ func _update_directional_embers(_delta: float) -> void:
 		var ember_col := Color(1.0, 0.72, 0.15, alpha)
 
 		# Draw travelling ember dashes from burning src to receiving dst
+		drew_any = true
 		for k in 2:
 			var frac := fmod(t_cycle + float(k) * 0.5, 1.0)
 			var dash_start := p1 + link_vec * frac
@@ -1206,9 +1222,14 @@ func _update_directional_embers(_delta: float) -> void:
 			heat_links_mesh.surface_set_color(ember_col)
 			heat_links_mesh.surface_add_vertex(dash_end)
 
-	heat_links_mesh.surface_end()
-	if heat_links_preview != null:
-		heat_links_preview.show()
+	if drew_any:
+		heat_links_mesh.surface_end()
+		if heat_links_preview != null:
+			heat_links_preview.show()
+	else:
+		heat_links_mesh.clear_surfaces()
+		if heat_links_preview != null:
+			heat_links_preview.hide()
 
 
 # ---------- Raycast Helpers ----------
