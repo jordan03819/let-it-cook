@@ -10,8 +10,10 @@ the editor — the generator is only a convenience for tiling).
   normalises the kit's materials, exposes `house_plots()`)
 * Selectable in the main menu as **Village Fields (authored preview)** (level index
   3, `RunState.HANDCRAFTED_LEVEL`). It never affects campaign unlocks.
-* While it contains no houses the game runs it in *staging* mode: win/lose
-  evaluation is suspended and the HUD reports the reserved plot count.
+* It ships with houses: `Houses/<plot>` instances one of the modular house
+  scenes (`scenes/houses/*.tscn`) on every plot. Delete that node and the game
+  drops back into *staging* mode: win/lose evaluation is suspended and the HUD
+  reports the reserved plot count instead.
 
 ## How the ground is made
 
@@ -50,50 +52,71 @@ Each `HousePlots/<name>` node is an empty marker carrying `metadata/cluster`,
 matching ground pads purely so the reserved ground reads clearly; delete that node
 once houses are in.
 
-| plot | x | z | y | facing | cluster | role |
+| plot | x | z | y | facing | cluster | role | house |
 |---|---:|---:|---:|---:|---|---|
-| `A1` | -23.6 | 1.9 | 0.0 | 265° | `green_west` | starter |
-| `A2` | -20.0 | 2.3 | 0.0 | 265° | `green_west` | mandatory |
-| `A3` | -16.5 | 1.8 | 0.0 | 265° | `green_west` | mandatory |
-| `A4` | -13.2 | 3.4 | 0.0 | 276° | `green_west` | mandatory |
-| `B1` | -11.5 | 0.2 | 0.0 | 276° | `green_east` | mandatory |
-| `B2` | -5.1 | 0.5 | 0.0 | 265° | `green_east` | mandatory |
-| `B3` | -1.6 | 1.6 | 0.0 | 265° | `green_east` | mandatory |
-| `B4` | 1.9 | 1.2 | 0.0 | 265° | `green_east` | mandatory |
-| `C1` | -8.2 | 2.7 | 0.0 | 5° | `north_row` | mandatory |
-| `C2` | -8.0 | -4.8 | 0.0 | 330° | `north_row` | mandatory |
-| `C3` | -5.1 | -8.1 | 0.0 | 323° | `north_row` | mandatory |
-| `C4` | -2.7 | -11.3 | 0.0 | 323° | `north_row` | mandatory |
-| `D1` | -8.2 | -1.2 | 0.0 | 61° | `hill_orchard` | mandatory |
-| `D2` | -12.1 | -3.3 | 0.0 | 45° | `hill_orchard` | mandatory |
-| `D3` | -15.2 | -6.8 | 0.0 | 45° | `hill_orchard` | mandatory |
-| `D4` | -18.0 | -9.8 | 0.0 | 40° | `hill_orchard` | mandatory |
-| `E1` | -13.7 | 7.0 | 0.0 | 345° | `pond_cottages` | mandatory |
-| `E2` | -12.4 | 10.3 | 0.0 | 4° | `pond_cottages` | mandatory |
-| `E3` | -13.2 | 13.8 | 0.0 | 328° | `pond_cottages` | mandatory |
-| `E4` | -14.9 | 17.0 | 0.0 | 300° | `pond_cottages` | mandatory |
-| `F1` | 18.7 | 6.7 | 0.0 | 23° | `east_farm` | mandatory |
-| `F2` | 21.9 | 8.5 | 0.0 | 23° | `east_farm` | mandatory |
-| `F3` | 19.1 | 10.7 | 0.0 | 348° | `east_farm` | mandatory |
-| `F4` | 21.0 | 13.8 | 0.0 | 319° | `east_farm` | mandatory |
-| `G1` | 5.9 | 2.1 | 0.0 | 275° | `farm_lane` | mandatory |
-| `G2` | 10.1 | 1.0 | 0.0 | 275° | `farm_lane` | mandatory |
-| `G3` | 14.3 | 1.2 | 0.0 | 265° | `farm_lane` | mandatory |
-| `G4` | 19.2 | 1.5 | 0.0 | 265° | `farm_lane` | mandatory |
-| `G5` | 22.9 | 1.8 | 0.0 | 272° | `farm_lane` | mandatory |
+| `A1` | -23.6 | 1.9 | 0.0 | 265° | `green_west` | starter | `cottage` |
+| `A2` | -20.0 | 2.3 | 0.0 | 265° | `green_west` | mandatory | `cottage` |
+| `A3` | -16.5 | 1.8 | 0.0 | 265° | `green_west` | mandatory | `cottage` |
+| `A4` | -13.2 | 3.4 | 0.0 | 276° | `green_west` | mandatory | `cottage` |
+| `B1` | -11.5 | 0.2 | 0.0 | 276° | `green_east` | mandatory | `small` |
+| `B2` | -5.1 | 0.5 | 0.0 | 265° | `green_east` | mandatory | `cottage` |
+| `B3` | -1.6 | 1.6 | 0.0 | 265° | `green_east` | mandatory | `small` |
+| `B4` | 1.9 | 1.2 | 0.0 | 265° | `green_east` | mandatory | `small` |
+| `C1` | -8.2 | 2.7 | 0.0 | 5° | `north_row` | mandatory | `cottage` |
+| `C2` | -8.0 | -4.8 | 0.0 | 330° | `north_row` | mandatory | `small` |
+| `C3` | -5.1 | -8.1 | 0.0 | 323° | `north_row` | mandatory | `cottage` |
+| `C4` | -2.7 | -11.3 | 0.0 | 323° | `north_row` | mandatory | `cottage` |
+| `D1` | -8.2 | -1.2 | 0.0 | 61° | `hill_orchard` | mandatory | `cottage` |
+| `D2` | -12.1 | -3.3 | 0.0 | 45° | `hill_orchard` | mandatory | `teal` |
+| `D3` | -15.2 | -6.8 | 0.0 | 45° | `hill_orchard` | mandatory | `teal` |
+| `D4` | -18.0 | -9.8 | 0.0 | 40° | `hill_orchard` | mandatory | `cottage` |
+| `E1` | -13.7 | 7.0 | 0.0 | 345° | `pond_cottages` | mandatory | `cottage` |
+| `E2` | -12.4 | 10.3 | 0.0 | 4° | `pond_cottages` | mandatory | `cottage` |
+| `E3` | -13.2 | 13.8 | 0.0 | 328° | `pond_cottages` | mandatory | `cottage` |
+| `E4` | -14.9 | 17.0 | 0.0 | 300° | `pond_cottages` | mandatory | `cottage` |
+| `F1` | 18.7 | 6.7 | 0.0 | 23° | `east_farm` | mandatory | `cottage` |
+| `F2` | 21.9 | 8.5 | 0.0 | 23° | `east_farm` | mandatory | `cottage` |
+| `F3` | 19.1 | 10.7 | 0.0 | 348° | `east_farm` | mandatory | `cottage` |
+| `F4` | 21.0 | 13.8 | 0.0 | 319° | `east_farm` | mandatory | `cottage` |
+| `G1` | 5.9 | 2.1 | 0.0 | 275° | `farm_lane` | mandatory | `teal` |
+| `G2` | 10.1 | 1.0 | 0.0 | 275° | `farm_lane` | mandatory | `cottage` |
+| `G3` | 14.3 | 1.2 | 0.0 | 265° | `farm_lane` | mandatory | `small` |
+| `G4` | 19.2 | 1.5 | 0.0 | 265° | `farm_lane` | mandatory | `cottage` |
+| `G5` | 22.9 | 1.8 | 0.0 | 272° | `farm_lane` | mandatory | `cottage` |
 
-## Dropping houses in
+## Houses
 
-1. Add a `Houses` node under `VillageFields`.
-2. Place house scenes under it (anything typed `VoxelHouse` is collected) or
-   re-parent them onto the plot markers so each house inherits position/facing.
-3. `VillageFieldsLevel.build_context()` then reports them as burnable structures and
-   automatically drops out of staging mode.
+The buildings are standalone scenes, not something the level assembles:
 
-Suggested layout (see the plot table): lane-facing fronts at 3.4-4.3 m pitch for
-easy spread, continuing along the main lane past the green into the `farm_lane`
-row and on into the `east_farm` cluster. Each marker's `rotation.y` already faces
-its road, so re-parenting a house onto a marker gives it the right front.
+* `scenes/houses/*.tscn` — one scene per cottage variant. Each is a complete
+  `VoxelHouse` (fuel, footprint, kind and the `mandatory_houses` group already
+  set) with the kit cottage baked in as a child called `Model`; `house.gd`
+  adopts that child on `_ready()` and drives heat, wetness, scorch and the burnt
+  look through its materials.
+* `scenes/kit_house.gd` — the only place that knows how the Fantasy Town Kit's
+  wall, roof and chimney pieces fit together.
+* `tools/build_house_scenes.gd` — rebuilds the scenes after a change to
+  `KitHouse`:
+
+  ```bash
+  godot --path . --script res://tools/build_house_scenes.gd
+  ```
+
+`Houses/<plot>` instances one per plot. The plot's `rotation.y` aims a building
+at its lane, and since the house scenes carry their front on local +Z while the
+markers face their local +X down the road, `emit_houses()` adds the -90 turn and
+then centres the footprint on the marker. Variants available:
+
+| variant | scene |
+|---|---|
+| `cottage` | res://scenes/houses/house_cottage.tscn |
+| `small` | res://scenes/houses/house_cottage_small.tscn |
+| `teal` | res://scenes/houses/house_cottage_teal.tscn |
+
+Every plot also gets its cleared earth pad, so the ground under a house reads as
+a worn yard rather than a lawn. Deleting `HousePlots/Sites` removes the pads.
+
+## Reserved building plots (29)
 
 ## Water
 

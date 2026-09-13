@@ -47,6 +47,22 @@ var _flash: float = 0.0
 var _mat_base: StandardMaterial3D
 var _mat_roof: StandardMaterial3D
 
+# --- Model visuals ---------------------------------------------------------
+# A house can be authored as a scene with its kit geometry baked in as a child
+# named "Model" (see scenes/houses/ and scenes/kit_house.gd). In that mode the
+# placeholder boxes are never built and every runtime cue — heat glow, wet
+# sheen, scorch, smoulder, the burnt look — is applied to the model's own
+# materials instead, so a kit house feeds back exactly like a voxel one.
+const MODEL_NODE_NAME := "Model"
+## Metadata the house reads off its model: the per-role tint table on the model
+## root, and the role tag on each piece (see scenes/kit_house.gd).
+const META_TINTS_META := "kit_tints"
+const META_ROLE_META := "kit_role"
+var visual_style: String = "voxel" # voxel | model
+var _model_root: Node3D = null
+var _model_mats: Array[StandardMaterial3D] = []
+var _model_base: Array[Color] = []
+
 # Progressive pre-ignition in-world feedback (SPEC Section 6.4)
 var _warmth_root: Node3D = null
 var _smoke_warmth: GPUParticles3D = null
@@ -78,10 +94,106 @@ func _ready() -> void:
 	collision_layer = 2
 	collision_mask = 0
 	_build_collision()
-	_build_visuals()
+	var baked := get_node_or_null(MODEL_NODE_NAME) as Node3D
+	if baked != null:
+		attach_model(baked)
+	else:
+		_build_visuals()
 	_build_fire_visuals()
 	_build_warmth_visuals()
 	_set_fire_visible(false)
+
+
+## Switches this house to a kit model. Called automatically for a scene that
+## carries a child named "Model"; also usable at runtime for a house assembled
+## in code.
+##
+## Every mesh gets its own material copy, tinted by the role its piece was
+## tagged with in the scene (KitHouse.META_ROLE) and recorded in KitHouse's
+## per-role tint table (KitHouse.META_TINTS). Owning the materials is the whole
+## point: kit models otherwise share one material per piece type across the
+## level, so one burning cottage and one cold cottage would fight over the same
+## glow, and neither could scorch without scorching the other.
+func attach_model(model: Node3D) -> void:
+	visual_style = "model"
+	_model_root = model
+	_model_mats.clear()
+	_model_base.clear()
+	var tints: Dictionary = model.get_meta(META_TINTS_META, {})
+	for piece in _model_pieces(model):
+		var role := str(piece.get_meta(META_ROLE_META, "wall"))
+		var tint: Color = tints.get(role, Color.WHITE)
+		for mi in KitHouse.mesh_instances(piece):
+			var src := mi.get_active_material(0) as StandardMaterial3D
+			var mat := StandardMaterial3D.new()
+			if src != null:
+				mat = src.duplicate()
+			mat.metallic = 0.0
+			mat.roughness = 0.9
+			mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+			mat.albedo_color = mat.albedo_color * tint
+			mat.emission_enabled = true
+			mat.emission = Color(0, 0, 0)
+			mat.emission_energy_multiplier = 0.0
+			mi.material_override = mat
+			_model_mats.append(mat)
+			_model_base.append(mat.albedo_color)
+	if _visual_root != null and is_instance_valid(_visual_root):
+		_visual_root.visible = false
+	_sync_model_look()
+
+
+## The piece nodes of a kit model, tags and all: a model's direct children are
+## its pieces.
+func _model_pieces(model: Node3D) -> Array[Node3D]:
+	var out: Array[Node3D] = []
+	for c in model.get_children():
+		if c is Node3D:
+			out.append(c as Node3D)
+	return out
+
+
+## Writes the current heat / wetness / scorch state onto the model materials.
+func _sync_model_look() -> void:
+	if _model_mats.is_empty():
+		return
+	var wet_factor := 1.0 - wetness * 0.35
+	var scorch_factor := 1.0
+	if state == State.BURNT:
+		scorch_factor = 0.22
+	elif _scorched:
+		scorch_factor = 0.55
+	elif state == State.UNBURNED and heat > 0.45:
+		scorch_factor = 1.0 - (heat - 0.45) * 0.6
+	var emission_colour := Color(0, 0, 0)
+	var emission_energy := 0.0
+	if state == State.SMOLDERING:
+		emission_colour = Color(1.0, 0.25, 0.05)
+		emission_energy = 0.8 + 0.4 * sin(float(Time.get_ticks_msec()) * 0.008)
+	elif state == State.BURNT:
+		emission_colour = Color(1.0, 0.3, 0.05)
+		emission_energy = _flash * 1.2
+	elif _flash > 0.0:
+		emission_colour = Color(1.0, 0.5, 0.1)
+		emission_energy = _flash * 1.6
+	elif state == State.BURNING:
+		emission_colour = Color(0.45, 0.08, 0.05) if _scorched else Color(0.9, 0.25, 0.05)
+		emission_energy = 0.5 if _scorched else 0.35 + heat * 0.8
+	elif kind != "stone" and heat > 0.02:
+		# Warming forecast: hotter reads brighter. This IS the UI.
+		emission_colour = Color(1.0, 0.45, 0.1)
+		emission_energy = heat * 1.4
+	for i in _model_mats.size():
+		var mat := _model_mats[i]
+		if i < _model_base.size():
+			mat.albedo_color = _shaded(_model_base[i], scorch_factor * wet_factor)
+		mat.roughness = clampf(0.9 - wetness * 0.6, 0.3, 1.0)
+		mat.emission = emission_colour
+		mat.emission_energy_multiplier = emission_energy
+
+
+static func _shaded(c: Color, factor: float) -> Color:
+	return Color(minf(c.r * factor, 1.0), minf(c.g * factor, 1.0), minf(c.b * factor, 1.0), c.a)
 
 
 func _build_collision() -> void:
@@ -126,6 +238,13 @@ func _add_box(parent: Node3D, size: Vector3, pos: Vector3, mat: Material) -> Mes
 
 
 func _rebuild_visuals() -> void:
+	if visual_style == "model":
+		for c in get_children():
+			if c is CollisionShape3D:
+				c.queue_free()
+		_build_collision()
+		_sync_model_look()
+		return
 	if _visual_root != null and is_instance_valid(_visual_root):
 		_visual_root.queue_free()
 	_visual_root = null
@@ -586,6 +705,10 @@ func _process(delta: float) -> void:
 
 	if _flash > 0.0:
 		_flash = maxf(0.0, _flash - delta * 1.2)
+
+	# Kit-model houses drive every visual cue through their own materials.
+	if visual_style == "model":
+		_sync_model_look()
 
 	# Tree foliage wind sway and downwind lean (SPEC Section 7.3)
 	if kind == "tree" and _tree_mesh_top != null and state != State.BURNT:

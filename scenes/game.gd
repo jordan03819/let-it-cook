@@ -1347,7 +1347,13 @@ func _end_game(did_win: bool) -> void:
 
 	if did_win:
 		RunState.unlocked = mini(2, maxi(RunState.unlocked, level_idx + 1))
-		if level_idx < 2:
+		if RunState.is_handcrafted(level_idx):
+			# A scene-authored level is a preview: finishing it must not read as
+			# winning the campaign, and it never advances the campaign levels.
+			msg_label.text = "%s FULLY COOKED!\nAll %d structures consumed." % [level_name, mandatory_houses.size()]
+			stats_label.text = "Time: %ds | Embers remaining: %d\nAuthored preview — no campaign progress." % [int(RunState.level_time), embers]
+			restart_button.text = "Replay %s" % level_name.capitalize()
+		elif level_idx < 2:
 			msg_label.text = "%s FULLY COOKED!\nAll %d settlement structures consumed." % [level_name, mandatory_houses.size()]
 			stats_label.text = "Time: %ds | Embers remaining: %d\nProceed to Level %d." % [int(RunState.level_time), embers, level_idx + 2]
 			restart_button.text = "Advance to Lv%d" % [level_idx + 2]

@@ -649,6 +649,13 @@ static func _build_shaman_court(pos: Vector3, village_root: Node3D, units_root: 
 	return shaman
 
 
+## Spawns `n` bucket-carrying villagers scattered inside the play area. Shared
+## with scene-authored levels (SPEC 11.1: at Village scale the bucket brigade is
+## the main opposition), so it is public rather than level-builder private.
+static func spawn_villagers(n: int, cam_bound: float, units_root: Node3D) -> void:
+	_spawn_villagers(n, cam_bound, units_root)
+
+
 static func _spawn_villagers(n: int, cam_bound: float, units_root: Node3D) -> void:
 	for i in n:
 		var v: VoxelVillager = VILLAGER_SCENE.instantiate()

@@ -24,7 +24,10 @@ const LEVEL_NAME := "VILLAGE FIELDS"
 const LEVEL_SUB := "Foundations: pond, lanes, farm & plots"
 const CAM_BOUND := 25.0
 const CAMERA_SIZE := 24.0
-const VILLAGER_COUNT := 0
+## Bucket-carrying villagers. They are the level's main opposition (SPEC 11.1):
+## they path to the nearest `water_sources` marker, which here is the pond rim or
+## the village well. Zero keeps the level uncontested.
+const VILLAGER_COUNT := 9
 const START_INDEX := 3
 
 ## Kenney's GLB exports ship `metallicFactor = 1`, which reads as unlit metal in
@@ -575,6 +578,12 @@ func build_context(units_root: Node3D) -> LevelBuilder.LevelContext:
 		ctx.starter_house = ctx.mandatory_houses[0]
 
 	ctx.staging = ctx.houses.is_empty()
+
+	# The village only fields a bucket brigade once there is something to burn;
+	# while the scene is still a foundation there is nothing to defend.
+	if not ctx.staging and VILLAGER_COUNT > 0:
+		LevelBuilder.spawn_villagers(VILLAGER_COUNT, ctx.cam_bound, units_root)
+
 	return ctx
 
 

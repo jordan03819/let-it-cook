@@ -1,0 +1,134 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/house.gd" id="1_l46lr"]
+[ext_resource type="PackedScene" path="res://assets/town/wall-wood-window-small.glb" id="2_itgcs"]
+[ext_resource type="PackedScene" path="res://assets/town/wall-wood.glb" id="3_syyxq"]
+[ext_resource type="PackedScene" path="res://assets/town/wall-wood-door.glb" id="4_wi1ic"]
+[ext_resource type="PackedScene" path="res://assets/town/pillar-wood.glb" id="5_xq0f8"]
+[ext_resource type="PackedScene" path="res://assets/town/roof-high.glb" id="6_fu7uo"]
+[ext_resource type="PackedScene" path="res://assets/town/roof-high-gable-end.glb" id="7_cnawj"]
+[ext_resource type="PackedScene" path="res://assets/town/chimney-base.glb" id="8_ppg3a"]
+[ext_resource type="PackedScene" path="res://assets/town/chimney-top.glb" id="9_05wsv"]
+
+[node name="cottage_wide" type="StaticBody3D" unique_id=98893650]
+script = ExtResource("1_l46lr")
+
+[node name="Model" type="Node3D" parent="." unique_id=1032310687]
+metadata/kit_tints = {
+"chimney": Color(0.72, 0.68, 0.62, 1),
+"roof": Color(0.88, 0.86, 0.86, 1),
+"trim": Color(1.1, 1.05, 0.92, 1),
+"wall": Color(1.1, 1.05, 0.92, 1)
+}
+
+[node name="wall-wood-window-small" type="Node3D" parent="Model" unique_id=3684980 instance=ExtResource("2_itgcs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 0.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@46" type="Node3D" parent="Model" unique_id=76906305 instance=ExtResource("2_itgcs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 1.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@47" type="Node3D" parent="Model" unique_id=290754475 instance=ExtResource("2_itgcs")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0.5, 0, 0.5)
+metadata/kit_role = "wall"
+
+[node name="wall-wood" type="Node3D" parent="Model" unique_id=1149598634 instance=ExtResource("3_syyxq")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0.5, 0, 1.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@48" type="Node3D" parent="Model" unique_id=653817733 instance=ExtResource("3_syyxq")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 0.5, 0, 1.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@49" type="Node3D" parent="Model" unique_id=2125055351 instance=ExtResource("3_syyxq")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 1.5, 0, 1.5)
+metadata/kit_role = "wall"
+
+[node name="wall-wood-door" type="Node3D" parent="Model" unique_id=1826564747 instance=ExtResource("4_wi1ic")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 2.5, 0, 1.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@50" type="Node3D" parent="Model" unique_id=1412090994 instance=ExtResource("3_syyxq")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 3.5, 0, 1.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@51" type="Node3D" parent="Model" unique_id=444247565 instance=ExtResource("3_syyxq")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0.5, 0, 0.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@52" type="Node3D" parent="Model" unique_id=1693609794 instance=ExtResource("3_syyxq")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.5, 0, 0.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@53" type="Node3D" parent="Model" unique_id=2114169941 instance=ExtResource("3_syyxq")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.5, 0, 0.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@54" type="Node3D" parent="Model" unique_id=1878710337 instance=ExtResource("3_syyxq")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.5, 0, 0.5)
+metadata/kit_role = "wall"
+
+[node name="pillar-wood" type="Node3D" parent="Model" unique_id=1335451458 instance=ExtResource("5_xq0f8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0.5)
+metadata/kit_role = "trim"
+
+[node name="@Node3D@55" type="Node3D" parent="Model" unique_id=2022046230 instance=ExtResource("5_xq0f8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 1.5)
+metadata/kit_role = "trim"
+
+[node name="@Node3D@56" type="Node3D" parent="Model" unique_id=1215019189 instance=ExtResource("5_xq0f8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 0.5)
+metadata/kit_role = "trim"
+
+[node name="@Node3D@57" type="Node3D" parent="Model" unique_id=580677925 instance=ExtResource("5_xq0f8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 1.5)
+metadata/kit_role = "trim"
+
+[node name="roof-high" type="Node3D" parent="Model" unique_id=1864475303 instance=ExtResource("6_fu7uo")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 0.5, 1, 0.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@58" type="Node3D" parent="Model" unique_id=80931216 instance=ExtResource("6_fu7uo")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0.5, 1, 1.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@59" type="Node3D" parent="Model" unique_id=880462466 instance=ExtResource("6_fu7uo")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 1.5, 1, 0.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@60" type="Node3D" parent="Model" unique_id=996752408 instance=ExtResource("6_fu7uo")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.5, 1, 1.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@61" type="Node3D" parent="Model" unique_id=1583579617 instance=ExtResource("6_fu7uo")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 2.5, 1, 0.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@62" type="Node3D" parent="Model" unique_id=1865628911 instance=ExtResource("6_fu7uo")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.5, 1, 1.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@63" type="Node3D" parent="Model" unique_id=370971187 instance=ExtResource("6_fu7uo")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 3.5, 1, 0.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@64" type="Node3D" parent="Model" unique_id=1347838827 instance=ExtResource("6_fu7uo")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.5, 1, 1.5)
+metadata/kit_role = "roof"
+
+[node name="roof-high-gable-end" type="Node3D" parent="Model" unique_id=319120257 instance=ExtResource("7_cnawj")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0.5, 1, 1)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@65" type="Node3D" parent="Model" unique_id=1455680997 instance=ExtResource("7_cnawj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 1, 1)
+metadata/kit_role = "roof"
+
+[node name="chimney-base" type="Node3D" parent="Model" unique_id=328653327 instance=ExtResource("8_ppg3a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 1.3465, 1.35)
+metadata/kit_role = "chimney"
+
+[node name="chimney-top" type="Node3D" parent="Model" unique_id=2101305763 instance=ExtResource("9_05wsv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 1.945, 1.35)
+metadata/kit_role = "chimney"

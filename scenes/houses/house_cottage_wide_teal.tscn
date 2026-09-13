@@ -1,0 +1,125 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/house.gd" id="1_cyos7"]
+[ext_resource type="PackedScene" path="res://assets/town/wall-window-small.glb" id="2_pve2l"]
+[ext_resource type="PackedScene" path="res://assets/town/wall-window-shutters.glb" id="3_y1f18"]
+[ext_resource type="PackedScene" path="res://assets/town/wall.glb" id="4_v05mb"]
+[ext_resource type="PackedScene" path="res://assets/town/wall-door.glb" id="5_vkhf1"]
+[ext_resource type="PackedScene" path="res://assets/town/pillar-wood.glb" id="6_ippxt"]
+[ext_resource type="PackedScene" path="res://assets/town/roof.glb" id="7_ljdn3"]
+[ext_resource type="PackedScene" path="res://assets/town/roof-gable-end.glb" id="8_4u3bw"]
+
+[node name="cottage_wide_teal" type="StaticBody3D" unique_id=172888339]
+script = ExtResource("1_cyos7")
+
+[node name="Model" type="Node3D" parent="." unique_id=334977118]
+metadata/kit_tints = {
+"chimney": Color(0.72, 0.68, 0.62, 1),
+"roof": Color(0.88, 0.86, 0.86, 1),
+"trim": Color(1.1, 1.05, 0.92, 1),
+"wall": Color(1.1, 1.05, 0.92, 1)
+}
+
+[node name="wall-window-small" type="Node3D" parent="Model" unique_id=2028338281 instance=ExtResource("2_pve2l")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 0.5)
+metadata/kit_role = "wall"
+
+[node name="wall-window-shutters" type="Node3D" parent="Model" unique_id=639511099 instance=ExtResource("3_y1f18")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 1.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@66" type="Node3D" parent="Model" unique_id=1185353644 instance=ExtResource("3_y1f18")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0.5, 0, 0.5)
+metadata/kit_role = "wall"
+
+[node name="wall" type="Node3D" parent="Model" unique_id=2124996637 instance=ExtResource("4_v05mb")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0.5, 0, 1.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@67" type="Node3D" parent="Model" unique_id=2051025485 instance=ExtResource("4_v05mb")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 0.5, 0, 1.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@68" type="Node3D" parent="Model" unique_id=101366740 instance=ExtResource("4_v05mb")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 1.5, 0, 1.5)
+metadata/kit_role = "wall"
+
+[node name="wall-door" type="Node3D" parent="Model" unique_id=1173685125 instance=ExtResource("5_vkhf1")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 2.5, 0, 1.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@69" type="Node3D" parent="Model" unique_id=724309145 instance=ExtResource("4_v05mb")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 3.5, 0, 1.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@70" type="Node3D" parent="Model" unique_id=1759073990 instance=ExtResource("4_v05mb")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0.5, 0, 0.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@71" type="Node3D" parent="Model" unique_id=1969157409 instance=ExtResource("4_v05mb")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.5, 0, 0.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@72" type="Node3D" parent="Model" unique_id=641607404 instance=ExtResource("4_v05mb")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.5, 0, 0.5)
+metadata/kit_role = "wall"
+
+[node name="@Node3D@73" type="Node3D" parent="Model" unique_id=1180990943 instance=ExtResource("4_v05mb")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.5, 0, 0.5)
+metadata/kit_role = "wall"
+
+[node name="pillar-wood" type="Node3D" parent="Model" unique_id=1335451458 instance=ExtResource("6_ippxt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0.5)
+metadata/kit_role = "trim"
+
+[node name="@Node3D@74" type="Node3D" parent="Model" unique_id=445387668 instance=ExtResource("6_ippxt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 1.5)
+metadata/kit_role = "trim"
+
+[node name="@Node3D@75" type="Node3D" parent="Model" unique_id=535236000 instance=ExtResource("6_ippxt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 0.5)
+metadata/kit_role = "trim"
+
+[node name="@Node3D@76" type="Node3D" parent="Model" unique_id=1936749097 instance=ExtResource("6_ippxt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 1.5)
+metadata/kit_role = "trim"
+
+[node name="roof" type="Node3D" parent="Model" unique_id=1700647091 instance=ExtResource("7_ljdn3")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 0.5, 1, 0.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@77" type="Node3D" parent="Model" unique_id=1772982734 instance=ExtResource("7_ljdn3")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0.5, 1, 1.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@78" type="Node3D" parent="Model" unique_id=647283485 instance=ExtResource("7_ljdn3")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 1.5, 1, 0.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@79" type="Node3D" parent="Model" unique_id=62567235 instance=ExtResource("7_ljdn3")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.5, 1, 1.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@80" type="Node3D" parent="Model" unique_id=1387865209 instance=ExtResource("7_ljdn3")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 2.5, 1, 0.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@81" type="Node3D" parent="Model" unique_id=874265929 instance=ExtResource("7_ljdn3")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.5, 1, 1.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@82" type="Node3D" parent="Model" unique_id=1209199340 instance=ExtResource("7_ljdn3")]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 3.5, 1, 0.5)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@83" type="Node3D" parent="Model" unique_id=150089243 instance=ExtResource("7_ljdn3")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.5, 1, 1.5)
+metadata/kit_role = "roof"
+
+[node name="roof-gable-end" type="Node3D" parent="Model" unique_id=1398301255 instance=ExtResource("8_4u3bw")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0.5, 1, 1)
+metadata/kit_role = "roof"
+
+[node name="@Node3D@84" type="Node3D" parent="Model" unique_id=242631255 instance=ExtResource("8_4u3bw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 1, 1)
+metadata/kit_role = "roof"
