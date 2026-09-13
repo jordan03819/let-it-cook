@@ -42,8 +42,8 @@ and fog so it sits in the same light as the procedural levels. The kit's candy
 palette (mint grass, salmon dirt, near-white water) is remapped onto the campaign
 palette in `village_fields.gd` (`PALETTE`).
 
-* Fire-spread bands used by the layout (SPEC 6.3): <= 4 m connected,
-  4-6 m conditional (needs a gust), > 6 m broken.
+* Fire-spread bands used by the layout (SPEC 6.3): <= 5.4 m connected,
+  5.4-7.6 m conditional (needs a gust or a chain), > 7.6 m broken.
 
 ## Reserved building plots (29)
 

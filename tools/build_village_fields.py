@@ -221,6 +221,13 @@ POND_R = 5.0
 def _h01(key, salt=0):
     return (zlib.crc32(("%s|%d" % (key, salt)).encode("utf-8")) % 100000) / 100000.0
 
+
+def _seed_of(key):
+    """Stable integer seed for a name. Python's built-in hash() is salted per
+    process, so seeding a field with it reshuffled every scatter layer on every
+    regeneration — the opposite of what this generator promises."""
+    return zlib.crc32(key.encode("utf-8")) % 100000
+
 # ---------------------------------------------------------------- road network
 # Roads are polylines in metres, NOT runs of axis-aligned 2 m cells: the generator
 # lays kit tiles along each curve at a fixed step, turned to the local tangent, so
@@ -902,7 +909,7 @@ def emit_scatter(scene):
                     "metadata/scale_min = %.2f" % smin,
                     "metadata/scale_max = %.2f" % smax,
                     "metadata/y = %.3f" % PROP_Y,
-                    "metadata/seed = %d" % (abs(hash(name)) % 100000)])
+                    "metadata/seed = %d" % _seed_of(name)])
 
 
 # ---------------------------------------------------------------- validation
@@ -954,10 +961,15 @@ def validate(plots):
             if d <= CONDITIONAL_MAX:
                 links[(p[0], q[0])] = d
     conditional = {k: v for k, v in links.items() if v > CONNECTED_MAX}
+    # Gaps that only a Wind Gust can take: worth knowing, since they are the
+    # level's broken bands rather than its spread network.
+    gust_only = sum(1 for p in plots for q in plots
+                    if p[0] < q[0] and CONDITIONAL_MAX < _distance(p, q) <= GUST_REACH)
     clusters = sorted({(p[5], p[6]) for p in plots})
     print("\nSpread graph: %d plots, %d links (%d connected, %d conditional)" % (
         len(plots), len(links), len(links) - len(conditional), len(conditional)))
     print("  clusters: " + ", ".join("%s(%s)" % (c[0], c[1]) for c in clusters))
+    print("  gust-only gaps (%.1f-%.1f m): %d" % (CONDITIONAL_MAX, GUST_REACH, gust_only))
     if conditional:
         print("  wind-assisted links: " + ", ".join(
             "%s-%s %.1fm" % (a, b, d) for (a, b), d in sorted(conditional.items(), key=lambda kv: kv[1])))
