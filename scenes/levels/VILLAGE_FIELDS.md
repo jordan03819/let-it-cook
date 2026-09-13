@@ -11,7 +11,9 @@ the editor — the generator is only a convenience for tiling).
 * Selectable in the main menu as **Village Fields (authored preview)** (level index
   3, `RunState.HANDCRAFTED_LEVEL`). It never affects campaign unlocks.
 * It ships with houses: `Houses/<plot>` instances one of the modular house
-  scenes (`scenes/houses/*.tscn`) on every plot. Delete that node and the game
+  scenes (`scenes/houses/*.tscn`) on every plot. The opening spark is free on
+  any house (SPEC 7.2); the `starter` role marks the site the layout suggests
+  opening on, nothing more. Delete that node and the game
   drops back into *staging* mode: win/lose evaluation is suspended and the HUD
   reports the reserved plot count instead.
 

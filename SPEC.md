@@ -55,7 +55,7 @@ The opening should be tense and deliberate. The final minute may become visually
 ## 5. Core Gameplay Loop
 
 1. Survey the settlement, wind, inhabitants, defenses, and environmental targets.
-2. Ignite one valid starter structure.
+2. Ignite any one combustible structure as the opening spark.
 3. Allow the fire to spread naturally while monitoring its strength and direction.
 4. Spend accumulated **Embers** to influence the disaster.
 5. Counter inhabitants and responders by redirecting fire toward them or their support targets.
@@ -158,7 +158,7 @@ Initial balancing values for the core demo are:
 | Starting Embers | 2 |
 | Ember capacity | 5 |
 | Local Wind Gust | 1 Ember |
-| Manual ignition after the free starter | 3 Embers |
+| Manual ignition after the opening spark | 3 Embers |
 | Wind cooldown | 6 seconds |
 | Expected paid actions per level | 8–12 |
 | Expected manual reignitions/new fronts | 1–2 |
@@ -321,7 +321,7 @@ The player must not be able to solve a level by repeatedly clicking every target
 ### 7.2 Ignite
 
 - The first ignition of a level is free.
-- It may target only a highlighted starter structure.
+- It may target any combustible structure: choosing where to open is the player's first decision.
 - Later manual ignitions cost 3 Embers under the initial demo balance.
 - Manual ignition is a recovery or tactical tool, not the primary way to burn the map.
 - Explosive barrels, fireproof structures, and protected objective actors cannot be manually ignited.
@@ -494,7 +494,7 @@ City helicopters provide late-game suppression through telegraphed water drops.
 Purpose: teach ignition, natural spread, wind, and the human response ladder.
 
 - Sparse wooden structures and vegetation.
-- One constrained starter ignition.
+- One free opening ignition, anywhere on the map.
 - Villagers first attempt a bucket brigade.
 - Firefighters arrive only after the bucket response has had time to act.
 - No unavoidable rain or stone firebreaks.
@@ -747,7 +747,7 @@ The polished initial demo is complete when:
 1. Village, Town, and City are playable in sequence without restarting the application.
 2. A representative successful run of each level lasts 2:30–3:30.
 3. Leaving the initial fire unattended usually leads to containment rather than a level wipe.
-4. The first ignition is restricted to an indicated starter structure.
+4. The opening ignition is free and may be placed on any combustible structure.
 5. Every ordinary combustible settlement structure must be destroyed; City stone, trees, barrels, and decorative props are clearly excluded from the counter.
 6. Villagers notice the initial fire and attempt a visible bucket response before official firefighters arrive.
 7. At least one level contains a shaman whose interruptible ritual summons fully presented rain.

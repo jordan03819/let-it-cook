@@ -25,6 +25,9 @@ class LevelContext extends RefCounted:
 	var houses: Array[VoxelHouse] = []
 	var mandatory_houses: Array[VoxelHouse] = []
 	var barrels: Array[VoxelBarrel] = []
+	## Which house the level suggests opening on. The opening spark is free on
+	## *any* house now (SPEC 7.2), so this is layout metadata: it is what the
+	## level's plot tables and docs call the starter site.
 	var starter_house: VoxelHouse = null
 	var shaman: VoxelShaman = null
 	## Handcrafted levels report reserved building sites here (SPEC 19 data-driven levels).
@@ -253,7 +256,7 @@ static func _build_village(ctx: LevelContext, village_root: Node3D, _units_root:
 
 	# Cluster 1: Southwest Starter Cluster (6 houses)
 	var sw_houses := [
-		Vector3(-6.4, 0, 8.0), # House 0: Starter House
+		Vector3(-6.4, 0, 8.0), # House 0: the site the layout suggests opening on
 		Vector3(-2.8, 0, 4.5),
 		Vector3(-6.2, 0, 4.2),
 		Vector3(-2.8, 0, 8.2),
@@ -322,9 +325,9 @@ static func _build_village(ctx: LevelContext, village_root: Node3D, _units_root:
 		var r := ctx.cam_bound * 0.88
 		_place_house(Vector3(cos(ang) * r, 0, sin(ang) * r), "tree", 24.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25), village_root, ctx)
 
-	# Set starter house
+	# Suggested opening site (the opening spark itself is free on any house)
 	ctx.starter_house = ctx.mandatory_houses[0]
-	ctx.starter_house.set_starter(true)
+
 
 
 static func _build_town(ctx: LevelContext, village_root: Node3D, units_root: Node3D) -> void:
@@ -394,7 +397,7 @@ static func _build_town(ctx: LevelContext, village_root: Node3D, units_root: Nod
 		for z_pos in [-14.0, -9.0, -4.0, 4.0, 9.0, 14.0]:
 			_place_house(Vector3(x_pos + randf_range(-0.4, 0.4), 0, z_pos + randf_range(-0.4, 0.4)), "tree", 24.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25), village_root, ctx)
 
-	# Pick Starter House: south district close to center
+	# Suggested opening site: south district, close to the centre
 	if not ctx.mandatory_houses.is_empty():
 		var best_starter := ctx.mandatory_houses[0]
 		var best_dist := 1e9
@@ -405,7 +408,7 @@ static func _build_town(ctx: LevelContext, village_root: Node3D, units_root: Nod
 					best_dist = d
 					best_starter = h
 		ctx.starter_house = best_starter
-		ctx.starter_house.set_starter(true)
+	
 
 
 static func _build_city(ctx: LevelContext, village_root: Node3D, _units_root: Node3D) -> void:
@@ -500,10 +503,10 @@ static func _build_city(ctx: LevelContext, village_root: Node3D, _units_root: No
 		for z_pos in [-18.0, -12.0, -6.0, 6.0, 12.0, 18.0]:
 			_place_house(Vector3(x_pos + randf_range(-0.5, 0.5), 0, z_pos + randf_range(-0.5, 0.5)), "tree", 24.0, Vector3(0.9, 1.0, 0.9), Color(0.4, 0.25, 0.12), Color(0.2, 0.55, 0.25), village_root, ctx)
 
-	# Set Starter House to SW District outer corner
+	# Suggested opening site: SW district outer corner
 	if not ctx.mandatory_houses.is_empty():
 		ctx.starter_house = ctx.mandatory_houses[0]
-		ctx.starter_house.set_starter(true)
+	
 
 
 static func _build_city_firebreak(ctx: LevelContext, village_root: Node3D) -> void:

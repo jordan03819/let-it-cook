@@ -573,7 +573,8 @@ func build_context(units_root: Node3D) -> LevelBuilder.LevelContext:
 		if h.is_in_group("mandatory_houses") or h.kind == "house":
 			ctx.mandatory_houses.append(h)
 
-	# The first ignition is free on the starter plot's first house, when houses exist.
+	# The opening spark is free on any house (SPEC 7.2); the starter plot is
+	# simply the site the level's layout suggests opening on.
 	if not ctx.mandatory_houses.is_empty():
 		ctx.starter_house = ctx.mandatory_houses[0]
 

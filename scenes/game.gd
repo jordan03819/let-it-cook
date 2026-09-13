@@ -26,7 +26,6 @@ var level_sub: String = ""
 var houses: Array[VoxelHouse] = []
 var mandatory_houses: Array[VoxelHouse] = []
 var barrels: Array[VoxelBarrel] = []
-var starter_house: VoxelHouse = null
 var shaman: VoxelShaman = null
 
 var burnt_mandatory: int = 0
@@ -41,7 +40,7 @@ var director: EncounterDirector = null
 var embers: int = EMBER_START
 var ember_reward_timer: float = 0.0
 var anti_stall_timer: float = 0.0
-var starter_ignited: bool = false
+var fire_started: bool = false
 ## Handcrafted levels report reserved building sites here and load in "staging"
 ## mode until houses exist, which suspends win/lose evaluation.
 var plots: Array[Dictionary] = []
@@ -371,9 +370,8 @@ func _load_level() -> void:
 	houses = ctx.houses
 	mandatory_houses = ctx.mandatory_houses
 	barrels = ctx.barrels
-	starter_house = ctx.starter_house
 	shaman = ctx.shaman
-	starter_ignited = false
+	fire_started = false
 
 	# Handcrafted levels report reserved building sites instead of generated houses.
 	plots = ctx.plots
@@ -407,7 +405,7 @@ func _load_level() -> void:
 	if staging:
 		_flash_hint("Foundations staged: %d building plots reserved." % plots.size())
 	elif not mandatory_houses.is_empty():
-		_flash_hint("Tip: First fire is free on the starter house. Observe the wind direction before sparking.")
+		_flash_hint("Tip: Your opening spark is free — pick any house. Check the wind direction with W.")
 	_update_hud()
 
 
@@ -484,8 +482,7 @@ func _clear_level() -> void:
 		if is_instance_valid(fl):
 			fl.hide()
 
-	starter_house = null
-	starter_ignited = false
+	fire_started = false
 	last_spark_house = null
 	shaman = null
 
@@ -562,7 +559,7 @@ func _process(delta: float) -> void:
 	var burning_count := fire_sim.count_burning()
 	var smoldering_count := fire_sim.count_smoldering()
 
-	director.tick(delta, elapsed, starter_ignited, burning_count, game_over)
+	director.tick(delta, elapsed, fire_started, burning_count, game_over)
 	SoundManager.update_fire_crackle(burning_count)
 
 	# Weather dampens fire strength
@@ -609,7 +606,7 @@ func _process(delta: float) -> void:
 		return
 
 	# Failure check: no flames and Last Spark either consumed or expired
-	if starter_ignited and not game_over:
+	if fire_started and not game_over:
 		if last_spark_active:
 			last_spark_timer -= delta
 			if last_spark_timer <= 0.0 or last_spark_house == null or last_spark_house.state == VoxelHouse.State.BURNT:
@@ -628,7 +625,7 @@ func _process(delta: float) -> void:
 
 # ---------- Event & Signal Handlers ----------
 func _on_house_burn_ending(h: VoxelHouse) -> void:
-	if game_over or not starter_ignited:
+	if game_over or not fire_started:
 		return
 
 	var other_burning := 0
@@ -647,7 +644,7 @@ func _on_house_burn_ending(h: VoxelHouse) -> void:
 
 
 func _on_house_extinguished(h: VoxelHouse) -> void:
-	if game_over or not starter_ignited:
+	if game_over or not fire_started:
 		return
 	if fire_sim.count_burning() == 0 and fire_sim.count_smoldering() == 0 and last_spark_available and burnt_mandatory < mandatory_houses.size():
 		last_spark_available = false
@@ -818,15 +815,13 @@ func _handle_left_click(screen_pos: Vector2) -> void:
 		_flash_hint("Stone structures are fireproof and cannot be ignited!")
 		return
 
-	if not starter_ignited:
-		if house == starter_house:
-			starter_house.set_starter(false)
-			starter_house.ignite()
-			starter_ignited = true
-			_flash_hint("Fire sparked! Direct spread with Wind Gust (Hold RMB on flames).")
-			_update_hud()
-		else:
-			_flash_hint("First fire must be on the highlighted STARTER house!")
+	if not fire_started:
+		# The opening spark is free anywhere: the player picks their own ground,
+		# which is the first real decision of a run.
+		house.ignite()
+		fire_started = true
+		_flash_hint("Fire sparked! Direct spread with Wind Gust (Hold RMB on flames).")
+		_update_hud()
 		return
 
 	if house.state == VoxelHouse.State.SMOLDERING:
@@ -1138,11 +1133,11 @@ func _update_hover_inspection(delta: float) -> void:
 		else:
 			hover_badge.global_position = hover_badge.global_position.lerp(target_pos, minf(1.0, delta * 20.0))
 
-		if hover_target == starter_house and not starter_ignited:
-			hover_label.text = "[ STARTER HOUSE ]\nFree Spark! Click to ignite."
+		if not fire_started and hover_target.kind != "stone":
+			hover_label.text = "[ %s ]\nFree Spark — click to ignite." % eval.status.to_upper()
 			hover_label.modulate = Color(1.0, 0.85, 0.2)
 			if _hint_t <= 0.0 and hint_label != null:
-				hint_label.text = "Inspect: [STARTER] Free initial spark! Click to ignite."
+				hint_label.text = "Inspect: free opening spark — click any house to ignite it."
 				hint_label.modulate.a = 0.9
 		else:
 			hover_label.text = "[ %s ]\n%s" % [eval.status.to_upper(), eval.detail]
@@ -1307,8 +1302,8 @@ func _update_hud() -> void:
 
 		if staging:
 			objective_label.text = "STAGING: %s — %d plots reserved" % [level_name, plots.size()]
-		elif not starter_ignited:
-			objective_label.text = "SPARK PHASE: Click the highlighted STARTER house to begin"
+		elif not fire_started:
+			objective_label.text = "SPARK PHASE: Click any house to start the fire"
 		elif last_spark_active:
 			objective_label.text = "CRITICAL: LAST SPARK SMOLDERING (%.1fs)! Click house to save (1 Ember)!" % maxf(0.0, last_spark_timer)
 		elif shaman != null and is_instance_valid(shaman) and shaman.state == VoxelShaman.State.CASTING:

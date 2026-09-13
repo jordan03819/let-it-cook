@@ -59,14 +59,14 @@ func setup(p_level_idx: int, p_units_root: Node3D, p_houses: Array[VoxelHouse], 
 	_no_fire_timer = 0.0
 
 
-func tick(delta: float, elapsed: float, starter_ignited: bool, burning_count: int, game_over: bool) -> void:
+func tick(delta: float, elapsed: float, fire_started: bool, burning_count: int, game_over: bool) -> void:
 	if game_over:
 		return
 
 	_tick_alarm(delta, burning_count)
 	_tick_buckets(delta, burning_count, game_over)
 
-	if starter_ignited and not game_over:
+	if fire_started and not game_over:
 		if firefighter_spawned and burning_count == 0:
 			_no_fire_timer += delta
 			if _no_fire_timer >= 6.0:
