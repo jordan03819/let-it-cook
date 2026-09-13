@@ -48,7 +48,7 @@ func _ready() -> void:
 
 	burn = CharBurnScript.new()
 	add_child(burn)
-	burn.configure(self, _visual, 1.8, randf_range(8.0, 10.5))
+	burn.configure(self, _visual, KitCharacter.SHAMAN_HEIGHT, randf_range(8.0, 10.5))
 	burn.died.connect(_on_burn_death)
 	burn.ignited.connect(_on_burn_ignited)
 
@@ -90,38 +90,22 @@ func bm_setup(b: BoxMesh, size: Vector3, mat: Material) -> void:
 
 
 func _build_visuals() -> void:
-	_visual = Node3D.new()
+	# A rigged Mini Character as the village mystic. The kit's emote clips are
+	# what the ritual reads through, so the pose only has to carry the colours:
+	# ceremonial indigo, with gold and the glowing orb kept from the old build.
+	_visual = KitCharacter.build(
+		KitCharacter.model_for(10),
+		KitCharacter.SHAMAN_HEIGHT,
+		Color(0.94, 0.86, 1.16))
 	_visual.name = "ShamanVisual"
 	add_child(_visual)
 
-	# Robe: Mystic indigo/purple with ceremonial gold trim
-	var robe_col := _mat(Color(0.35, 0.14, 0.52))
-	var trim_col := _mat(Color(0.95, 0.82, 0.18), true, 1.2)
-	var skin_col := _mat(Color(0.92, 0.74, 0.58))
-	var wood_col := _mat(Color(0.38, 0.24, 0.14))
-	var orb_col := _mat(Color(0.2, 0.85, 0.95), true, 2.5) # Glowing cyan orb
+	# Gold sash across the robe.
+	var sash := _box(_visual, Vector3(0.16, 0.5, 0.06), Vector3(0.0, 0.5, 0.16), _mat(Color(0.95, 0.82, 0.18), true, 1.2))
+	sash.rotation.z = 0.5
 
-	# Robe skirt & torso
-	_box(_visual, Vector3(0.65, 0.8, 0.55), Vector3(0, 0.4, 0), robe_col)
-	_box(_visual, Vector3(0.55, 0.6, 0.45), Vector3(0, 0.9, 0), robe_col)
-	_box(_visual, Vector3(0.57, 0.12, 0.47), Vector3(0, 0.8, 0), trim_col)
-	_box(_visual, Vector3(0.12, 0.6, 0.48), Vector3(0, 0.9, 0), trim_col)
-
-	# Head
-	_box(_visual, Vector3(0.42, 0.38, 0.42), Vector3(0, 1.35, 0), skin_col)
-
-	# Mystic Headdress / Antlers
-	var antler_col := _mat(Color(0.85, 0.8, 0.72))
-	_box(_visual, Vector3(0.5, 0.14, 0.5), Vector3(0, 1.58, 0), robe_col)
-	_box(_visual, Vector3(0.12, 0.45, 0.12), Vector3(-0.25, 1.82, 0), antler_col)
-	_box(_visual, Vector3(0.12, 0.45, 0.12), Vector3(0.25, 1.82, 0), antler_col)
-	_box(_visual, Vector3(0.25, 0.1, 0.1), Vector3(-0.32, 1.95, 0), antler_col)
-	_box(_visual, Vector3(0.25, 0.1, 0.1), Vector3(0.32, 1.95, 0), antler_col)
-
-	# Ritual Staff in hand
-	_box(_visual, Vector3(0.1, 1.8, 0.1), Vector3(0.42, 0.9, 0.25), wood_col)
-	_box(_visual, Vector3(0.28, 0.28, 0.28), Vector3(0.42, 1.85, 0.25), orb_col)
-
+	# Glowing cyan orb, held up, so the ritual has something to pulse.
+	_box(_visual, Vector3(0.14, 0.14, 0.14), Vector3(0.26, 0.74, 0.10), _mat(Color(0.2, 0.85, 0.95), true, 2.5))
 
 func _build_ritual_vfx() -> void:
 	_ritual_vfx = Node3D.new()
@@ -277,7 +261,7 @@ func _process(delta: float) -> void:
 		ritual_tick.emit(cast_time_remaining)
 
 		# Idle chanting bob
-		_visual.position.y = absf(sin(float(Time.get_ticks_msec()) * 0.008)) * 0.12
+		KitCharacter.play(_visual, KitCharacter.CLIP_CHEER, 0.8)
 
 		if cast_time_remaining <= 0.0:
 			_complete_ritual()
@@ -330,7 +314,7 @@ func _physics_flee(delta: float) -> void:
 	var dir := away.normalized()
 	velocity = dir * speed_flee
 	_visual.rotation.y = atan2(dir.x, dir.z)
-	_visual.position.y = absf(sin(float(Time.get_ticks_msec()) * 0.025)) * 0.15
+	KitCharacter.play(_visual, KitCharacter.CLIP_WALK, 1.0)
 	move_and_slide()
 
 

@@ -7,11 +7,13 @@ extends RefCounted
 signal wind_shifted(new_dir: Vector3)
 
 # Spatial tuning bands (SPEC Section 6.3)
-# Connected: <= 4.2m, Conditional: 4.2m–6.0m, Broken: > 6.0m (crossable by Wind Gust up to 8.5m)
-const HOUSE_CONNECTED_RADIUS: float = 4.2
-const HOUSE_CONDITIONAL_RADIUS: float = 6.0
+# Connected: <= 5.4m, Conditional: 5.4m–7.6m, Broken: > 7.6m (crossable by Wind
+# Gust up to 10.5m). Widened from 4.2/6.0/8.5: a village laid out along lanes
+# leaves longer gaps than a grid, and the old bands made most of them untakeable.
+const HOUSE_CONNECTED_RADIUS: float = 5.4
+const HOUSE_CONDITIONAL_RADIUS: float = 7.6
 const HOUSE_RADIUS: float = HOUSE_CONDITIONAL_RADIUS
-const TREE_RADIUS: float = 4.5
+const TREE_RADIUS: float = 5.6
 const HOUSE_HEAT: float = 0.035
 const TREE_HEAT: float = 0.13
 const HEAT_DECAY: float = 0.025
@@ -21,7 +23,7 @@ const WIND_SHIFT_MIN: float = 22.0
 const WIND_SHIFT_MAX: float = 34.0
 
 const WIND_GUST_DURATION: float = 4.0
-const WIND_GUST_RANGE: float = 8.5
+const WIND_GUST_RANGE: float = 10.5
 const WIND_GUST_HALF_ANGLE: float = deg_to_rad(30.0) # 60-degree cone total
 
 var houses: Array[VoxelHouse] = []

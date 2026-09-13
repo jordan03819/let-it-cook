@@ -15,7 +15,7 @@ const LAST_SPARK_COST: int = 1
 # Local Wind Gust ability (SPEC Section 6.6, 7.3 & 7.4)
 const WIND_COOLDOWN_MAX: float = 6.0
 const WIND_GUST_DURATION: float = 4.0
-const WIND_GUST_RANGE: float = 8.5
+const WIND_GUST_RANGE: float = 10.5
 const WIND_GUST_HALF_ANGLE: float = deg_to_rad(30.0) # 60-degree cone total
 
 var level_idx: int = 0

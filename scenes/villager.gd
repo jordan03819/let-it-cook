@@ -22,6 +22,11 @@ var _dead: bool = false
 var _spread_t: float = 0.0
 var _shout_t: float = 0.0
 
+## How tall a villager is drawn (see KitCharacter.VILLAGER_HEIGHT): the kit's
+## people match the kit's doors, so this is small next to a cottage on purpose.
+## The collision box, the bucket and the bubble all hang off it.
+const VISUAL_HEIGHT := KitCharacter.VILLAGER_HEIGHT
+
 var _visual: Node3D = null
 var _bubble: Label3D = null
 var _bucket_node: Node3D = null
@@ -42,7 +47,7 @@ func _ready() -> void:
 
 	burn = CharBurnScript.new()
 	add_child(burn)
-	burn.configure(self, _visual, 1.6, randf_range(8.5, 11.5))
+	burn.configure(self, _visual, VISUAL_HEIGHT, randf_range(8.5, 11.5))
 	burn.died.connect(_on_burn_death)
 	burn.ignited.connect(_on_burn_ignited)
 	burn.extinguished.connect(_on_burn_extinguished)
@@ -68,23 +73,54 @@ func _box(size: Vector3, pos: Vector3, mat: Material) -> MeshInstance3D:
 
 
 func _build() -> void:
-	_visual = Node3D.new()
+	# A rigged Mini Character (assets/chars), scaled to the height this game's
+	# people are drawn at, instead of a stack of placeholder boxes. The kit's
+	# own animation library is what the villager now moves with (see
+	# _animate), and its materials are per-instance so burning one leaves the
+	# rest of the crowd alone.
+	_visual = KitCharacter.build(KitCharacter.model_for(_variant_index()), VISUAL_HEIGHT, _tint())
 	add_child(_visual)
+
 	var col := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
-	shape.size = Vector3(0.6, 1.4, 0.6)
+	shape.size = Vector3(0.55, VISUAL_HEIGHT * 0.9, 0.55)
 	col.shape = shape
-	col.position = Vector3(0, 0.7, 0)
+	col.position = Vector3(0, VISUAL_HEIGHT * 0.45, 0)
 	add_child(col)
 
-	var skin := _mat(Color(0.95, 0.78, 0.62))
-	var shirt := _mat(Color(0.3 + randf() * 0.6, 0.35 + randf() * 0.4, 0.5 + randf() * 0.4))
-	var pants := _mat(Color(0.25, 0.25, 0.35))
-	_box(Vector3(0.5, 0.55, 0.35), Vector3(0, 0.85, 0), shirt)
-	_box(Vector3(0.2, 0.55, 0.2), Vector3(-0.13, 0.27, 0), pants)
-	_box(Vector3(0.2, 0.55, 0.2), Vector3(0.13, 0.27, 0), pants)
-	_box(Vector3(0.42, 0.38, 0.42), Vector3(0, 1.32, 0), skin)
-	_box(Vector3(0.46, 0.14, 0.46), Vector3(0, 1.55, 0), _mat(Color(0.2 + randf() * 0.6, 0.15, 0.1)))
+
+## Each villager gets their own character: the index is seeded from the instance
+## so a crowd is varied but a given villager keeps their face for the whole run.
+func _variant_index() -> int:
+	return abs(int(get_instance_id() / 7) + _role_offset())
+
+
+func _role_offset() -> int:
+	return 0 if role == "bucket" else MODELS_OFFSET
+
+
+const MODELS_OFFSET := 5
+
+
+## Nudges the kit's colours toward the campaign palette (SPEC 11.1) without
+## losing the character: a small, per-villager warm/cool shift.
+func _tint() -> Color:
+	var k := float(abs(int(get_instance_id()) % 100)) / 100.0
+	return Color(0.94 + k * 0.10, 0.93 + k * 0.05, 0.90 + k * 0.05)
+
+
+## Drives the kit's animations from how the villager is actually moving, so a
+## walker walks, a bucket carrier holds a bucket, and a panicking one runs.
+func _animate(moving: bool, walking_clip: String = KitCharacter.CLIP_WALK, speed: float = 1.0) -> void:
+	if _visual == null:
+		return
+	if not moving:
+		var idle := KitCharacter.CLIP_HOLD_RIGHT if is_bucket() else KitCharacter.CLIP_IDLE
+		KitCharacter.play(_visual, idle)
+	elif walking_clip == KitCharacter.CLIP_HOLD_RIGHT:
+		KitCharacter.play(_visual, KitCharacter.CLIP_WALK, speed)
+	else:
+		KitCharacter.play(_visual, walking_clip, speed)
 
 
 func _build_bubble() -> void:
@@ -96,7 +132,7 @@ func _build_bubble() -> void:
 	_bubble.outline_size = 16
 	_bubble.outline_modulate = Color(0.1, 0.05, 0.05)
 	_bubble.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	_bubble.position = Vector3(0, 2.4, 0)
+	_bubble.position = Vector3(0, VISUAL_HEIGHT + 0.7, 0)
 	_bubble.visible = false
 	add_child(_bubble)
 
@@ -172,13 +208,14 @@ func _build_bucket() -> void:
 		return
 	_bucket_node = Node3D.new()
 	_bucket_node.name = "Bucket"
-	_bucket_node.position = Vector3(0.38, 0.85, 0.2)
+	# In the carrier's hand: hip height, out to one side and a little in front.
+	_bucket_node.position = Vector3(VISUAL_HEIGHT * 0.30, VISUAL_HEIGHT * 0.48, VISUAL_HEIGHT * 0.16)
 	_visual.add_child(_bucket_node)
 
 	# Wood bucket casing
 	var mi := MeshInstance3D.new()
 	var bm := BoxMesh.new()
-	bm.size = Vector3(0.32, 0.34, 0.32)
+	bm.size = Vector3(VISUAL_HEIGHT * 0.26, VISUAL_HEIGHT * 0.28, VISUAL_HEIGHT * 0.26)
 	bm.material = _mat(Color(0.48, 0.32, 0.18))
 	mi.mesh = bm
 	_bucket_node.add_child(mi)
@@ -271,7 +308,7 @@ func _physics_flee_burning(delta: float) -> void:
 	velocity = _dir * (speed_panic * 1.25)
 	if _dir.length_squared() > 0.01:
 		_visual.rotation.y = atan2(_dir.x, _dir.z)
-	_visual.position.y = absf(sin(Time.get_ticks_msec() * 0.032)) * 0.16
+	_animate(true, KitCharacter.CLIP_RUN, 1.15)
 	move_and_slide()
 
 
@@ -395,7 +432,7 @@ func _physics_bucket(delta: float) -> void:
 
 	if _dir.length_squared() > 0.01:
 		_visual.rotation.y = atan2(_dir.x, _dir.z)
-	_visual.position.y = absf(sin(Time.get_ticks_msec() * 0.016)) * 0.09
+	_animate(velocity.length_squared() > 0.01, KitCharacter.CLIP_WALK, 1.05)
 	move_and_slide()
 
 
@@ -506,7 +543,10 @@ func _physics_wander(delta: float) -> void:
 	velocity = _dir * spd
 	if _dir.length_squared() > 0.01:
 		_visual.rotation.y = atan2(_dir.x, _dir.z)
-	_visual.position.y = absf(sin(Time.get_ticks_msec() * (0.02 if _panicking else 0.008))) * (0.12 if _panicking else 0.05)
+	if _panicking:
+		_animate(true, KitCharacter.CLIP_RUN, 1.2)
+	else:
+		_animate(velocity.length_squared() > 0.01, KitCharacter.CLIP_WALK, 1.0)
 	move_and_slide()
 
 

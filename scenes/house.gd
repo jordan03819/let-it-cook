@@ -17,6 +17,10 @@ var fuel_max: float = 22.0
 var fuel: float = 22.0
 var heat: float = 0.0 # 0..1 warming from nearby burning buildings. 1 = catches.
 var wetness: float = 0.0 # 0..1 water saturation; cools heat, resists fire, dries over time
+## Water delivered since this building caught. Putting a fire *out* takes a
+## quantity of water rather than a splash: see WATER_TO_EXTINGUISH. It bleeds
+## away while nobody is spraying, so a brigade has to keep at it (SPEC 6.7).
+var water_soaked: float = 0.0
 var kind: String = "house" # house | tree | stone
 var house_size: Vector3 = Vector3(2.0, 1.6, 2.0)
 var base_color: Color = Color(0.9, 0.8, 0.65)
@@ -28,6 +32,15 @@ var _starter_marker: Node3D = null
 var _smolder_label: Label3D = null
 var _gust_tilt: Vector3 = Vector3.ZERO
 var _tree_foliage_mats: Array[StandardMaterial3D] = []
+
+## Water needed to smother a burning structure, and the smaller amount that
+## snuffs a last spark. A bucket delivers 0.55, so a brigade needs ~6 trips for
+## a house, a firefighter's hose ~1.7 seconds, and a helicopter drop still needs
+## a second pass to finish the job.
+const WATER_TO_EXTINGUISH: float = 3.2
+const WATER_TO_DOUSE_SMOLDER: float = 0.9
+## How fast delivered water evaporates off a burning building (per second).
+const WATER_SOAK_DECAY: float = 0.10
 
 var _scorched: bool = false
 var _scorch_tween: Tween = null
@@ -464,12 +477,17 @@ func apply_ambient_wind(dir: Vector3, strength: float) -> void:
 func apply_water(amount: float, delta: float) -> void:
 	if kind == "stone" or state == State.BURNT or state == State.DEMOLISHED:
 		return
+	# Wetness (0..1) is the *damping*: it slows heat build-up and darkens the
+	# wood. Putting the fire out is the separate water tally below, so a splash
+	# can soak a building without magically ending the fire.
 	wetness = clampf(wetness + amount * delta * 1.1, 0.0, 1.0)
 	if state == State.BURNING:
-		if wetness >= 0.8:
+		water_soaked += amount * delta
+		if water_soaked >= WATER_TO_EXTINGUISH:
 			extinguish()
 	elif state == State.SMOLDERING:
-		if wetness >= 0.4:
+		water_soaked += amount * delta
+		if water_soaked >= WATER_TO_DOUSE_SMOLDER:
 			extinguish()
 	elif state == State.UNBURNED:
 		heat = maxf(0.0, heat - amount * delta * 2.5)
@@ -481,6 +499,7 @@ func extinguish() -> void:
 	state = State.UNBURNED
 	heat = 0.0
 	wetness = 0.85
+	water_soaked = 0.0
 	_set_fire_visible(false)
 	if _smolder_label != null and is_instance_valid(_smolder_label):
 		_smolder_label.queue_free()
@@ -622,6 +641,7 @@ func reignite(new_fuel: float = 35.0) -> bool:
 	if kind == "stone" or (state != State.SMOLDERING and state != State.UNBURNED):
 		return false
 	state = State.BURNING
+	water_soaked = 0.0
 	fuel = new_fuel
 	fuel_max = maxf(fuel_max, new_fuel)
 	heat = 0.0
@@ -648,6 +668,7 @@ func ignite() -> bool:
 		_starter_marker = null
 	state = State.BURNING
 	heat = 0.0
+	water_soaked = 0.0
 	_set_fire_visible(true)
 	_flash = 1.0
 	_pop(1.2)
@@ -720,6 +741,11 @@ func _process(delta: float) -> void:
 		if _tree_mesh_mid != null:
 			_tree_mesh_mid.position = Vector3(tree_lean.x * 0.55 + sway * 0.5, 2.1, tree_lean.z * 0.55 + sway * 0.25)
 		_tree_mesh_top.position = Vector3(tree_lean.x * 0.9 + sway, 2.7, tree_lean.z * 0.9 + sway * 0.5)
+
+	# Water thrown at a fire evaporates off again: a brigade that gives up loses
+	# the ground it had made.
+	if water_soaked > 0.0 and state == State.BURNING:
+		water_soaked = maxf(0.0, water_soaked - delta * WATER_SOAK_DECAY)
 
 	# Evaporation: drying over time (SPEC 6.7 & 8.4)
 	if wetness > 0.0:

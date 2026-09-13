@@ -657,7 +657,7 @@ def emit_trees(scene):
             ang = _h01(key + "a", k) * math.tau
             rad = _h01(key + "r", k) * spread
             sx, sz = x + math.cos(ang) * rad, z + math.sin(ang) * rad
-            if _on_path(sx, sz) or _near_plot_pt(sx, sz):
+            if _on_path(sx, sz) or _near_plot_pt(sx, sz) or _in_field(sx, sz):
                 continue
             s = 0.95 + _h01(key + "s", k) * 0.75
             scene.prop(species[int(_h01(key + "sp", k) * len(species)) % len(species)],
@@ -689,10 +689,42 @@ def emit_trees(scene):
     for ci, (cx, cz, count, spread) in enumerate([
             (-15.5, -8.0, 5, 2.6), (-10.5, -14.5, 4, 2.2), (5.5, -9.5, 4, 2.4),
             (9.0, -3.5, 2, 1.6), (-4.0, 9.5, 4, 2.4), (3.0, 7.5, 5, 2.8),
-            (13.5, -8.0, 4, 2.4), (-22.5, 4.5, 3, 2.2), (17.0, 12.0, 3, 2.4),
-            (-13.0, 20.0, 4, 2.6), (7.0, 18.0, 4, 2.6), (-2.5, -6.0, 2, 1.5),
-            (24.0, 12.0, 3, 2.2), (-24.0, -6.0, 3, 2.0)]):
+            (13.5, -8.0, 4, 2.4), (-22.5, 4.5, 3, 2.2), (-2.5, -6.0, 2, 1.5),
+            (-24.0, -6.0, 3, 2.0)]):
         _stand("Terrain/Trees", "Stand%d" % ci, cx, cz, count, spread)
+
+    # The east half of the meadow was the bare side of the map: the farm track
+    # and the fields sit there, so the woodland fills the gaps between them
+    # rather than the ground they use. Bigger groups read as woodland that the
+    # farm was cut out of, which is also what stops the map edge feeling empty.
+    for ci, (cx, cz, count, spread) in enumerate([
+            # north-east, either side of the rise
+            (14.0, -20.5, 6, 3.2), (7.0, -19.0, 5, 2.8), (0.5, -20.0, 5, 3.0),
+            (17.5, -13.0, 5, 2.6), (11.0, -14.5, 4, 2.4), (4.0, -16.5, 4, 2.6),
+            (23.5, -9.0, 4, 2.4), (19.0, -5.0, 3, 2.2), (25.0, 4.0, 3, 2.2),
+            # the middle meadow between the green and the farm track
+            (6.0, -2.0, 4, 2.4), (12.5, 1.5, 3, 2.0), (16.5, -1.5, 3, 2.2),
+            (9.5, 5.0, 3, 2.2), (14.0, 6.0, 3, 2.2), (5.0, 11.5, 4, 2.6),
+            (10.5, 12.5, 4, 2.6), (16.0, 14.5, 4, 2.6), (9.0, 18.5, 5, 2.8),
+            (14.5, 20.5, 5, 2.8), (2.5, 16.5, 5, 2.8), (-3.5, 19.5, 4, 2.6),
+            (20.0, 21.0, 5, 2.8), (24.0, 17.5, 3, 2.2), (24.5, -14.0, 3, 2.2),
+            # south and south-west, behind the pond cottages
+            (-20.5, 21.0, 5, 2.8), (-14.5, 24.0, 4, 2.6), (-8.0, 21.5, 4, 2.6),
+            (-24.0, 16.0, 4, 2.4), (-24.5, 22.0, 3, 2.2), (-1.0, 23.5, 4, 2.6),
+            (-11.5, 17.5, 3, 2.2), (-6.5, 13.0, 3, 2.2),
+            # the north-west hillside, thinning out as it climbs
+            (-20.0, -14.0, 5, 2.6), (-24.0, -19.0, 4, 2.4), (-14.0, -19.5, 5, 2.8),
+            (-8.5, -20.5, 4, 2.6), (-3.0, -18.0, 4, 2.4), (-19.0, -6.0, 3, 2.2),
+            (-24.5, -11.0, 3, 2.2),
+            # the last bare meadow cells, measured from a density map of the
+            # built scene: the north-centre, the inner north-west, the ground
+            # between the pond cottages, and the strip east of the farm lane
+            (1.0, -12.5, 4, 2.6), (5.0, -16.5, 4, 2.6), (3.0, -19.5, 4, 2.6),
+            (-11.0, -6.0, 4, 2.6), (-16.5, -4.0, 3, 2.2), (-4.5, -4.5, 3, 2.2),
+            (-11.5, 20.0, 4, 2.6), (-16.5, 21.5, 3, 2.2), (-8.5, 24.0, 4, 2.6),
+            (17.0, -6.5, 3, 2.2), (21.5, -4.0, 3, 2.2), (18.5, 9.5, 3, 2.2),
+            (16.5, 12.0, 3, 2.2), (25.0, 22.0, 4, 2.6)]):
+        _stand("Terrain/Trees", "StandE%d" % ci, cx, cz, count, spread)
 
     # pines standing on the north-east rise: planted at hill-top height so the
     # rise reads as a wooded knoll instead of a bare stone wall
@@ -712,6 +744,22 @@ def emit_trees(scene):
                        rot_y=_h01("ort", row * 3 + col) * 360.0,
                        scale=(0.9 + _h01("ors", row * 3 + col) * 0.25,) * 3,
                        name="Orchard%d_%d" % (row, col))
+
+
+# Ploughed ground: crops are laid out in strips, and a tree in the middle of a
+# field reads as a mistake. (x0, z0, x1, z1)
+FIELD_RECTS = [
+    (21.5, 5.6, 25.4, 15.4),     # FieldA strips
+    (21.5, 15.0, 25.4, 19.0),    # FieldB strips
+    (-18.8, 5.0, -14.6, 12.0),   # kitchen garden + melon patch
+]
+
+
+def _in_field(x, z, margin=1.0):
+    for x0, z0, x1, z1 in FIELD_RECTS:
+        if x0 - margin <= x <= x1 + margin and z0 - margin <= z <= z1 + margin:
+            return True
+    return False
 
 
 def _near_plot_pt(x, z, radius=2.4):
@@ -862,8 +910,12 @@ def emit_scatter(scene):
 # network must offer more than one clearing order, and optional props (trees,
 # barrels) must never be the only way in. This check runs on every build.
 
-CONNECTED_MAX = 4.0        # centre-to-centre that spreads without help
-CONDITIONAL_MAX = 6.0      # needs a gust to jump between buildings
+# Spread bands, mirroring FireSimulation's tuning (SPEC 6.3): houses inside
+# CONNECTED_MAX catch from each other unaided, out to CONDITIONAL_MAX they need
+# a gust or a chain, and past GUST_REACH nothing crosses at all.
+CONNECTED_MAX = 5.4
+CONDITIONAL_MAX = 7.6
+GUST_REACH = 10.5
 
 
 def _distance(a, b):
@@ -977,8 +1029,8 @@ and fog so it sits in the same light as the procedural levels. The kit's candy
 palette (mint grass, salmon dirt, near-white water) is remapped onto the campaign
 palette in `village_fields.gd` (`PALETTE`).
 
-* Fire-spread bands used by the layout (SPEC 6.3): <= 4 m connected,
-  4-6 m conditional (needs a gust), > 6 m broken.
+* Fire-spread bands used by the layout (SPEC 6.3): <= 5.4 m connected,
+  5.4-7.6 m conditional (needs a gust or a chain), > 7.6 m broken.
 
 ## Reserved building plots ({{COUNT}})
 

@@ -54,7 +54,7 @@ func _ready() -> void:
 		courage = 1.6
 	burn = CharBurnScript.new()
 	add_child(burn)
-	burn.configure(self, _visual, 1.9, randf_range(5.0, 6.0))
+	burn.configure(self, _visual, KitCharacter.RESPONDER_HEIGHT, randf_range(5.0, 6.0))
 	burn.died.connect(_on_burn_death)
 
 
@@ -81,34 +81,37 @@ func _box(parent: Node3D, size: Vector3, pos: Vector3, mat: Material) -> MeshIns
 
 
 func _build_visuals() -> void:
-	_visual = Node3D.new()
+	# A rigged Mini Character in a responder's colours (assets/chars): the kit's
+	# own walk/idle/die clips carry the movement that the old box stack mimed by
+	# bobbing up and down.
+	_visual = KitCharacter.build(
+		KitCharacter.model_for(3 if not elite else 8),
+		KitCharacter.RESPONDER_HEIGHT,
+		_responser_tint())
 	add_child(_visual)
+
 	var col := CollisionShape3D.new()
 	var cap := BoxShape3D.new()
-	cap.size = Vector3(0.7, 1.6, 0.7)
+	cap.size = Vector3(0.6, KitCharacter.RESPONDER_HEIGHT, 0.6)
 	col.shape = cap
-	col.position = Vector3(0, 0.8, 0)
+	col.position = Vector3(0, KitCharacter.RESPONDER_HEIGHT * 0.5, 0)
 	add_child(col)
-	var coat := Color(0.85, 0.7, 0.35) if not elite else Color(0.12, 0.22, 0.65)
-	var trim := Color(1.0, 0.9, 0.2) if not elite else Color(0.2, 0.85, 1.0)
-	var helm := Color(0.85, 0.15, 0.1) if not elite else Color(0.95, 0.85, 0.2)
-	_box(_visual, Vector3(0.22, 0.5, 0.22), Vector3(-0.15, 0.25, 0), _voxel_mat(Color(0.1, 0.15, 0.4)))
-	_box(_visual, Vector3(0.22, 0.5, 0.22), Vector3(0.15, 0.25, 0), _voxel_mat(Color(0.1, 0.15, 0.4)))
-	_box(_visual, Vector3(0.7, 0.7, 0.45), Vector3(0, 0.85, 0), _voxel_mat(coat))
-	_box(_visual, Vector3(0.72, 0.15, 0.47), Vector3(0, 0.85, 0), _voxel_mat(trim, true))
-	_box(_visual, Vector3(0.45, 0.4, 0.45), Vector3(0, 1.4, 0), _voxel_mat(Color(0.95, 0.75, 0.6)))
-	_box(_visual, Vector3(0.6, 0.25, 0.6), Vector3(0, 1.68, 0), _voxel_mat(helm))
-	_box(_visual, Vector3(0.62, 0.08, 0.62), Vector3(0, 1.56, 0), _voxel_mat(Color(0.7, 0.1, 0.08) if not elite else Color(0.8, 0.7, 0.15)))
-	_box(_visual, Vector3(0.15, 0.15, 0.7), Vector3(0.3, 1.0, 0.4), _voxel_mat(Color(0.3, 0.3, 0.32)))
-	if elite:
-		var lamp := OmniLight3D.new()
-		lamp.light_color = Color(0.8, 0.95, 1.0)
-		lamp.light_energy = 1.4
-		lamp.omni_range = 3.5
-		lamp.position = Vector3(0, 1.7, 0.35)
-		_visual.add_child(lamp)
-		_box(_visual, Vector3(0.18, 0.14, 0.12), Vector3(0, 1.7, 0.32), _voxel_mat(Color(0.85, 0.95, 1.0), true))
 
+
+## Responders wear the campaign's colours so they read at a glance: yellow kit
+## for the volunteers, cold blue for the elite crews.
+func _responser_tint() -> Color:
+	return Color(0.72, 0.86, 1.05) if elite else Color(1.12, 1.0, 0.78)
+
+
+## Keeps the crew animated: they run when working, idle on the spot.
+func _animate(moving: bool) -> void:
+	if _visual == null:
+		return
+	if moving:
+		KitCharacter.play(_visual, KitCharacter.CLIP_WALK, 1.1)
+	else:
+		KitCharacter.play(_visual, KitCharacter.CLIP_IDLE)
 
 func _build_water() -> void:
 	_water_particles = GPUParticles3D.new()
@@ -369,7 +372,7 @@ func _physics_flee(delta: float) -> void:
 		away = Vector3(randf_range(-1, 1), 0, randf_range(-1, 1))
 	_face(away.normalized())
 	velocity = away.normalized() * speed_flee
-	_visual.position.y = absf(sin(Time.get_ticks_msec() * 0.03)) * 0.16
+	_animate(true)
 	move_and_slide()
 
 
@@ -414,7 +417,7 @@ func _spread_fire() -> void:
 func _move(dir: Vector3, _delta: float) -> void:
 	_face(dir)
 	velocity = dir * speed
-	_visual.position.y = absf(sin(Time.get_ticks_msec() * 0.012)) * 0.08
+	_animate(velocity.length_squared() > 0.01)
 	move_and_slide()
 
 

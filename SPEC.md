@@ -110,9 +110,9 @@ Each level is designed as an implicit **spread network**:
 
 Initial spatial tuning bands are:
 
-- **Connected:** under approximately 4 metres; ordinary fire can cross without assistance.
-- **Conditional:** approximately 4–6 metres; crossing requires favorable wind, combined heat from multiple fires, or an environmental chain.
-- **Broken:** over approximately 6 metres or divided by a hard firebreak; ordinary spread cannot cross.
+- **Connected:** under approximately 5.4 metres; ordinary fire can cross without assistance.
+- **Conditional:** approximately 5.4–7.6 metres; crossing requires favorable wind, combined heat from multiple fires, or an environmental chain.
+- **Broken:** over approximately 7.6 metres or divided by a hard firebreak; ordinary spread cannot cross. A Wind Gust reaches 10.5 metres.
 
 Exact distances are subject to playtesting, but every gap must visually communicate its category.
 
