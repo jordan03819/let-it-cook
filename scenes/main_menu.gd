@@ -5,6 +5,7 @@ extends Control
 @onready var start_button: Button = %StartButton
 @onready var level2_button: Button = %Level2Button
 @onready var level3_button: Button = %Level3Button
+@onready var level_fields_button: Button = %LevelFieldsButton
 @onready var options_button: Button = %OptionsButton
 @onready var quit_button: Button = %QuitButton
 @onready var options_panel: PanelContainer = %OptionsPanel
@@ -37,6 +38,8 @@ func _ready() -> void:
 		level2_button.pressed.connect(_on_level2_pressed)
 	if not level3_button.pressed.is_connected(_on_level3_pressed):
 		level3_button.pressed.connect(_on_level3_pressed)
+	if not level_fields_button.pressed.is_connected(_on_level_fields_pressed):
+		level_fields_button.pressed.connect(_on_level_fields_pressed)
 	if not options_back_button.pressed.is_connected(_on_options_back_pressed):
 		options_back_button.pressed.connect(_on_options_back_pressed)
 	if not volume_slider.value_changed.is_connected(_on_volume_changed):
@@ -75,6 +78,14 @@ func _on_level3_pressed() -> void:
 		return
 	RunState.reset_run()
 	RunState.start_level(2)
+	_open_game()
+
+
+## Authored level preview: always reachable so the layout can be compared side by
+## side with the generated Village. It does not touch campaign progression.
+func _on_level_fields_pressed() -> void:
+	RunState.reset_run()
+	RunState.start_level(RunState.HANDCRAFTED_LEVEL)
 	_open_game()
 
 

@@ -27,6 +27,10 @@ class LevelContext extends RefCounted:
 	var barrels: Array[VoxelBarrel] = []
 	var starter_house: VoxelHouse = null
 	var shaman: VoxelShaman = null
+	## Handcrafted levels report reserved building sites here (SPEC 19 data-driven levels).
+	var plots: Array[Dictionary] = []
+	## True when the level has no burnable structures yet, so win/lose must not be evaluated.
+	var staging: bool = false
 
 
 static func build_level(level_idx: int, village_root: Node3D, units_root: Node3D) -> LevelContext:

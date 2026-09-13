@@ -1,0 +1,2244 @@
+[gd_scene load_steps=73 format=3]
+
+[ext_resource type="Script" path="res://scenes/levels/village_fields.gd" id="1_scene_script"]
+[ext_resource type="PackedScene" path="res://assets/nature/ground_grass.glb" id="m_ground_grass"]
+[ext_resource type="PackedScene" path="res://assets/nature/tree_small.glb" id="m_tree_small"]
+[ext_resource type="PackedScene" path="res://assets/nature/tree_default.glb" id="m_tree_default"]
+[ext_resource type="PackedScene" path="res://assets/nature/tree_thin.glb" id="m_tree_thin"]
+[ext_resource type="PackedScene" path="res://assets/nature/tree_pineTallA.glb" id="m_tree_pineTallA"]
+[ext_resource type="PackedScene" path="res://assets/nature/tree_blocks.glb" id="m_tree_blocks"]
+[ext_resource type="PackedScene" path="res://assets/nature/tree_oak.glb" id="m_tree_oak"]
+[ext_resource type="PackedScene" path="res://assets/nature/tree_pineTallB.glb" id="m_tree_pineTallB"]
+[ext_resource type="PackedScene" path="res://assets/nature/sign.glb" id="m_sign"]
+[ext_resource type="PackedScene" path="res://assets/nature/pot_large.glb" id="m_pot_large"]
+[ext_resource type="PackedScene" path="res://assets/nature/campfire_bricks.glb" id="m_campfire_bricks"]
+[ext_resource type="PackedScene" path="res://assets/nature/log.glb" id="m_log"]
+[ext_resource type="PackedScene" path="res://assets/nature/statue_ring.glb" id="m_statue_ring"]
+[ext_resource type="PackedScene" path="res://assets/nature/tent_detailedClosed.glb" id="m_tent_detailedClosed"]
+[ext_resource type="PackedScene" path="res://assets/nature/tent_smallOpen.glb" id="m_tent_smallOpen"]
+[ext_resource type="PackedScene" path="res://assets/nature/campfire_logs.glb" id="m_campfire_logs"]
+[ext_resource type="PackedScene" path="res://assets/nature/log_stack.glb" id="m_log_stack"]
+[ext_resource type="PackedScene" path="res://assets/nature/log_stackLarge.glb" id="m_log_stackLarge"]
+[ext_resource type="PackedScene" path="res://assets/nature/stump_round.glb" id="m_stump_round"]
+[ext_resource type="PackedScene" path="res://assets/nature/stump_square.glb" id="m_stump_square"]
+[ext_resource type="PackedScene" path="res://assets/nature/log_large.glb" id="m_log_large"]
+[ext_resource type="PackedScene" path="res://assets/nature/statue_columnDamaged.glb" id="m_statue_columnDamaged"]
+[ext_resource type="PackedScene" path="res://assets/nature/statue_obelisk.glb" id="m_statue_obelisk"]
+[ext_resource type="PackedScene" path="res://assets/nature/statue_head.glb" id="m_statue_head"]
+[ext_resource type="PackedScene" path="res://assets/nature/stone_largeB.glb" id="m_stone_largeB"]
+[ext_resource type="PackedScene" path="res://assets/nature/hanging_moss.glb" id="m_hanging_moss"]
+[ext_resource type="PackedScene" path="res://assets/nature/lily_small.glb" id="m_lily_small"]
+[ext_resource type="PackedScene" path="res://assets/nature/lily_large.glb" id="m_lily_large"]
+[ext_resource type="PackedScene" path="res://assets/nature/canoe.glb" id="m_canoe"]
+[ext_resource type="PackedScene" path="res://assets/nature/canoe_paddle.glb" id="m_canoe_paddle"]
+[ext_resource type="PackedScene" path="res://assets/nature/rock_largeC.glb" id="m_rock_largeC"]
+[ext_resource type="PackedScene" path="res://assets/nature/rock_largeA.glb" id="m_rock_largeA"]
+[ext_resource type="PackedScene" path="res://assets/nature/rock_smallB.glb" id="m_rock_smallB"]
+[ext_resource type="PackedScene" path="res://assets/nature/rock_tallA.glb" id="m_rock_tallA"]
+[ext_resource type="PackedScene" path="res://assets/nature/stone_largeC.glb" id="m_stone_largeC"]
+[ext_resource type="PackedScene" path="res://assets/nature/rock_smallD.glb" id="m_rock_smallD"]
+[ext_resource type="PackedScene" path="res://assets/nature/plant_bushLarge.glb" id="m_plant_bushLarge"]
+[ext_resource type="PackedScene" path="res://assets/nature/plant_bush.glb" id="m_plant_bush"]
+[ext_resource type="PackedScene" path="res://assets/nature/plant_bushDetailed.glb" id="m_plant_bushDetailed"]
+[ext_resource type="PackedScene" path="res://assets/nature/plant_bushSmall.glb" id="m_plant_bushSmall"]
+[ext_resource type="PackedScene" path="res://assets/nature/plant_bushLargeTriangle.glb" id="m_plant_bushLargeTriangle"]
+[ext_resource type="PackedScene" path="res://assets/nature/plant_bushTriangle.glb" id="m_plant_bushTriangle"]
+[ext_resource type="PackedScene" path="res://assets/nature/plant_flatTall.glb" id="m_plant_flatTall"]
+[ext_resource type="PackedScene" path="res://assets/nature/plant_flatShort.glb" id="m_plant_flatShort"]
+[ext_resource type="PackedScene" path="res://assets/nature/flower_redA.glb" id="m_flower_redA"]
+[ext_resource type="PackedScene" path="res://assets/nature/flower_yellowB.glb" id="m_flower_yellowB"]
+[ext_resource type="PackedScene" path="res://assets/nature/flower_purpleC.glb" id="m_flower_purpleC"]
+[ext_resource type="PackedScene" path="res://assets/nature/flower_redC.glb" id="m_flower_redC"]
+[ext_resource type="PackedScene" path="res://assets/nature/mushroom_red.glb" id="m_mushroom_red"]
+[ext_resource type="PackedScene" path="res://assets/nature/mushroom_tan.glb" id="m_mushroom_tan"]
+[ext_resource type="PackedScene" path="res://assets/nature/mushroom_redGroup.glb" id="m_mushroom_redGroup"]
+[ext_resource type="PackedScene" path="res://assets/nature/mushroom_tanGroup.glb" id="m_mushroom_tanGroup"]
+[ext_resource type="PackedScene" path="res://assets/nature/stump_squareDetailed.glb" id="m_stump_squareDetailed"]
+[ext_resource type="PackedScene" path="res://assets/nature/crops_dirtRow.glb" id="m_crops_dirtRow"]
+[ext_resource type="PackedScene" path="res://assets/nature/crops_cornStageD.glb" id="m_crops_cornStageD"]
+[ext_resource type="PackedScene" path="res://assets/nature/crops_wheatStageB.glb" id="m_crops_wheatStageB"]
+[ext_resource type="PackedScene" path="res://assets/nature/crop_carrot.glb" id="m_crop_carrot"]
+[ext_resource type="PackedScene" path="res://assets/nature/crop_melon.glb" id="m_crop_melon"]
+[ext_resource type="PackedScene" path="res://assets/nature/crop_pumpkin.glb" id="m_crop_pumpkin"]
+[ext_resource type="PackedScene" path="res://assets/nature/crop_turnip.glb" id="m_crop_turnip"]
+[ext_resource type="PackedScene" path="res://assets/nature/fence_simple.glb" id="m_fence_simple"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Soil_0"]
+albedo_color = Color(0.26, 0.20, 0.15, 1)
+
+[sub_resource type="BoxMesh" id="Box_Soil_0"]
+size = Vector3(58.0, 0.4, 54.0)
+material = SubResource("Mat_Soil_0")
+
+[sub_resource type="StandardMaterial3D" id="Mat_Kerb_2"]
+albedo_color = Color(0.46, 0.45, 0.41, 1)
+
+[sub_resource type="BoxMesh" id="Box_Kerb_2"]
+size = Vector3(1.0, 0.05, 1.0)
+material = SubResource("Mat_Kerb_2")
+
+[sub_resource type="StandardMaterial3D" id="Mat_Earth_4"]
+albedo_color = Color(0.53, 0.48, 0.34, 1)
+
+[sub_resource type="BoxMesh" id="Box_Earth_4"]
+size = Vector3(1.0, 0.03, 1.0)
+material = SubResource("Mat_Earth_4")
+
+[sub_resource type="BoxShape3D" id="Shape_Land_6"]
+size = Vector3(52.0, 2.0, 31.75)
+
+[sub_resource type="BoxShape3D" id="Shape_Land_7"]
+size = Vector3(52.0, 2.0, 5.75)
+
+[sub_resource type="BoxShape3D" id="Shape_Land_8"]
+size = Vector3(37.75, 2.0, 14.5)
+
+[sub_resource type="BoxShape3D" id="Shape_Pond_9"]
+size = Vector3(14.5, 2.0, 14.5)
+
+[node name="VillageFields" type="Node3D"]
+script = ExtResource("1_scene_script")
+[node name="Atmosphere" parent="." type="Node3D"]
+
+[node name="Terrain" parent="." type="Node3D"]
+
+[node name="Lawn" parent="Terrain" type="Node3D"]
+
+[node name="Meadow" parent="Terrain/Lawn" instance=ExtResource("m_ground_grass")]
+transform = Transform3D(52.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 52.000000, 0.0000, -0.0300, 0.0000)
+
+[node name="Underlay" parent="Terrain" type="Node3D"]
+
+[node name="SoilSlab" parent="Terrain/Underlay" type="MeshInstance3D"]
+mesh = SubResource("Box_Soil_0")
+position = Vector3(0.0000, -0.5500, 0.0000)
+
+[node name="Hills" parent="Terrain" type="Node3D"]
+
+[node name="Hill0" parent="Terrain/Hills" type="Node3D"]
+metadata/centre = Vector2(-19.00, -18.00)
+metadata/radii = Vector2(6.50, 5.00)
+metadata/height = 1.00
+metadata/seed = 3.453
+
+[node name="Hill1" parent="Terrain/Hills" type="Node3D"]
+metadata/centre = Vector2(-21.50, -13.00)
+metadata/radii = Vector2(3.50, 2.50)
+metadata/height = 0.50
+metadata/seed = 0.489
+
+[node name="Hill2" parent="Terrain/Hills" type="Node3D"]
+metadata/centre = Vector2(22.00, -18.50)
+metadata/radii = Vector2(4.00, 3.00)
+metadata/height = 1.00
+metadata/seed = 1.419
+
+[node name="Roads" parent="." type="Node3D"]
+
+[node name="MainRoad" parent="Roads" type="Node3D"]
+metadata/spine = PackedVector3Array(-26.000, 0, 5.000, -16.000, 0, 5.800, -6.000, 0, 4.600, 4.000, 0, 5.400, 14.000, 0, 4.400, 22.000, 0, 5.000, 26.000, 0, 4.800)
+metadata/half_width = 1.05
+metadata/kind = "dirt"
+metadata/seed = 4.282
+
+[node name="NorthLoop" parent="Roads" type="Node3D"]
+metadata/spine = PackedVector3Array(-4.000, 0, 5.400, -4.800, 0, -3.000, 0.000, 0, -9.500, 6.000, 0, -12.500, 12.000, 0, -11.000, 16.000, 0, -5.000, 15.000, 0, 1.000, 14.000, 0, 4.600)
+metadata/half_width = 1.05
+metadata/kind = "dirt"
+metadata/seed = 1.462
+
+[node name="HillLane" parent="Roads" type="Node3D"]
+metadata/spine = PackedVector3Array(-4.800, 0, -3.000, -9.500, 0, -5.500, -13.500, 0, -9.500, -16.500, 0, -13.000)
+metadata/half_width = 1.05
+metadata/kind = "dirt"
+metadata/seed = 0.185
+
+[node name="PondLane" parent="Roads" type="Node3D"]
+metadata/spine = PackedVector3Array(-9.500, 0, 4.600, -10.600, 0, 9.000, -10.200, 0, 14.000, -13.000, 0, 18.500, -18.000, 0, 21.500)
+metadata/half_width = 1.05
+metadata/kind = "dirt"
+metadata/seed = 4.588
+
+[node name="CampTrack" parent="Roads" type="Node3D"]
+metadata/spine = PackedVector3Array(6.000, 0, -12.500, 4.000, 0, -16.500, 6.500, 0, -19.500)
+metadata/half_width = 1.05
+metadata/kind = "dirt"
+metadata/seed = 0.077
+
+[node name="FarmTrack" parent="Roads" type="Node3D"]
+metadata/spine = PackedVector3Array(22.000, 0, 5.000, 24.000, 0, 9.500, 23.000, 0, 14.500, 20.000, 0, 18.000)
+metadata/half_width = 1.05
+metadata/kind = "dirt"
+metadata/seed = 4.768
+
+[node name="PondDock" parent="Roads" type="Node3D"]
+metadata/spine = PackedVector3Array(-12.400, 0, 10.000, -15.400, 0, 10.600)
+metadata/half_width = 0.9
+metadata/kind = "wood"
+metadata/seed = 5.684
+
+[node name="CampPlanks" parent="Roads" type="Node3D"]
+metadata/spine = PackedVector3Array(1.400, 0, -17.200, 3.200, 0, -18.600)
+metadata/half_width = 0.9
+metadata/kind = "wood"
+metadata/seed = 4.533
+
+[node name="FarmYard" parent="Roads" type="Node3D"]
+metadata/spine = PackedVector3Array(23.600, 0, 8.400, 22.200, 0, 10.200)
+metadata/half_width = 0.9
+metadata/kind = "wood"
+metadata/seed = 5.635
+
+[node name="Water" parent="." type="Node3D"]
+
+[node name="Pond" parent="Water" type="Node3D"]
+metadata/centre = Vector2(-19.00, 13.00)
+metadata/radius = 5.00
+metadata/seed = 7.592
+
+[node name="WaterPoints" parent="Water" type="Node3D"]
+
+[node name="Trees" parent="Terrain" type="Node3D"]
+
+[node name="Belt0_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(0.552070, 0, 0.893571, 0, 1.050358, 0, -0.893571, 0, 0.552070, -27.1222, -0.0300, -22.9822)
+
+[node name="Belt0_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-1.409774, 0, 0.851289, 0, 1.646863, 0, -0.851289, 0, -1.409774, -26.0026, -0.0300, -23.3945)
+
+[node name="Belt0_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-1.025814, 0, -0.697897, 0, 1.240708, 0, 0.697897, 0, -1.025814, -26.5831, -0.0300, -24.5447)
+
+[node name="Belt0_0_3" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-1.052051, 0, 0.134651, 0, 1.060632, 0, -0.134651, 0, -1.052051, -25.3132, -0.0300, -24.7122)
+
+[node name="Belt0_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.961036, 0, -0.064526, 0, 0.963200, 0, 0.064526, 0, -0.961036, -25.5698, -0.0300, 22.5444)
+
+[node name="Belt0_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.438361, 0, 1.459098, 0, 1.523525, 0, -1.459098, 0, -0.438361, -26.4201, -0.0300, 23.8503)
+
+[node name="Belt0_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.157084, 0, 1.285649, 0, 1.295210, 0, -1.285649, 0, -0.157084, -25.9444, -0.0300, 23.6270)
+
+[node name="Belt0_1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.542384, 0, 0.376346, 0, 1.587635, 0, -0.376346, 0, 1.542384, -25.3075, -0.0300, 24.2443)
+
+[node name="Belt0_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.014991, 0, 0.017667, 0, 1.015145, 0, -0.017667, 0, 1.014991, -21.4373, -0.0300, -26.7016)
+
+[node name="Belt0_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.957311, 0, 0.290233, 0, 1.000340, 0, -0.290233, 0, -0.957311, -22.5964, -0.0300, -24.7136)
+
+[node name="Belt0_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-0.155899, 0, 0.994821, 0, 1.006962, 0, -0.994821, 0, -0.155899, 24.5411, -0.0300, -25.7005)
+
+[node name="Belt0_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-1.400693, 0, 0.738252, 0, 1.583337, 0, -0.738252, 0, -1.400693, 24.2745, -0.0300, -26.1162)
+
+[node name="Belt1_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.735054, 0, -0.688872, 0, 1.007397, 0, 0.688872, 0, -0.735054, -25.8311, -0.0300, 22.7732)
+
+[node name="Belt1_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(1.124868, 0, -1.059251, 0, 1.545103, 0, 1.059251, 0, 1.124868, -24.9210, -0.0300, 24.6397)
+
+[node name="Belt1_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(1.003904, 0, -0.860255, 0, 1.322067, 0, 0.860255, 0, 1.003904, -24.4877, -0.0300, 23.6616)
+
+[node name="Belt1_1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(1.209804, 0, 1.023319, 0, 1.584553, 0, -1.023319, 0, 1.209804, -24.3709, -0.0300, 24.4992)
+
+[node name="Belt1_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.571790, 0, -0.885425, 0, 1.054002, 0, 0.885425, 0, -0.571790, -23.5463, -0.0300, -24.7483)
+
+[node name="Belt1_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.143993, 0, -0.985797, 0, 1.510137, 0, 0.985797, 0, 1.143993, -25.0777, -0.0300, -24.9876)
+
+[node name="Belt1_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-1.129592, 0, -1.136569, 0, 1.602425, 0, 1.136569, 0, -1.129592, 24.3443, -0.0300, -24.1935)
+
+[node name="Belt1_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(1.407838, 0, 0.612484, 0, 1.535300, 0, -0.612484, 0, 1.407838, 26.1581, -0.0300, -25.0473)
+
+[node name="Belt1_3_2" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(0.922099, 0, -0.751863, 0, 1.189775, 0, 0.751863, 0, 0.922099, 22.9324, -0.0300, -24.6233)
+
+[node name="Belt1_3_3" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.577480, 0, 1.478322, 0, 1.587110, 0, -1.478322, 0, -0.577480, 24.2519, -0.0300, -24.4268)
+
+[node name="Belt2_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-1.147066, 0, -0.466624, 0, 1.238345, 0, 0.466624, 0, -1.147066, -22.5753, -0.0300, -22.9337)
+
+[node name="Belt2_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(0.893988, 0, -1.051934, 0, 1.380500, 0, 1.051934, 0, 0.893988, -23.1283, -0.0300, -23.0727)
+
+[node name="Belt2_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.692830, 0, -1.005952, 0, 1.221455, 0, 1.005952, 0, -0.692830, -24.4307, -0.0300, -24.0396)
+
+[node name="Belt2_0_3" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-1.376465, 0, -0.738685, 0, 1.562150, 0, 0.738685, 0, -1.376465, -23.0582, -0.0300, -22.7568)
+
+[node name="Belt2_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-1.456725, 0, 0.408370, 0, 1.512882, 0, -0.408370, 0, -1.456725, -22.5797, -0.0300, 24.5576)
+
+[node name="Belt2_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(1.085593, 0, -0.252705, 0, 1.114618, 0, 0.252705, 0, 1.085593, -22.1075, -0.0300, 23.3543)
+
+[node name="Belt2_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(0.101776, 0, 1.318611, 0, 1.322532, 0, -1.318611, 0, 0.101776, -20.5614, -0.0300, 24.5262)
+
+[node name="Belt2_1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-0.800386, 0, 0.811731, 0, 1.139968, 0, -0.811731, 0, -0.800386, -20.7133, -0.0300, 23.2635)
+
+[node name="Belt2_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.275576, 0, 1.334930, 0, 1.363077, 0, -1.334930, 0, 0.275576, -25.4712, -0.0300, -21.4424)
+
+[node name="Belt2_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.339445, 0, -1.608557, 0, 1.643982, 0, 1.608557, 0, -0.339445, -24.2155, -0.0300, -22.4841)
+
+[node name="Belt2_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(1.555405, 0, 0.023848, 0, 1.555587, 0, -0.023848, 0, 1.555405, -24.0628, -0.0300, -22.1620)
+
+[node name="Belt2_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-0.243568, 0, -1.137577, 0, 1.163360, 0, 1.137577, 0, -0.243568, 24.4561, -0.0300, -23.4169)
+
+[node name="Belt2_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-1.314384, 0, -0.785484, 0, 1.531205, 0, 0.785484, 0, -1.314384, 22.8703, -0.0300, -22.2320)
+
+[node name="Belt2_3_2" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.372369, 0, -0.153169, 0, 1.380890, 0, 0.153169, 0, 1.372369, 24.5515, -0.0300, -21.8013)
+
+[node name="Belt2_3_3" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(0.938103, 0, 1.131798, 0, 1.470035, 0, -1.131798, 0, 0.938103, 24.2392, -0.0300, -20.9390)
+
+[node name="Belt3_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-1.002195, 0, -0.705484, 0, 1.225602, 0, 0.705484, 0, -1.002195, -22.1963, -0.0300, -25.3653)
+
+[node name="Belt3_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-1.065242, 0, 0.401451, 0, 1.138378, 0, -0.401451, 0, -1.065242, -19.8911, -0.0300, -26.1882)
+
+[node name="Belt3_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(1.220498, 0, 0.393006, 0, 1.282212, 0, -0.393006, 0, 1.220498, -20.4736, -0.0300, -24.5416)
+
+[node name="Belt3_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(1.168716, 0, -0.989195, 0, 1.531145, 0, 0.989195, 0, 1.168716, -20.9194, -0.0300, 23.3049)
+
+[node name="Belt3_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-1.235106, 0, 0.369037, 0, 1.289060, 0, -0.369037, 0, -1.235106, -20.1230, -0.0300, 22.3285)
+
+[node name="Belt3_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(0.737404, 0, 1.166007, 0, 1.379615, 0, -1.166007, 0, 0.737404, -21.8745, -0.0300, 23.3719)
+
+[node name="Belt3_1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(1.602521, 0, -0.095263, 0, 1.605350, 0, 0.095263, 0, 1.602521, -20.1058, -0.0300, 24.0220)
+
+[node name="Belt3_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.144271, 0, -1.142116, 0, 1.616720, 0, 1.142116, 0, 1.144271, -23.9451, -0.0300, -20.5450)
+
+[node name="Belt3_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.089062, 0, -1.043571, 0, 1.047365, 0, 1.043571, 0, -0.089062, -24.4702, -0.0300, -21.1880)
+
+[node name="Belt3_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-1.560450, 0, 0.288029, 0, 1.586810, 0, -0.288029, 0, -1.560450, -25.5974, -0.0300, -19.6623)
+
+[node name="Belt3_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-0.818452, 0, 0.607304, 0, 1.019157, 0, -0.607304, 0, -0.818452, 26.5418, -0.0300, -20.0716)
+
+[node name="Belt3_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(1.035065, 0, 1.313483, 0, 1.672302, 0, -1.313483, 0, 1.035065, 24.9370, -0.0300, -19.3804)
+
+[node name="Belt3_3_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.633587, 0, 0.883681, 0, 1.087347, 0, -0.883681, 0, -0.633587, 26.1528, -0.0300, -19.3710)
+
+[node name="Belt3_3_3" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-1.010026, 0, 1.037560, 0, 1.447992, 0, -1.037560, 0, -1.010026, 26.1095, -0.0300, -20.9216)
+
+[node name="Belt4_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(0.902987, 0, 0.332163, 0, 0.962142, 0, -0.332163, 0, 0.902987, -19.1217, -0.0300, -24.5722)
+
+[node name="Belt4_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.605440, 0, 0.960411, 0, 1.135317, 0, -0.960411, 0, -0.605440, -18.8116, -0.0300, -24.5195)
+
+[node name="Belt4_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-0.992774, 0, -0.457297, 0, 1.093033, 0, 0.457297, 0, -0.992774, -19.2380, -0.0300, -24.4866)
+
+[node name="Belt4_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.460972, 0, 1.628998, 0, 1.692965, 0, -1.628998, 0, -0.460972, -20.7014, -0.0300, 23.8725)
+
+[node name="Belt4_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-0.487903, 0, -1.305316, 0, 1.393520, 0, 1.305316, 0, -0.487903, -19.6681, -0.0300, 23.5134)
+
+[node name="Belt4_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.703703, 0, 0.973830, 0, 1.201475, 0, -0.973830, 0, 0.703703, -18.9055, -0.0300, 24.2197)
+
+[node name="Belt4_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-0.699964, 0, -1.194340, 0, 1.384340, 0, 1.194340, 0, -0.699964, -25.0831, -0.0300, -18.4633)
+
+[node name="Belt4_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-1.294820, 0, -0.843451, 0, 1.545305, 0, 0.843451, 0, -1.294820, -23.5534, -0.0300, -18.6204)
+
+[node name="Belt4_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(0.805387, 0, -1.181894, 0, 1.430217, 0, 1.181894, 0, 0.805387, 26.3405, -0.0300, -19.5563)
+
+[node name="Belt4_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(0.945737, 0, 0.312158, 0, 0.995922, 0, -0.312158, 0, 0.945737, 24.1575, -0.0300, -19.3545)
+
+[node name="Belt4_3_2" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-0.800380, 0, -1.488507, 0, 1.690047, 0, 1.488507, 0, -0.800380, 24.6833, -0.0300, -17.8224)
+
+[node name="Belt4_3_3" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.365551, 0, -1.048729, 0, 1.110613, 0, 1.048729, 0, -0.365551, 23.2469, -0.0300, -18.7043)
+
+[node name="Belt5_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.130452, 0, 0.658425, 0, 1.308222, 0, -0.658425, 0, 1.130452, -16.6397, -0.0300, 24.2344)
+
+[node name="Belt5_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.378180, 0, -0.982486, 0, 1.052758, 0, 0.982486, 0, -0.378180, -18.1719, -0.0300, 25.6735)
+
+[node name="Belt5_1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.032472, 0, 0.017907, 0, 1.032628, 0, -0.017907, 0, 1.032472, -16.7967, -0.0300, 23.8446)
+
+[node name="Belt5_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.015090, 0, -1.154599, 0, 1.154697, 0, 1.154599, 0, -0.015090, -23.1055, -0.0300, -16.9623)
+
+[node name="Belt5_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-1.536336, 0, -0.397964, 0, 1.587042, 0, 0.397964, 0, -1.536336, -23.9397, -0.0300, -17.0529)
+
+[node name="Belt5_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.904243, 0, 0.502750, 0, 1.034607, 0, -0.502750, 0, 0.904243, -23.1343, -0.0300, -18.6566)
+
+[node name="Belt5_2_3" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-0.569563, 0, -1.203701, 0, 1.331653, 0, 1.203701, 0, -0.569563, -22.0933, -0.0300, -16.9856)
+
+[node name="Belt5_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.417462, 0, -0.901668, 0, 0.993620, 0, 0.901668, 0, -0.417462, 25.7876, -0.0300, -17.4204)
+
+[node name="Belt5_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-0.130377, 0, 1.209498, 0, 1.216505, 0, -1.209498, 0, -0.130377, 26.6610, -0.0300, -17.4428)
+
+[node name="Belt6_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.156636, 0, -1.181464, 0, 1.653380, 0, 1.181464, 0, 1.156636, -15.2858, -0.0300, -25.5893)
+
+[node name="Belt6_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(0.968500, 0, 0.875832, 0, 1.305785, 0, -0.875832, 0, 0.968500, -14.6091, -0.0300, -24.4547)
+
+[node name="Belt6_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.894289, 0, -0.561247, 0, 1.055817, 0, 0.561247, 0, 0.894289, -16.1940, -0.0300, 22.9932)
+
+[node name="Belt6_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.152089, 0, -0.434677, 0, 1.231362, 0, 0.434677, 0, 1.152089, -15.5608, -0.0300, 22.4992)
+
+[node name="Belt6_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.952783, 0, 0.042772, 0, 0.953742, 0, -0.042772, 0, 0.952783, -23.5962, -0.0300, -15.6897)
+
+[node name="Belt6_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(1.055422, 0, -0.831920, 0, 1.343878, 0, 0.831920, 0, 1.055422, -24.3853, -0.0300, -15.3258)
+
+[node name="Belt6_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(0.987423, 0, 0.022215, 0, 0.987672, 0, -0.022215, 0, 0.987423, -24.3425, -0.0300, -14.3457)
+
+[node name="Belt6_2_3" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-0.640966, 0, -1.304638, 0, 1.453587, 0, 1.304638, 0, -0.640966, -24.5483, -0.0300, -15.2489)
+
+[node name="Belt6_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(0.012996, 0, 1.681635, 0, 1.681685, 0, -1.681635, 0, 0.012996, 23.0791, -0.0300, -15.0128)
+
+[node name="Belt6_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(0.830663, 0, 0.505377, 0, 0.972320, 0, -0.505377, 0, 0.830663, 24.7591, -0.0300, -14.0117)
+
+[node name="Belt7_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(1.053973, 0, 0.928731, 0, 1.404777, 0, -0.928731, 0, 1.053973, -12.3351, -0.0300, -24.4491)
+
+[node name="Belt7_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(0.403532, 0, -0.944533, 0, 1.027122, 0, 0.944533, 0, 0.403532, -11.2520, -0.0300, -24.2284)
+
+[node name="Belt7_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(0.169377, 0, 1.097507, 0, 1.110500, 0, -1.097507, 0, 0.169377, -13.0627, -0.0300, 25.2853)
+
+[node name="Belt7_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.232249, 0, 1.625275, 0, 1.641785, 0, -1.625275, 0, 0.232249, -14.2306, -0.0300, 23.2393)
+
+[node name="Belt7_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(0.968865, 0, 0.790807, 0, 1.250630, 0, -0.790807, 0, 0.968865, -13.8674, -0.0300, 25.3979)
+
+[node name="Belt7_1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-1.292777, 0, -0.443252, 0, 1.366655, 0, 0.443252, 0, -1.292777, -14.6220, -0.0300, 25.9157)
+
+[node name="Belt7_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-0.376921, 0, 1.352714, 0, 1.404245, 0, -1.352714, 0, -0.376921, -21.7553, -0.0300, -14.7131)
+
+[node name="Belt7_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.576531, 0, -1.521983, 0, 1.627520, 0, 1.521983, 0, 0.576531, -22.8628, -0.0300, -13.6311)
+
+[node name="Belt7_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(1.370742, 0, 0.317812, 0, 1.407102, 0, -0.317812, 0, 1.370742, 22.6563, -0.0300, -13.4682)
+
+[node name="Belt7_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.657576, 0, 0.173938, 0, 1.666678, 0, -0.173938, 0, 1.657576, 24.0481, -0.0300, -14.3608)
+
+[node name="Belt7_3_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.840922, 0, 0.833139, 0, 1.183752, 0, -0.833139, 0, -0.840922, 23.1171, -0.0300, -11.9595)
+
+[node name="Belt8_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(0.252890, 0, 1.471365, 0, 1.492940, 0, -1.471365, 0, 0.252890, -10.4092, -0.0300, -25.2236)
+
+[node name="Belt8_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.345573, 0, 1.030632, 0, 1.087025, 0, -1.030632, 0, -0.345573, -11.6962, -0.0300, -23.8831)
+
+[node name="Belt8_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(1.080586, 0, 0.928204, 0, 1.424510, 0, -0.928204, 0, 1.080586, -10.7398, -0.0300, -24.4060)
+
+[node name="Belt8_0_3" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-0.981894, 0, -0.313657, 0, 1.030775, 0, 0.313657, 0, -0.981894, -9.4881, -0.0300, -24.1711)
+
+[node name="Belt8_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.218594, 0, 1.600761, 0, 1.615617, 0, -1.600761, 0, -0.218594, -10.1228, -0.0300, 23.7393)
+
+[node name="Belt8_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(1.003922, 0, 0.310228, 0, 1.050763, 0, -0.310228, 0, 1.003922, -11.1318, -0.0300, 24.0331)
+
+[node name="Belt8_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(1.028204, 0, 1.329343, 0, 1.680582, 0, -1.329343, 0, 1.028204, -23.1882, -0.0300, -11.4919)
+
+[node name="Belt8_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(0.265545, 0, 0.971147, 0, 1.006798, 0, -0.971147, 0, 0.265545, -23.8777, -0.0300, -10.6623)
+
+[node name="Belt8_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-1.100343, 0, -0.549033, 0, 1.229712, 0, 0.549033, 0, -1.100343, -23.0514, -0.0300, -13.2770)
+
+[node name="Belt8_2_3" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.902137, 0, -1.289459, 0, 1.573707, 0, 1.289459, 0, -0.902137, -24.3282, -0.0300, -12.3574)
+
+[node name="Belt8_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.920255, 0, -1.168243, 0, 1.487165, 0, 1.168243, 0, -0.920255, 23.2974, -0.0300, -12.2906)
+
+[node name="Belt8_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(0.094833, 0, 1.524133, 0, 1.527080, 0, -1.524133, 0, 0.094833, 22.3103, -0.0300, -12.4926)
+
+[node name="Belt9_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.911089, 0, -1.424543, 0, 1.690978, 0, 1.424543, 0, 0.911089, -11.4140, -0.0300, -23.4707)
+
+[node name="Belt9_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-1.062639, 0, -0.360246, 0, 1.122043, 0, 0.360246, 0, -1.062639, -7.9187, -0.0300, -23.8665)
+
+[node name="Belt9_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(0.084695, 0, -1.232461, 0, 1.235367, 0, 1.232461, 0, 0.084695, -9.9734, -0.0300, -22.7678)
+
+[node name="Belt9_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.327299, 0, 0.280528, 0, 1.356620, 0, -0.280528, 0, 1.327299, -8.6403, -0.0300, 23.8024)
+
+[node name="Belt9_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.976937, 0, -0.273670, 0, 1.014545, 0, 0.273670, 0, 0.976937, -10.4902, -0.0300, 24.5457)
+
+[node name="Belt9_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-1.275573, 0, -0.854166, 0, 1.535150, 0, 0.854166, 0, -1.275573, -8.5471, -0.0300, 22.6569)
+
+[node name="Belt9_1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-1.429025, 0, -0.305595, 0, 1.461335, 0, 0.305595, 0, -1.429025, -10.1837, -0.0300, 25.2209)
+
+[node name="Belt9_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(1.530138, 0, 0.683374, 0, 1.675805, 0, -0.683374, 0, 1.530138, -25.4899, -0.0300, -10.4085)
+
+[node name="Belt9_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-0.849452, 0, -0.464422, 0, 0.968120, 0, 0.464422, 0, -0.849452, -25.1014, -0.0300, -10.6125)
+
+[node name="Belt9_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-1.128534, 0, -0.957866, 0, 1.480235, 0, 0.957866, 0, -1.128534, -26.8600, -0.0300, -9.9313)
+
+[node name="Belt9_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(1.512966, 0, -0.258573, 0, 1.534902, 0, 0.258573, 0, 1.512966, 24.5611, -0.0300, -9.4316)
+
+[node name="Belt9_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-1.149591, 0, -0.251206, 0, 1.176718, 0, 0.251206, 0, -1.149591, 22.5406, -0.0300, -10.2082)
+
+[node name="Belt9_3_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.184801, 0, -1.575793, 0, 1.586593, 0, 1.575793, 0, -0.184801, 25.5491, -0.0300, -10.9536)
+
+[node name="Belt9_3_3" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-0.731750, 0, -1.002392, 0, 1.241067, 0, 1.002392, 0, -0.731750, 25.9056, -0.0300, -8.3474)
+
+[node name="Belt10_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-0.110561, 0, 1.584111, 0, 1.587965, 0, -1.584111, 0, -0.110561, -8.8445, -0.0300, 22.6831)
+
+[node name="Belt10_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(0.569617, 0, 0.863962, 0, 1.034840, 0, -0.863962, 0, 0.569617, -7.5888, -0.0300, 24.7593)
+
+[node name="Belt10_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-1.242994, 0, -0.204323, 0, 1.259675, 0, 0.204323, 0, -1.242994, -8.8458, -0.0300, 23.4643)
+
+[node name="Belt10_1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(0.149839, 0, -1.471561, 0, 1.479170, 0, 1.471561, 0, 0.149839, -8.0126, -0.0300, 24.5986)
+
+[node name="Belt10_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-0.668158, 0, 1.437925, 0, 1.585580, 0, -1.437925, 0, -0.668158, -24.2730, -0.0300, -7.9640)
+
+[node name="Belt10_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.049567, 0, -0.458501, 0, 1.145345, 0, 0.458501, 0, 1.049567, -23.6620, -0.0300, -6.4331)
+
+[node name="Belt10_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(1.104841, 0, -0.839021, 0, 1.387310, 0, 0.839021, 0, 1.104841, -24.6502, -0.0300, -7.6146)
+
+[node name="Belt10_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(1.592266, 0, 0.330368, 0, 1.626177, 0, -0.330368, 0, 1.592266, 25.5756, -0.0300, -9.2582)
+
+[node name="Belt10_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.279206, 0, -0.414751, 0, 1.344762, 0, 0.414751, 0, 1.279206, 24.0308, -0.0300, -7.6442)
+
+[node name="Belt11_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(0.569356, 0, -1.549300, 0, 1.650605, 0, 1.549300, 0, 0.569356, -6.9491, -0.0300, -25.2380)
+
+[node name="Belt11_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-1.146195, 0, -0.242854, 0, 1.171640, 0, 0.242854, 0, -1.146195, -6.1777, -0.0300, -24.6420)
+
+[node name="Belt11_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-0.219127, 0, -1.564322, 0, 1.579595, 0, 1.564322, 0, -0.219127, -4.5784, -0.0300, -23.3088)
+
+[node name="Belt11_0_3" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-1.352812, 0, 0.126249, 0, 1.358690, 0, -0.126249, 0, -1.352812, -6.7606, -0.0300, -24.4659)
+
+[node name="Belt11_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.504291, 0, -1.110921, 0, 1.220023, 0, 1.110921, 0, -0.504291, -6.0844, -0.0300, 23.2755)
+
+[node name="Belt11_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-0.733905, 0, 0.874535, 0, 1.141677, 0, -0.874535, 0, -0.733905, -6.5264, -0.0300, 23.7635)
+
+[node name="Belt11_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-1.278986, 0, 1.045407, 0, 1.651873, 0, -1.045407, 0, -1.278986, -8.1886, -0.0300, 24.4577)
+
+[node name="Belt11_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-0.032162, 0, 1.184621, 0, 1.185058, 0, -1.184621, 0, -0.032162, -21.9765, -0.0300, -6.5877)
+
+[node name="Belt11_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.775695, 0, 1.246750, 0, 1.468363, 0, -1.246750, 0, -0.775695, -23.3415, -0.0300, -5.7001)
+
+[node name="Belt12_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(0.772908, 0, 1.036588, 0, 1.293020, 0, -1.036588, 0, 0.772908, -5.6630, -0.0300, -25.2307)
+
+[node name="Belt12_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(0.921392, 0, -0.331656, 0, 0.979265, 0, 0.331656, 0, 0.921392, -4.1109, -0.0300, -24.6761)
+
+[node name="Belt12_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(1.232876, 0, 0.492347, 0, 1.327550, 0, -0.492347, 0, 1.232876, -3.3814, -0.0300, -24.4071)
+
+[node name="Belt12_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-0.565599, 0, 0.785100, 0, 0.967617, 0, -0.785100, 0, -0.565599, -5.2096, -0.0300, 23.5769)
+
+[node name="Belt12_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.110029, 0, -0.440621, 0, 1.194282, 0, 0.440621, 0, 1.110029, -4.5704, -0.0300, 24.3569)
+
+[node name="Belt12_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(1.270765, 0, -1.044293, 0, 1.644807, 0, 1.044293, 0, 1.270765, -2.5738, -0.0300, 23.5405)
+
+[node name="Belt12_1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-1.136949, 0, -0.179636, 0, 1.151053, 0, 0.179636, 0, -1.136949, -2.9398, -0.0300, 23.0528)
+
+[node name="Belt13_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(0.120708, 0, -1.012770, 0, 1.019937, 0, 1.012770, 0, 0.120708, -2.8750, -0.0300, -23.3847)
+
+[node name="Belt13_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-0.940765, 0, 0.325004, 0, 0.995322, 0, -0.325004, 0, -0.940765, -2.5323, -0.0300, -23.3522)
+
+[node name="Belt13_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(0.598782, 0, -1.011470, 0, 1.175420, 0, 1.011470, 0, 0.598782, -2.6976, -0.0300, 24.5502)
+
+[node name="Belt13_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(0.346033, 0, -1.258977, 0, 1.305665, 0, 1.258977, 0, 0.346033, -3.3829, -0.0300, 23.6717)
+
+[node name="Belt13_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.090356, 0, 1.587300, 0, 1.589870, 0, -1.587300, 0, 0.090356, -2.0423, -0.0300, 23.1613)
+
+[node name="Belt13_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(1.442592, 0, 0.034541, 0, 1.443005, 0, -0.034541, 0, 1.442592, -23.8755, -0.0300, -1.7354)
+
+[node name="Belt13_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.387535, 0, 0.348370, 0, 1.430600, 0, -0.348370, 0, 1.387535, -24.1294, -0.0300, -1.6581)
+
+[node name="Belt13_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(0.841915, 0, 0.511498, 0, 0.985115, 0, -0.511498, 0, 0.841915, -23.0672, -0.0300, -3.0115)
+
+[node name="Belt13_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-1.270089, 0, -0.170351, 0, 1.281462, 0, 0.170351, 0, -1.270089, 23.1231, -0.0300, -1.9626)
+
+[node name="Belt13_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.723852, 0, -1.366703, 0, 1.546558, 0, 1.366703, 0, -0.723852, 24.3271, -0.0300, -3.2826)
+
+[node name="Belt13_3_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-1.100021, 0, -0.470943, 0, 1.196592, 0, 0.470943, 0, -1.100021, 23.4912, -0.0300, -4.5578)
+
+[node name="Belt13_3_3" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(0.134448, 0, -1.502906, 0, 1.508907, 0, 1.502906, 0, 0.134448, 24.6638, -0.0300, -2.6675)
+
+[node name="Belt14_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(1.048228, 0, -0.013700, 0, 1.048318, 0, 0.013700, 0, 1.048228, -1.8771, -0.0300, -23.8456)
+
+[node name="Belt14_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(0.810603, 0, -0.928113, 0, 1.232263, 0, 0.928113, 0, 0.810603, -0.7051, -0.0300, -24.7880)
+
+[node name="Belt14_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(1.143267, 0, 1.015997, 0, 1.529480, 0, -1.015997, 0, 1.143267, -0.7048, -0.0300, 24.1246)
+
+[node name="Belt14_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.957836, 0, -1.069942, 0, 1.436045, 0, 1.069942, 0, 0.957836, -0.6324, -0.0300, 24.6836)
+
+[node name="Belt15_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-0.781880, 0, -0.549882, 0, 0.955880, 0, 0.549882, 0, -0.781880, 0.0532, -0.0300, -25.0510)
+
+[node name="Belt15_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(0.615372, 0, -0.851817, 0, 1.050845, 0, 0.851817, 0, 0.615372, 0.1784, -0.0300, -22.6773)
+
+[node name="Belt15_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.028259, 0, 1.083522, 0, 1.083890, 0, -1.083522, 0, -0.028259, -0.4770, -0.0300, -23.7583)
+
+[node name="Belt15_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-0.620519, 0, -0.935655, 0, 1.122718, 0, 0.935655, 0, -0.620519, 0.0436, -0.0300, 23.3319)
+
+[node name="Belt15_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-0.233642, 0, 1.283409, 0, 1.304502, 0, -1.283409, 0, -0.233642, -0.4261, -0.0300, 23.8072)
+
+[node name="Belt15_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.436032, 0, -1.142189, 0, 1.222587, 0, 1.142189, 0, 0.436032, 2.5103, -0.0300, 23.6293)
+
+[node name="Belt16_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-0.168715, 0, 1.068264, 0, 1.081505, 0, -1.068264, 0, -0.168715, 1.9847, -0.0300, -24.5922)
+
+[node name="Belt16_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-1.289347, 0, 0.715274, 0, 1.474460, 0, -0.715274, 0, -1.289347, 2.3219, -0.0300, -22.8408)
+
+[node name="Belt16_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.059611, 0, -1.447628, 0, 1.448855, 0, 1.447628, 0, -0.059611, 3.7831, -0.0300, -26.7422)
+
+[node name="Belt16_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.506938, 0, 0.866854, 0, 1.004202, 0, -0.866854, 0, 0.506938, 1.8732, -0.0300, 22.8537)
+
+[node name="Belt16_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-1.608301, 0, -0.225391, 0, 1.624017, 0, 0.225391, 0, -1.608301, 1.2632, -0.0300, 23.7936)
+
+[node name="Belt17_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(1.160798, 0, -0.968927, 0, 1.512042, 0, 0.968927, 0, 1.160798, 4.5064, -0.0300, -24.7834)
+
+[node name="Belt17_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(0.578470, 0, 1.250457, 0, 1.377778, 0, -1.250457, 0, 0.578470, 4.6148, -0.0300, -24.1780)
+
+[node name="Belt17_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-1.031619, 0, 0.831282, 0, 1.324865, 0, -0.831282, 0, -1.031619, 6.3395, -0.0300, 25.4709)
+
+[node name="Belt17_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.757835, 0, 0.700006, 0, 1.031660, 0, -0.700006, 0, -0.757835, 6.4059, -0.0300, 24.2989)
+
+[node name="Belt17_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-1.166267, 0, -0.232290, 0, 1.189175, 0, 0.232290, 0, -1.166267, 4.4583, -0.0300, 24.7558)
+
+[node name="Belt17_1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-0.884440, 0, 0.594992, 0, 1.065950, 0, -0.594992, 0, -0.884440, 3.8618, -0.0300, 25.7151)
+
+[node name="Belt18_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(0.865200, 0, 0.718415, 0, 1.124585, 0, -0.718415, 0, 0.865200, 5.1533, -0.0300, -23.7981)
+
+[node name="Belt18_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-1.377667, 0, 0.766082, 0, 1.576340, 0, -0.766082, 0, -1.377667, 6.8806, -0.0300, -23.4651)
+
+[node name="Belt18_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.381318, 0, 1.125494, 0, 1.188335, 0, -1.125494, 0, 0.381318, 7.4221, -0.0300, -23.2307)
+
+[node name="Belt18_0_3" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(0.492423, 0, -1.009492, 0, 1.123190, 0, 1.009492, 0, 0.492423, 5.8256, -0.0300, -22.9857)
+
+[node name="Belt18_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-0.952153, 0, -0.901591, 0, 1.311282, 0, 0.901591, 0, -0.952153, 6.5232, -0.0300, 24.5790)
+
+[node name="Belt18_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.131680, 0, 1.164556, 0, 1.171977, 0, -1.164556, 0, 0.131680, 7.2284, -0.0300, 25.6331)
+
+[node name="Belt18_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(0.179420, 0, 1.379796, 0, 1.391412, 0, -1.379796, 0, 0.179420, 6.5386, -0.0300, 24.4978)
+
+[node name="Belt19_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(1.330406, 0, -0.195148, 0, 1.344642, 0, 0.195148, 0, 1.330406, 10.0310, -0.0300, -24.0979)
+
+[node name="Belt19_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.050734, 0, 1.401219, 0, 1.402137, 0, -1.401219, 0, -0.050734, 10.1704, -0.0300, -24.6571)
+
+[node name="Belt19_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(0.132504, 0, -0.950271, 0, 0.959465, 0, 0.950271, 0, 0.132504, 6.1423, -0.0300, 24.0694)
+
+[node name="Belt19_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(0.817614, 0, -1.305149, 0, 1.540100, 0, 1.305149, 0, 0.817614, 7.4483, -0.0300, 24.6903)
+
+[node name="Belt19_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.471610, 0, -0.858239, 0, 0.979280, 0, 0.858239, 0, -0.471610, -23.7072, -0.0300, 8.0617)
+
+[node name="Belt19_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.212729, 0, -1.400587, 0, 1.416650, 0, 1.400587, 0, 0.212729, -23.1234, -0.0300, 7.2323)
+
+[node name="Belt19_2_3" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(0.838140, 0, 1.309213, 0, 1.554515, 0, -1.309213, 0, 0.838140, -25.0179, -0.0300, 8.5412)
+
+[node name="Belt20_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-1.543842, 0, -0.593924, 0, 1.654145, 0, 0.593924, 0, -1.543842, 10.0149, -0.0300, -24.0457)
+
+[node name="Belt20_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-0.698368, 0, 1.337423, 0, 1.508780, 0, -1.337423, 0, -0.698368, 9.8800, -0.0300, -24.0241)
+
+[node name="Belt20_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(1.136480, 0, -1.202786, 0, 1.654775, 0, 1.202786, 0, 1.136480, 10.0632, -0.0300, -24.3223)
+
+[node name="Belt20_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-1.247944, 0, 1.035298, 0, 1.621482, 0, -1.035298, 0, -1.247944, 9.0639, -0.0300, 22.5166)
+
+[node name="Belt20_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(0.955478, 0, -0.912743, 0, 1.321378, 0, 0.912743, 0, 0.955478, 10.2576, -0.0300, 23.3447)
+
+[node name="Belt20_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(1.146678, 0, -0.472776, 0, 1.240317, 0, 0.472776, 0, 1.146678, -25.0018, -0.0300, 8.7915)
+
+[node name="Belt20_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.237008, 0, -1.342055, 0, 1.362823, 0, 1.342055, 0, -0.237008, -23.6937, -0.0300, 10.2573)
+
+[node name="Belt20_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-0.953988, 0, 0.532921, 0, 1.092747, 0, -0.532921, 0, -0.953988, -23.8867, -0.0300, 9.9985)
+
+[node name="Belt21_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.059796, 0, 1.228588, 0, 1.230042, 0, -1.228588, 0, 0.059796, 12.2614, -0.0300, -22.5738)
+
+[node name="Belt21_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.896113, 0, 0.868176, 0, 1.247697, 0, -0.868176, 0, -0.896113, 10.4120, -0.0300, -22.5552)
+
+[node name="Belt21_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.123893, 0, 1.079889, 0, 1.086972, 0, -1.079889, 0, 0.123893, 10.4850, -0.0300, -23.1453)
+
+[node name="Belt21_0_3" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(0.153143, 0, 1.477291, 0, 1.485208, 0, -1.477291, 0, 0.153143, 11.5972, -0.0300, -21.1918)
+
+[node name="Belt21_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.729712, 0, -0.854274, 0, 1.123505, 0, 0.854274, 0, -0.729712, 11.4474, -0.0300, 24.1817)
+
+[node name="Belt21_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(1.338958, 0, -0.177105, 0, 1.350620, 0, 0.177105, 0, 1.338958, 11.3236, -0.0300, 25.7968)
+
+[node name="Belt21_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-0.323900, 0, -1.435061, 0, 1.471160, 0, 1.435061, 0, -0.323900, -23.5118, -0.0300, 12.1648)
+
+[node name="Belt21_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(1.552240, 0, 0.489407, 0, 1.627565, 0, -0.489407, 0, 1.552240, -21.3223, -0.0300, 12.4561)
+
+[node name="Belt21_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-1.103974, 0, 1.156972, 0, 1.599170, 0, -1.156972, 0, -1.103974, -22.9735, -0.0300, 13.0480)
+
+[node name="Belt21_2_3" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-1.304986, 0, -0.497146, 0, 1.396475, 0, 0.497146, 0, -1.304986, -22.8846, -0.0300, 11.8253)
+
+[node name="Belt22_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(1.105167, 0, -1.019162, 0, 1.503357, 0, 1.019162, 0, 1.105167, 13.7967, -0.0300, -22.9618)
+
+[node name="Belt22_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.407785, 0, -0.688351, 0, 1.567063, 0, 0.688351, 0, 1.407785, 15.4180, -0.0300, -25.1419)
+
+[node name="Belt22_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(0.555445, 0, 0.959876, 0, 1.109000, 0, -0.959876, 0, 0.555445, 13.7046, -0.0300, 24.7545)
+
+[node name="Belt22_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-0.105982, 0, 1.518511, 0, 1.522205, 0, -1.518511, 0, -0.105982, 13.6686, -0.0300, 24.4830)
+
+[node name="Belt22_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-1.582033, 0, 0.564071, 0, 1.679585, 0, -0.564071, 0, -1.582033, -24.3644, -0.0300, 14.2387)
+
+[node name="Belt22_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-1.259495, 0, -0.063601, 0, 1.261100, 0, 0.063601, 0, -1.259495, -23.4078, -0.0300, 14.8659)
+
+[node name="Belt22_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.112198, 0, -0.667125, 0, 1.296935, 0, 0.667125, 0, 1.112198, -26.0638, -0.0300, 12.4609)
+
+[node name="Belt23_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-1.216658, 0, 0.088603, 0, 1.219880, 0, -0.088603, 0, -1.216658, 15.4085, -0.0300, -24.3265)
+
+[node name="Belt23_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.522378, 0, -0.862508, 0, 1.008365, 0, 0.862508, 0, -0.522378, 16.1729, -0.0300, -23.1237)
+
+[node name="Belt24_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(1.370111, 0, -0.297050, 0, 1.401942, 0, 0.297050, 0, 1.370111, -24.5813, -0.0300, 16.5272)
+
+[node name="Belt24_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.590999, 0, 1.379969, 0, 1.501197, 0, -1.379969, 0, -0.590999, -23.1333, -0.0300, 16.3347)
+
+[node name="Belt24_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.602417, 0, 1.322666, 0, 1.453392, 0, -1.322666, 0, 0.602417, -25.6477, -0.0300, 17.3117)
+
+[node name="Belt24_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.662928, 0, 0.843315, 0, 1.072685, 0, -0.843315, 0, 0.662928, 24.8831, -0.0300, 16.9592)
+
+[node name="Belt24_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.166672, 0, -0.313735, 0, 1.208120, 0, 0.313735, 0, 1.166672, 24.3744, -0.0300, 17.8345)
+
+[node name="Belt24_3_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-1.255737, 0, 0.810149, 0, 1.494395, 0, -0.810149, 0, -1.255737, 25.4749, -0.0300, 15.5437)
+
+[node name="Belt25_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.944199, 0, -0.370750, 0, 1.014380, 0, 0.370750, 0, -0.944199, 17.6583, -0.0300, 25.6869)
+
+[node name="Belt25_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-1.128025, 0, -0.099269, 0, 1.132385, 0, 0.099269, 0, -1.128025, 17.4792, -0.0300, 23.7399)
+
+[node name="Belt25_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.735767, 0, -0.930427, 0, 1.186190, 0, 0.930427, 0, -0.735767, 19.2406, -0.0300, 24.7501)
+
+[node name="Belt25_1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.286766, 0, 1.046433, 0, 1.085015, 0, -1.046433, 0, -0.286766, 19.9004, -0.0300, 26.6615)
+
+[node name="Belt25_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(1.133928, 0, -0.883108, 0, 1.437245, 0, 0.883108, 0, 1.133928, -23.9946, -0.0300, 19.0458)
+
+[node name="Belt25_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.291929, 0, -0.977039, 0, 1.019720, 0, 0.977039, 0, -0.291929, -23.2991, -0.0300, 18.9841)
+
+[node name="Belt25_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(0.554312, 0, -1.248734, 0, 1.366235, 0, 1.248734, 0, 0.554312, -21.7491, -0.0300, 18.4887)
+
+[node name="Belt25_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.049459, 0, -1.026832, 0, 1.028023, 0, 1.026832, 0, -0.049459, 22.9080, -0.0300, 18.8107)
+
+[node name="Belt25_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-1.010913, 0, -0.020328, 0, 1.011117, 0, 0.020328, 0, -1.010913, 23.3378, -0.0300, 19.4741)
+
+[node name="Belt25_3_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-1.391506, 0, 0.441519, 0, 1.459872, 0, -0.441519, 0, -1.391506, 23.5648, -0.0300, 20.6633)
+
+[node name="Belt25_3_3" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.064689, 0, -0.582186, 0, 1.213467, 0, 0.582186, 0, 1.064689, 22.9578, -0.0300, 19.4889)
+
+[node name="Belt26_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-0.641379, 0, 0.917851, 0, 1.119740, 0, -0.917851, 0, -0.641379, -25.0275, -0.0300, 21.8508)
+
+[node name="Belt26_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.382105, 0, 0.568726, 0, 1.494545, 0, -0.568726, 0, 1.382105, -24.0812, -0.0300, 18.7950)
+
+[node name="Belt26_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-0.068930, 0, 1.152210, 0, 1.154270, 0, -1.152210, 0, -0.068930, -24.4355, -0.0300, 20.0294)
+
+[node name="Belt26_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-1.565055, 0, 0.370956, 0, 1.608417, 0, -0.370956, 0, -1.565055, 22.2453, -0.0300, 21.7666)
+
+[node name="Belt26_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(1.007320, 0, -0.182073, 0, 1.023643, 0, 0.182073, 0, 1.007320, 22.9864, -0.0300, 20.8196)
+
+[node name="Belt26_3_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(1.535093, 0, 0.039747, 0, 1.535608, 0, -0.039747, 0, 1.535093, 21.6460, -0.0300, 19.3039)
+
+[node name="Belt27_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-0.395900, 0, -1.106191, 0, 1.174902, 0, 1.106191, 0, -0.395900, 22.3156, -0.0300, 23.7962)
+
+[node name="Belt27_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(1.352374, 0, -0.652226, 0, 1.501437, 0, 0.652226, 0, 1.352374, 22.3125, -0.0300, 22.9439)
+
+[node name="Belt27_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-0.078967, 0, -1.087168, 0, 1.090032, 0, 1.087168, 0, -0.078967, 21.1643, -0.0300, 22.3843)
+
+[node name="Belt27_1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.452013, 0, 0.185286, 0, 1.463788, 0, -0.185286, 0, 1.452013, 22.8339, -0.0300, 20.9025)
+
+[node name="Belt27_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-0.804272, 0, -0.822673, 0, 1.150497, 0, 0.822673, 0, -0.804272, -24.3790, -0.0300, 22.1117)
+
+[node name="Belt27_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.899934, 0, 0.774502, 0, 1.187323, 0, -0.774502, 0, -0.899934, -24.7716, -0.0300, 22.8053)
+
+[node name="Belt27_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(0.517185, 0, 0.943563, 0, 1.076008, 0, -0.943563, 0, 0.517185, -24.7224, -0.0300, 22.8160)
+
+[node name="Belt27_2_3" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(1.125125, 0, -0.216535, 0, 1.145772, 0, 0.216535, 0, 1.125125, -23.6202, -0.0300, 23.4433)
+
+[node name="Belt27_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.679185, 0, -1.140412, 0, 1.327340, 0, 1.140412, 0, -0.679185, 24.2682, -0.0300, 22.3715)
+
+[node name="Belt27_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-0.432494, 0, -1.456155, 0, 1.519025, 0, 1.456155, 0, -0.432494, 24.3970, -0.0300, 20.9394)
+
+[node name="Belt28_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.611379, 0, 0.832876, 0, 1.033182, 0, -0.832876, 0, 0.611379, 23.0034, -0.0300, -22.0387)
+
+[node name="Belt28_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-0.875171, 0, -0.963502, 0, 1.301638, 0, 0.963502, 0, -0.875171, 24.0088, -0.0300, -23.0366)
+
+[node name="Belt28_0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.567468, 0, 1.022157, 0, 1.169112, 0, -1.022157, 0, 0.567468, 26.4410, -0.0300, -22.9365)
+
+[node name="Belt28_0_3" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.049649, 0, 1.137653, 0, 1.547907, 0, -1.137653, 0, 1.049649, 23.6410, -0.0300, -23.7929)
+
+[node name="Belt28_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(1.624840, 0, 0.457150, 0, 1.687925, 0, -0.457150, 0, 1.624840, 23.3133, -0.0300, 24.2645)
+
+[node name="Belt28_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-1.423988, 0, 0.889323, 0, 1.678880, 0, -0.889323, 0, -1.423988, 24.3891, -0.0300, 24.9052)
+
+[node name="Belt28_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.814714, 0, -1.322209, 0, 1.553060, 0, 1.322209, 0, -0.814714, -22.1264, -0.0300, 22.7382)
+
+[node name="Belt28_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.589579, 0, -0.552393, 0, 1.682825, 0, 0.552393, 0, 1.589579, -23.2684, -0.0300, 24.4234)
+
+[node name="Belt28_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-1.045894, 0, -0.919747, 0, 1.392777, 0, 0.919747, 0, -1.045894, 22.7616, -0.0300, 23.8754)
+
+[node name="Belt28_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.996880, 0, -0.936368, 0, 1.367682, 0, 0.936368, 0, -0.996880, 25.0869, -0.0300, 24.7537)
+
+[node name="Belt28_3_2" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(0.945879, 0, 1.205596, 0, 1.532367, 0, -1.205596, 0, 0.945879, 24.1802, -0.0300, 23.3644)
+
+[node name="Belt28_3_3" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-1.176611, 0, -1.089157, 0, 1.603333, 0, 1.089157, 0, -1.176611, 24.5088, -0.0300, 22.6265)
+
+[node name="Belt29_0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.070545, 0, 0.764414, 0, 1.315445, 0, -0.764414, 0, 1.070545, 28.1516, -0.0300, -23.5941)
+
+[node name="Belt29_0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.894519, 0, -0.861742, 0, 1.242080, 0, 0.861742, 0, -0.894519, 24.9650, -0.0300, -22.7248)
+
+[node name="Belt29_1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.173277, 0, 1.381397, 0, 1.392222, 0, -1.381397, 0, -0.173277, 26.4248, -0.0300, 24.1206)
+
+[node name="Belt29_1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.729248, 0, 1.201858, 0, 1.405797, 0, -1.201858, 0, 0.729248, 24.4554, -0.0300, 23.0748)
+
+[node name="Belt29_1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-1.349898, 0, 0.385385, 0, 1.403833, 0, -0.385385, 0, -1.349898, 27.5072, -0.0300, 24.7022)
+
+[node name="Belt29_1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-1.026095, 0, 0.024504, 0, 1.026388, 0, -0.024504, 0, -1.026095, 25.1588, -0.0300, 24.3673)
+
+[node name="Belt29_2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.593434, 0, -0.841446, 0, 1.029657, 0, 0.841446, 0, -0.593434, -22.8955, -0.0300, 25.9525)
+
+[node name="Belt29_2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(0.776721, 0, 1.210759, 0, 1.438482, 0, -1.210759, 0, 0.776721, -21.4465, -0.0300, 26.4150)
+
+[node name="Belt29_2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(0.848753, 0, -1.133694, 0, 1.416208, 0, 1.133694, 0, 0.848753, -22.1300, -0.0300, 25.5861)
+
+[node name="Belt29_2_3" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-1.422660, 0, 0.113405, 0, 1.427172, 0, -0.113405, 0, -1.422660, -22.2932, -0.0300, 25.2900)
+
+[node name="Belt29_3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(0.945236, 0, -0.454481, 0, 1.048820, 0, 0.454481, 0, 0.945236, 25.0227, -0.0300, 28.2447)
+
+[node name="Belt29_3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-1.045442, 0, -1.298726, 0, 1.667225, 0, 1.298726, 0, -1.045442, 24.2352, -0.0300, 25.0984)
+
+[node name="Stand1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-0.079389, 0, 1.240698, 0, 1.243235, 0, -1.240698, 0, -0.079389, -10.4168, -0.0300, -14.6578)
+
+[node name="Stand1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(1.020953, 0, 1.176246, 0, 1.557530, 0, -1.176246, 0, 1.020953, -11.5591, -0.0300, -14.8157)
+
+[node name="Stand1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.456629, 0, 1.055027, 0, 1.149605, 0, -1.055027, 0, -0.456629, -8.9999, -0.0300, -15.1371)
+
+[node name="Stand1_3" parent="Terrain/Trees" instance=ExtResource("m_tree_thin")]
+transform = Transform3D(-1.095710, 0, -0.612000, 0, 1.255040, 0, 0.612000, 0, -1.095710, -10.9536, -0.0300, -12.4180)
+
+[node name="Stand2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.377178, 0, -1.223575, 0, 1.280390, 0, 1.223575, 0, 0.377178, 5.8181, -0.0300, -9.3727)
+
+[node name="Stand2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(1.060858, 0, 0.574303, 0, 1.206335, 0, -0.574303, 0, 1.060858, 5.8569, -0.0300, -8.6765)
+
+[node name="Stand2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.979331, 0, -1.225400, 0, 1.568660, 0, 1.225400, 0, 0.979331, 6.2138, -0.0300, -8.1378)
+
+[node name="Stand2_3" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-1.276555, 0, -0.077496, 0, 1.278905, 0, 0.077496, 0, -1.276555, 5.5274, -0.0300, -9.5181)
+
+[node name="Stand3_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(1.145081, 0, 0.477177, 0, 1.240528, 0, -0.477177, 0, 1.145081, 8.4939, -0.0300, -3.2110)
+
+[node name="Stand3_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(1.137525, 0, 1.249493, 0, 1.689732, 0, -1.249493, 0, 1.137525, 7.4569, -0.0300, -3.4357)
+
+[node name="Stand4_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.488613, 0, -1.086706, 0, 1.191500, 0, 1.086706, 0, -0.488613, -5.2390, -0.0300, 8.4261)
+
+[node name="Stand4_1" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(1.189090, 0, -0.333101, 0, 1.234865, 0, 0.333101, 0, 1.189090, -5.2258, -0.0300, 10.7806)
+
+[node name="Stand4_2" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(0.954230, 0, 1.337090, 0, 1.642670, 0, -1.337090, 0, 0.954230, -4.3632, -0.0300, 8.3562)
+
+[node name="Stand4_3" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-1.067395, 0, 1.257578, 0, 1.649495, 0, -1.257578, 0, -1.067395, -5.0130, -0.0300, 9.4819)
+
+[node name="Stand5_1" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(0.045138, 0, -1.225371, 0, 1.226202, 0, 1.225371, 0, 0.045138, 3.8039, -0.0300, 10.1769)
+
+[node name="Stand5_2" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(0.220462, 0, -0.961291, 0, 0.986247, 0, 0.961291, 0, 0.220462, 4.5229, -0.0300, 7.7282)
+
+[node name="Stand6_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.857105, 0, -1.466477, 0, 1.698583, 0, 1.466477, 0, 0.857105, 11.5302, -0.0300, -6.6688)
+
+[node name="Stand8_0" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.536041, 0, 0.884063, 0, 1.033880, 0, -0.884063, 0, -0.536041, 17.3038, -0.0300, 13.4635)
+
+[node name="Stand8_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.285042, 0, 1.644809, 0, 1.669325, 0, -1.644809, 0, 0.285042, 16.5095, -0.0300, 12.7789)
+
+[node name="Stand8_2" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(1.522659, 0, -0.218171, 0, 1.538210, 0, 0.218171, 0, 1.522659, 16.1993, -0.0300, 12.6297)
+
+[node name="Stand9_0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(0.924534, 0, 0.448180, 0, 1.027438, 0, -0.448180, 0, 0.924534, -13.1072, -0.0300, 20.9299)
+
+[node name="Stand9_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.512306, 0, 0.618639, 0, 1.633948, 0, -0.618639, 0, 1.512306, -13.1538, -0.0300, 20.7179)
+
+[node name="Stand10_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.290178, 0, -0.420639, 0, 1.357017, 0, 0.420639, 0, 1.290178, 6.0764, -0.0300, 18.1373)
+
+[node name="Stand10_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(0.600648, 0, -0.798316, 0, 0.999042, 0, 0.798316, 0, 0.600648, 9.4981, -0.0300, 17.6750)
+
+[node name="Stand10_2" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(-0.986248, 0, -0.948318, 0, 1.368208, 0, 0.948318, 0, -0.986248, 5.8353, -0.0300, 17.0036)
+
+[node name="Stand10_3" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-0.781409, 0, -1.116001, 0, 1.362372, 0, 1.116001, 0, -0.781409, 8.4879, -0.0300, 17.6992)
+
+[node name="Stand13_0" parent="Terrain/Trees" instance=ExtResource("m_tree_blocks")]
+transform = Transform3D(-1.000841, 0, 0.918079, 0, 1.358143, 0, -0.918079, 0, -1.000841, -24.0741, -0.0300, -5.5134)
+
+[node name="Stand13_1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(1.008355, 0, -0.954568, 0, 1.388517, 0, 0.954568, 0, 1.008355, -24.0635, -0.0300, -5.9336)
+
+[node name="Stand13_2" parent="Terrain/Trees" instance=ExtResource("m_tree_small")]
+transform = Transform3D(0.941794, 0, 0.297525, 0, 0.987672, 0, -0.297525, 0, 0.941794, -25.0610, -0.0300, -5.2895)
+
+[node name="RisePine0" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(0.383702, 0, 0.912042, 0, 0.989468, 0, -0.912042, 0, 0.383702, 20.5000, 0.9700, -19.6000)
+
+[node name="RisePine1" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-0.790393, 0, 1.009505, 0, 1.282116, 0, -1.009505, 0, -0.790393, 22.4000, 0.9700, -18.2000)
+
+[node name="RisePine2" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-0.099311, 0, 0.910033, 0, 0.915436, 0, -0.910033, 0, -0.099311, 24.0000, 0.9700, -19.2000)
+
+[node name="RisePine3" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallA")]
+transform = Transform3D(-0.022519, 0, -1.279854, 0, 1.280052, 0, 1.279854, 0, -0.022519, 23.2000, 0.9700, -16.4000)
+
+[node name="RisePine4" parent="Terrain/Trees" instance=ExtResource("m_tree_pineTallB")]
+transform = Transform3D(-0.490432, 0, 1.123817, 0, 1.226168, 0, -1.123817, 0, -0.490432, 20.2000, 0.9700, -17.0000)
+
+[node name="RisePine5" parent="Terrain/Trees" instance=ExtResource("m_tree_default")]
+transform = Transform3D(-0.672820, 0, -0.954392, 0, 1.167712, 0, 0.954392, 0, -0.672820, 25.0000, 0.9700, -17.6000)
+
+[node name="Orchard0_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(1.069031, 0, 0.037899, 0, 1.069703, 0, -0.037899, 0, 1.069031, -21.3194, 0.9700, -20.1237)
+
+[node name="Orchard0_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.957961, 0, -0.307936, 0, 1.006238, 0, 0.307936, 0, -0.957961, -18.9513, 0.9700, -19.9587)
+
+[node name="Orchard0_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.917332, 0, 0.478201, 0, 1.034493, 0, -0.478201, 0, 0.917332, -16.1250, 0.9700, -19.7994)
+
+[node name="Orchard1_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.481344, 0, -0.861405, 0, 0.986768, 0, 0.861405, 0, -0.481344, -21.6237, 0.9700, -17.4326)
+
+[node name="Orchard1_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(-0.519755, 0, 0.893272, 0, 1.033480, 0, -0.893272, 0, -0.519755, -18.7490, 0.9700, -17.2894)
+
+[node name="Orchard1_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.997290, 0, -0.273434, 0, 1.034095, 0, 0.273434, 0, 0.997290, -16.3764, 0.9700, -17.4957)
+
+[node name="Orchard2_0" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.879169, 0, 0.575373, 0, 1.050710, 0, -0.575373, 0, 0.879169, -21.3564, 0.9700, -15.0262)
+
+[node name="Orchard2_1" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.947002, 0, 0.466221, 0, 1.055545, 0, -0.466221, 0, 0.947002, -18.7048, 0.9700, -14.6220)
+
+[node name="Orchard2_2" parent="Terrain/Trees" instance=ExtResource("m_tree_oak")]
+transform = Transform3D(0.818607, 0, -0.688901, 0, 1.069908, 0, 0.688901, 0, 0.818607, -16.1179, 0.9700, -14.8192)
+
+[node name="Details" parent="." type="Node3D"]
+
+[node name="VillageSign" parent="Details" instance=ExtResource("m_sign")]
+transform = Transform3D(0.939693, 0, -0.342020, 0, 1.000000, 0, 0.342020, 0, 0.939693, -8.4000, -0.0300, 1.4000)
+
+[node name="GreenPot" parent="Details" instance=ExtResource("m_pot_large")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -6.6000, -0.0300, 3.4000)
+
+[node name="GreenFire" parent="Details" instance=ExtResource("m_campfire_bricks")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -7.4000, -0.0300, -0.4000)
+
+[node name="GreenLog" parent="Details" instance=ExtResource("m_log")]
+transform = Transform3D(0.819152, 0, -0.573576, 0, 1.000000, 0, 0.573576, 0, 0.819152, -6.0000, -0.0300, -0.8000)
+
+[node name="Well" parent="Details" instance=ExtResource("m_statue_ring")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -8.0000, -0.0300, 2.0000)
+
+[node name="WellBeam" parent="Details" instance=ExtResource("m_log")]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1.000000, 0, 1.000000, 0, 0.000000, -8.0000, 0.3900, 2.0000)
+
+[node name="Camp" parent="Details" type="Node3D"]
+
+[node name="TentA" parent="Details/Camp" instance=ExtResource("m_tent_detailedClosed")]
+transform = Transform3D(-0.939693, 0, 0.342020, 0, 1.000000, 0, -0.342020, 0, -0.939693, 5.0000, -0.0300, -16.2000)
+
+[node name="TentB" parent="Details/Camp" instance=ExtResource("m_tent_smallOpen")]
+transform = Transform3D(-0.866025, 0, -0.500000, 0, 1.000000, 0, 0.500000, 0, -0.866025, 7.6000, -0.0300, -17.0000)
+
+[node name="CampFire" parent="Details/Camp" instance=ExtResource("m_campfire_logs")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, 6.4000, -0.0300, -15.4000)
+
+[node name="StackA" parent="Details/Camp" instance=ExtResource("m_log_stack")]
+transform = Transform3D(0.906308, 0, -0.422618, 0, 1.000000, 0, 0.422618, 0, 0.906308, 4.2000, -0.0300, -17.4000)
+
+[node name="StackB" parent="Details/Camp" instance=ExtResource("m_log_stackLarge")]
+transform = Transform3D(0.258819, 0, -0.965926, 0, 1.000000, 0, 0.965926, 0, 0.258819, 8.6000, -0.0300, -15.2000)
+
+[node name="StumpA" parent="Details/Camp" instance=ExtResource("m_stump_round")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, 3.2000, -0.0300, -15.6000)
+
+[node name="StumpB" parent="Details/Camp" instance=ExtResource("m_stump_square")]
+transform = Transform3D(0.766044, 0, -0.642788, 0, 1.000000, 0, 0.642788, 0, 0.766044, 9.4000, -0.0300, -16.6000)
+
+[node name="LogBig" parent="Details/Camp" instance=ExtResource("m_log_large")]
+transform = Transform3D(0.965926, 0, -0.258819, 0, 1.000000, 0, 0.258819, 0, 0.965926, 5.6000, -0.0300, -18.2000)
+
+[node name="Shrine" parent="Details" type="Node3D"]
+
+[node name="Ring" parent="Details/Shrine" instance=ExtResource("m_statue_ring")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -16.0000, -0.0300, 18.4000)
+
+[node name="Column" parent="Details/Shrine" instance=ExtResource("m_statue_columnDamaged")]
+transform = Transform3D(0.906308, 0, -0.422618, 0, 1.000000, 0, 0.422618, 0, 0.906308, -16.6000, -0.0300, 19.2000)
+
+[node name="Obelisk" parent="Details/Shrine" instance=ExtResource("m_statue_obelisk")]
+transform = Transform3D(0.965926, 0, 0.258819, 0, 1.000000, 0, -0.258819, 0, 0.965926, -15.2000, -0.0300, 19.4000)
+
+[node name="Head" parent="Details/Shrine" instance=ExtResource("m_statue_head")]
+transform = Transform3D(0.500000, 0, -0.866025, 0, 1.000000, 0, 0.866025, 0, 0.500000, -17.2000, -0.0300, 18.0000)
+
+[node name="Stone0" parent="Details/Shrine" instance=ExtResource("m_stone_largeB")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -14.6000, -0.0300, 18.2000)
+
+[node name="Stone1" parent="Details/Shrine" instance=ExtResource("m_stone_largeB")]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1.000000, 0, 0.707107, 0, 0.707107, -17.4000, -0.0300, 19.6000)
+
+[node name="Stone2" parent="Details/Shrine" instance=ExtResource("m_stone_largeB")]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1.000000, 0, 1.000000, 0, 0.000000, -16.0000, -0.0300, 20.4000)
+
+[node name="Stone3" parent="Details/Shrine" instance=ExtResource("m_stone_largeB")]
+transform = Transform3D(-0.707107, 0, -0.707107, 0, 1.000000, 0, 0.707107, 0, -0.707107, -14.2000, -0.0300, 19.6000)
+
+[node name="Moss" parent="Details/Shrine" instance=ExtResource("m_hanging_moss")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -16.0000, 0.7700, 18.4000)
+
+[node name="PondLife" parent="Details" type="Node3D"]
+
+[node name="Lily0" parent="Details/PondLife" instance=ExtResource("m_lily_small")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -20.5000, 0.0200, 12.2000)
+
+[node name="Lily1" parent="Details/PondLife" instance=ExtResource("m_lily_large")]
+transform = Transform3D(0.798636, 0, -0.601815, 0, 1.000000, 0, 0.601815, 0, 0.798636, -18.4000, 0.0200, 11.0000)
+
+[node name="Lily2" parent="Details/PondLife" instance=ExtResource("m_lily_small")]
+transform = Transform3D(0.275637, 0, -0.961262, 0, 1.000000, 0, 0.961262, 0, 0.275637, -16.6000, 0.0200, 13.6000)
+
+[node name="Lily3" parent="Details/PondLife" instance=ExtResource("m_lily_large")]
+transform = Transform3D(-0.358368, 0, -0.933580, 0, 1.000000, 0, 0.933580, 0, -0.358368, -21.0000, 0.0200, 14.8000)
+
+[node name="Lily4" parent="Details/PondLife" instance=ExtResource("m_lily_small")]
+transform = Transform3D(-0.848048, 0, -0.529919, 0, 1.000000, 0, 0.529919, 0, -0.848048, -19.2000, 0.0200, 15.4000)
+
+[node name="Canoe" parent="Details/PondLife" instance=ExtResource("m_canoe")]
+transform = Transform3D(0.990268, 0, -0.139173, 0, 1.000000, 0, 0.139173, 0, 0.990268, -22.0000, 0.0200, 13.2000)
+
+[node name="Paddle" parent="Details/PondLife" instance=ExtResource("m_canoe_paddle")]
+transform = Transform3D(0.866025, 0, -0.500000, 0, 1.000000, 0, 0.500000, 0, 0.866025, -21.4000, 0.0200, 13.4000)
+
+[node name="PondRock0" parent="Details/PondLife" instance=ExtResource("m_rock_largeC")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -23.0000, -0.0300, 10.4000)
+
+[node name="PondRock1" parent="Details/PondLife" instance=ExtResource("m_rock_largeC")]
+transform = Transform3D(0.573576, 0, -0.819152, 0, 1.000000, 0, 0.819152, 0, 0.573576, -22.2000, -0.0300, 16.0000)
+
+[node name="PondRock2" parent="Details/PondLife" instance=ExtResource("m_rock_largeC")]
+transform = Transform3D(-0.342020, 0, -0.939693, 0, 1.000000, 0, 0.939693, 0, -0.342020, -15.2000, -0.0300, 10.4000)
+
+[node name="PondRock3" parent="Details/PondLife" instance=ExtResource("m_rock_largeC")]
+transform = Transform3D(-0.965926, 0, -0.258819, 0, 1.000000, 0, 0.258819, 0, -0.965926, -15.6000, -0.0300, 15.6000)
+
+[node name="Rocks" parent="Terrain" type="Node3D"]
+
+[node name="Rock0" parent="Terrain/Rocks" instance=ExtResource("m_rock_largeA")]
+transform = Transform3D(0.738378, 0, 0.904980, 0, 1.167986, 0, -0.904980, 0, 0.738378, -1.6244, -0.0300, -17.5309)
+
+[node name="Rock1" parent="Terrain/Rocks" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-0.423057, 0, -0.950308, 0, 1.040222, 0, 0.950308, 0, -0.423057, 1.4154, -0.0300, -18.2217)
+
+[node name="Rock2" parent="Terrain/Rocks" instance=ExtResource("m_rock_tallA")]
+transform = Transform3D(-0.432005, 0, -0.808775, 0, 0.916922, 0, 0.808775, 0, -0.432005, 1.6497, -0.0300, -16.6718)
+
+[node name="Rock3" parent="Terrain/Rocks" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(1.179087, 0, -0.092498, 0, 1.182710, 0, 0.092498, 0, 1.179087, -5.1038, -0.0300, -19.5491)
+
+[node name="Rock4" parent="Terrain/Rocks" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.766965, 0, 0.659983, 0, 1.011836, 0, -0.659983, 0, -0.766965, 4.8921, -0.0300, -18.8651)
+
+[node name="Rock5" parent="Terrain/Rocks" instance=ExtResource("m_rock_largeA")]
+transform = Transform3D(-0.459025, 0, -0.871577, 0, 0.985064, 0, 0.871577, 0, -0.459025, 7.9897, -0.0300, -12.3320)
+
+[node name="Rock6" parent="Terrain/Rocks" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(0.758022, 0, 0.425639, 0, 0.869348, 0, -0.425639, 0, 0.758022, 8.9078, -0.0300, -4.0370)
+
+[node name="Rock7" parent="Terrain/Rocks" instance=ExtResource("m_rock_tallA")]
+transform = Transform3D(0.467301, 0, 1.114474, 0, 1.208480, 0, -1.114474, 0, 0.467301, 8.4567, -0.0300, 5.5412)
+
+[node name="Rock8" parent="Terrain/Rocks" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(0.924212, 0, -0.248596, 0, 0.957062, 0, 0.248596, 0, 0.924212, 10.2823, -0.0300, 10.7240)
+
+[node name="Rock9" parent="Terrain/Rocks" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(0.915052, 0, -0.472342, 0, 1.029770, 0, 0.472342, 0, 0.915052, -5.5961, -0.0300, 13.5958)
+
+[node name="Rock10" parent="Terrain/Rocks" instance=ExtResource("m_rock_largeA")]
+transform = Transform3D(-0.215522, 0, 1.330967, 0, 1.348304, 0, -1.330967, 0, -0.215522, -8.2132, -0.0300, 15.9735)
+
+[node name="Rock11" parent="Terrain/Rocks" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-0.823515, 0, -1.018831, 0, 1.310036, 0, 1.018831, 0, -0.823515, -2.6446, -0.0300, 16.5844)
+
+[node name="Rock12" parent="Terrain/Rocks" instance=ExtResource("m_rock_tallA")]
+transform = Transform3D(0.907329, 0, 0.428559, 0, 1.003448, 0, -0.428559, 0, 0.907329, 2.2962, -0.0300, 14.2082)
+
+[node name="Rock13" parent="Terrain/Rocks" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(1.108500, 0, 0.403890, 0, 1.179788, 0, -0.403890, 0, 1.108500, 6.0165, -0.0300, 12.5954)
+
+[node name="Rock14" parent="Terrain/Rocks" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-1.127355, 0, -0.055295, 0, 1.128710, 0, 0.055295, 0, -1.127355, -23.1541, -0.0300, -12.4828)
+
+[node name="Rock15" parent="Terrain/Rocks" instance=ExtResource("m_rock_largeA")]
+transform = Transform3D(1.180076, 0, 0.469800, 0, 1.270154, 0, -0.469800, 0, 1.180076, -22.6491, -0.0300, -19.3350)
+
+[node name="Rock16" parent="Terrain/Rocks" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-1.290376, 0, 0.443788, 0, 1.364558, 0, -0.443788, 0, -1.290376, -12.7835, -0.0300, -16.7968)
+
+[node name="Rock17" parent="Terrain/Rocks" instance=ExtResource("m_rock_tallA")]
+transform = Transform3D(0.899773, 0, -0.256144, 0, 0.935522, 0, 0.256144, 0, 0.899773, -14.5203, -0.0300, -10.1043)
+
+[node name="Rock18" parent="Terrain/Rocks" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(0.406886, 0, 0.748232, 0, 0.851708, 0, -0.748232, 0, 0.406886, 19.1578, -0.0300, 12.1270)
+
+[node name="Rock19" parent="Terrain/Rocks" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.374021, 0, 0.869853, 0, 0.946856, 0, -0.869853, 0, -0.374021, 23.1644, -0.0300, 5.9765)
+
+[node name="Rock20" parent="Terrain/Rocks" instance=ExtResource("m_rock_largeA")]
+transform = Transform3D(0.566222, 0, 1.053985, 0, 1.196450, 0, -1.053985, 0, 0.566222, 25.1793, -0.0300, 10.4343)
+
+[node name="Rock21" parent="Terrain/Rocks" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(0.260685, 0, 1.112274, 0, 1.142414, 0, -1.112274, 0, 0.260685, 19.2597, -0.0300, 18.8725)
+
+[node name="Rock22" parent="Terrain/Rocks" instance=ExtResource("m_rock_tallA")]
+transform = Transform3D(0.541599, 0, 0.932026, 0, 1.077962, 0, -0.932026, 0, 0.541599, -11.3697, -0.0300, -4.6167)
+
+[node name="Rock23" parent="Terrain/Rocks" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(-0.823954, 0, 1.060033, 0, 1.342598, 0, -1.060033, 0, -0.823954, -11.9873, -0.0300, 2.4987)
+
+[node name="Rock24" parent="Terrain/Rocks" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.247219, 0, 1.158897, 0, 1.184972, 0, -1.158897, 0, -0.247219, -11.3782, -0.0300, -6.3665)
+
+[node name="Plants" parent="Terrain" type="Node3D"]
+
+[node name="Plant0" parent="Terrain/Plants" instance=ExtResource("m_plant_bushLarge")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -21.0000, -0.0300, 2.4000)
+
+[node name="Plant1" parent="Terrain/Plants" instance=ExtResource("m_plant_bush")]
+transform = Transform3D(0.601815, 0, -0.798636, 0, 1.000000, 0, 0.798636, 0, 0.601815, -18.4000, -0.0300, 6.0000)
+
+[node name="Plant2" parent="Terrain/Plants" instance=ExtResource("m_plant_bushDetailed")]
+transform = Transform3D(-0.275637, 0, -0.961262, 0, 1.000000, 0, 0.961262, 0, -0.275637, -12.6000, -0.0300, -2.0000)
+
+[node name="Plant3" parent="Terrain/Plants" instance=ExtResource("m_plant_bushSmall")]
+transform = Transform3D(-0.933580, 0, -0.358368, 0, 1.000000, 0, 0.358368, 0, -0.933580, -1.0000, -0.0300, 2.6000)
+
+[node name="Plant4" parent="Terrain/Plants" instance=ExtResource("m_plant_bushLargeTriangle")]
+transform = Transform3D(-0.848048, 0, 0.529919, 0, 1.000000, 0, -0.529919, 0, -0.848048, 3.6000, -0.0300, 6.0000)
+
+[node name="Plant5" parent="Terrain/Plants" instance=ExtResource("m_plant_bushTriangle")]
+transform = Transform3D(-0.087156, 0, 0.996195, 0, 1.000000, 0, -0.996195, 0, -0.087156, 8.4000, -0.0300, -6.0000)
+
+[node name="Plant6" parent="Terrain/Plants" instance=ExtResource("m_plant_flatTall")]
+transform = Transform3D(0.743145, 0, 0.669131, 0, 1.000000, 0, -0.669131, 0, 0.743145, -10.0000, -0.0300, 6.4000)
+
+[node name="Plant7" parent="Terrain/Plants" instance=ExtResource("m_plant_flatShort")]
+transform = Transform3D(0.981627, 0, -0.190809, 0, 1.000000, 0, 0.190809, 0, 0.981627, -2.6000, -0.0300, -6.0000)
+
+[node name="Plant8" parent="Terrain/Plants" instance=ExtResource("m_flower_redA")]
+transform = Transform3D(0.438371, 0, -0.898794, 0, 1.000000, 0, 0.898794, 0, 0.438371, -14.0000, -0.0300, 0.0000)
+
+[node name="Plant9" parent="Terrain/Plants" instance=ExtResource("m_flower_yellowB")]
+transform = Transform3D(-0.453990, 0, -0.891007, 0, 1.000000, 0, 0.891007, 0, -0.453990, -6.0000, -0.0300, -2.6000)
+
+[node name="Plant10" parent="Terrain/Plants" instance=ExtResource("m_flower_purpleC")]
+transform = Transform3D(-0.984808, 0, -0.173648, 0, 1.000000, 0, 0.173648, 0, -0.984808, 1.0000, -0.0300, 0.0000)
+
+[node name="Plant11" parent="Terrain/Plants" instance=ExtResource("m_flower_redC")]
+transform = Transform3D(-0.731354, 0, 0.681998, 0, 1.000000, 0, -0.681998, 0, -0.731354, 9.4000, -0.0300, 3.0000)
+
+[node name="Plant12" parent="Terrain/Plants" instance=ExtResource("m_mushroom_red")]
+transform = Transform3D(0.104528, 0, 0.994522, 0, 1.000000, 0, -0.994522, 0, 0.104528, -19.0000, -0.0300, -14.0000)
+
+[node name="Plant13" parent="Terrain/Plants" instance=ExtResource("m_mushroom_tan")]
+transform = Transform3D(0.857167, 0, 0.515038, 0, 1.000000, 0, -0.515038, 0, 0.857167, -20.4000, -0.0300, -16.0000)
+
+[node name="Plant14" parent="Terrain/Plants" instance=ExtResource("m_mushroom_redGroup")]
+transform = Transform3D(0.927184, 0, -0.374607, 0, 1.000000, 0, 0.374607, 0, 0.927184, 3.4000, -0.0300, -18.0000)
+
+[node name="Plant15" parent="Terrain/Plants" instance=ExtResource("m_mushroom_tanGroup")]
+transform = Transform3D(0.258819, 0, -0.965926, 0, 1.000000, 0, 0.965926, 0, 0.258819, 8.0000, -0.0300, -19.4000)
+
+[node name="Plant16" parent="Terrain/Plants" instance=ExtResource("m_stump_round")]
+transform = Transform3D(-0.615661, 0, -0.788011, 0, 1.000000, 0, 0.788011, 0, -0.615661, -12.0000, -0.0300, -8.0000)
+
+[node name="Plant17" parent="Terrain/Plants" instance=ExtResource("m_stump_squareDetailed")]
+transform = Transform3D(-0.999848, 0, 0.017452, 0, 1.000000, 0, -0.017452, 0, -0.999848, 6.0000, -0.0300, -10.0000)
+
+[node name="Plant18" parent="Terrain/Plants" instance=ExtResource("m_log")]
+transform = Transform3D(-0.587785, 0, 0.809017, 0, 1.000000, 0, -0.809017, 0, -0.587785, 8.0000, -0.0300, -6.0000)
+
+[node name="Plant19" parent="Terrain/Plants" instance=ExtResource("m_log_large")]
+transform = Transform3D(0.292372, 0, 0.956305, 0, 1.000000, 0, -0.956305, 0, 0.292372, -22.0000, -0.0300, -20.0000)
+
+[node name="Crops" parent="." type="Node3D"]
+
+[node name="FieldA" parent="Crops" type="Node3D"]
+
+[node name="Strip_FieldA_0" parent="Crops/FieldA" instance=ExtResource("m_crops_dirtRow")]
+transform = Transform3D(2.999996, 0, -0.004830, 0, 1.000000, 0, 0.001610, 0, 0.999999, 23.0000, 0.0220, 6.5000)
+
+[node name="Crop_FieldA_0_0" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.357111, 0, -0.873765, 0, 0.943924, 0, 0.873765, 0, 0.357111, 21.6111, 0.0220, 6.3846)
+
+[node name="Crop_FieldA_0_3" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.594900, 0, -0.614043, 0, 0.854959, 0, 0.614043, 0, 0.594900, 22.9970, 0.0220, 6.4153)
+
+[node name="Crop_FieldA_0_4" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(-0.540389, 0, -0.681596, 0, 0.869824, 0, 0.681596, 0, -0.540389, 23.3471, 0.0220, 6.3544)
+
+[node name="Crop_FieldA_0_5" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(-1.066200, 0, 0.354297, 0, 1.123525, 0, -0.354297, 0, -1.066200, 24.0039, 0.0220, 6.5287)
+
+[node name="Strip_FieldA_1" parent="Crops/FieldA" instance=ExtResource("m_crops_dirtRow")]
+transform = Transform3D(2.999601, 0, 0.048948, 0, 1.000000, 0, -0.016316, 0, 0.999867, 23.0000, 0.0220, 8.5000)
+
+[node name="Crop_FieldA_1_3" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.443282, 0, 0.764824, 0, 0.883999, 0, -0.764824, 0, 0.443282, 22.9654, 0.0220, 8.3362)
+
+[node name="Crop_FieldA_1_4" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.136690, 0, -1.071718, 0, 1.080400, 0, 1.071718, 0, 0.136690, 23.4537, 0.0220, 8.3339)
+
+[node name="Crop_FieldA_1_6" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.730021, 0, -0.447168, 0, 0.856090, 0, 0.447168, 0, 0.730021, 24.5162, 0.0220, 8.3961)
+
+[node name="Strip_FieldA_2" parent="Crops/FieldA" instance=ExtResource("m_crops_dirtRow")]
+transform = Transform3D(2.998504, 0, 0.094722, 0, 1.000000, 0, -0.031574, 0, 0.999501, 23.0000, 0.0220, 10.5000)
+
+[node name="Crop_FieldA_2_0" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.589305, 0, -0.885807, 0, 1.063924, 0, 0.885807, 0, 0.589305, 21.3783, 0.0220, 10.6392)
+
+[node name="Crop_FieldA_2_2" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.361692, 0, -1.022954, 0, 1.085014, 0, 1.022954, 0, 0.361692, 22.3837, 0.0220, 10.4784)
+
+[node name="Crop_FieldA_2_4" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(-0.874975, 0, -0.517978, 0, 1.016800, 0, 0.517978, 0, -0.874975, 23.4337, 0.0220, 10.5775)
+
+[node name="Crop_FieldA_2_6" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.546575, 0, -0.920903, 0, 1.070890, 0, 0.920903, 0, 0.546575, 24.3999, 0.0220, 10.4870)
+
+[node name="Strip_FieldA_3" parent="Crops/FieldA" instance=ExtResource("m_crops_dirtRow")]
+transform = Transform3D(2.999516, 0, 0.053898, 0, 1.000000, 0, -0.017966, 0, 0.999839, 23.0000, 0.0220, 12.5000)
+
+[node name="Crop_FieldA_3_0" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.167236, 0, -1.123886, 0, 1.136260, 0, 1.123886, 0, 0.167236, 21.6017, 0.0220, 12.6398)
+
+[node name="Crop_FieldA_3_3" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(-1.094898, 0, -0.206012, 0, 1.114111, 0, 0.206012, 0, -1.094898, 22.9104, 0.0220, 12.6496)
+
+[node name="Crop_FieldA_3_4" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.814512, 0, 0.687994, 0, 1.066192, 0, -0.687994, 0, 0.814512, 23.3337, 0.0220, 12.3694)
+
+[node name="Crop_FieldA_3_6" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.390326, 0, -0.873977, 0, 0.957178, 0, 0.873977, 0, 0.390326, 24.4902, 0.0220, 12.4692)
+
+[node name="Strip_FieldA_4" parent="Crops/FieldA" instance=ExtResource("m_crops_dirtRow")]
+transform = Transform3D(3.000000, 0, -0.000861, 0, 1.000000, 0, 0.000287, 0, 1.000000, 23.0000, 0.0220, 14.5000)
+
+[node name="Crop_FieldA_4_0" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.092929, 0, 0.893698, 0, 0.898516, 0, -0.893698, 0, 0.092929, 21.5618, 0.0220, 14.5526)
+
+[node name="Crop_FieldA_4_1" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.196697, 0, 0.889947, 0, 0.911425, 0, -0.889947, 0, 0.196697, 22.1497, 0.0220, 14.6579)
+
+[node name="Crop_FieldA_4_3" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.291894, 0, -1.011342, 0, 1.052623, 0, 1.011342, 0, 0.291894, 23.0150, 0.0220, 14.5088)
+
+[node name="Crop_FieldA_4_4" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(-0.150307, 0, 0.974751, 0, 0.986272, 0, -0.974751, 0, -0.150307, 23.4599, 0.0220, 14.5570)
+
+[node name="Crop_FieldA_4_6" parent="Crops/FieldA" instance=ExtResource("m_crops_cornStageD")]
+transform = Transform3D(0.925432, 0, 0.059916, 0, 0.927370, 0, -0.059916, 0, 0.925432, 24.3286, 0.0220, 14.6532)
+
+[node name="FieldB" parent="Crops" type="Node3D"]
+
+[node name="Strip_FieldB_0" parent="Crops/FieldB" instance=ExtResource("m_crops_dirtRow")]
+transform = Transform3D(2.999806, 0, -0.034102, 0, 1.000000, 0, 0.011367, 0, 0.999935, 23.0000, 0.0220, 16.0000)
+
+[node name="Crop_FieldB_0_0" parent="Crops/FieldB" instance=ExtResource("m_crops_wheatStageB")]
+transform = Transform3D(0.583036, 0, -0.716792, 0, 0.923971, 0, 0.716792, 0, 0.583036, 21.5127, 0.0220, 16.1487)
+
+[node name="Crop_FieldB_0_1" parent="Crops/FieldB" instance=ExtResource("m_crops_wheatStageB")]
+transform = Transform3D(0.849680, 0, -0.388089, 0, 0.934114, 0, 0.388089, 0, 0.849680, 22.1036, 0.0220, 15.8721)
+
+[node name="Crop_FieldB_0_2" parent="Crops/FieldB" instance=ExtResource("m_crops_wheatStageB")]
+transform = Transform3D(0.694540, 0, 0.696113, 0, 0.983341, 0, -0.696113, 0, 0.694540, 22.5933, 0.0220, 16.0639)
+
+[node name="Crop_FieldB_0_4" parent="Crops/FieldB" instance=ExtResource("m_crops_wheatStageB")]
+transform = Transform3D(0.049456, 0, -0.877543, 0, 0.878935, 0, 0.877543, 0, 0.049456, 23.5647, 0.0220, 16.0944)
+
+[node name="Crop_FieldB_0_5" parent="Crops/FieldB" instance=ExtResource("m_crops_wheatStageB")]
+transform = Transform3D(0.922879, 0, 0.526939, 0, 1.062718, 0, -0.526939, 0, 0.922879, 23.9532, 0.0220, 16.0801)
+
+[node name="Crop_FieldB_0_6" parent="Crops/FieldB" instance=ExtResource("m_crops_wheatStageB")]
+transform = Transform3D(0.955916, 0, 0.288564, 0, 0.998521, 0, -0.288564, 0, 0.955916, 24.5759, 0.0220, 16.0480)
+
+[node name="Strip_FieldB_1" parent="Crops/FieldB" instance=ExtResource("m_crops_dirtRow")]
+transform = Transform3D(2.999991, 0, -0.007399, 0, 1.000000, 0, 0.002466, 0, 0.999997, 23.0000, 0.0220, 18.0000)
+
+[node name="Crop_FieldB_1_0" parent="Crops/FieldB" instance=ExtResource("m_crops_wheatStageB")]
+transform = Transform3D(-0.458505, 0, -0.884426, 0, 0.996211, 0, 0.884426, 0, -0.458505, 21.6741, 0.0220, 18.0908)
+
+[node name="Crop_FieldB_1_3" parent="Crops/FieldB" instance=ExtResource("m_crops_wheatStageB")]
+transform = Transform3D(-0.926363, 0, 0.126323, 0, 0.934936, 0, -0.126323, 0, -0.926363, 23.0278, 0.0220, 18.1465)
+
+[node name="Crop_FieldB_1_6" parent="Crops/FieldB" instance=ExtResource("m_crops_wheatStageB")]
+transform = Transform3D(0.448830, 0, -0.735324, 0, 0.861481, 0, 0.735324, 0, 0.448830, 24.6317, 0.0220, 17.9993)
+
+[node name="Garden" parent="Crops" type="Node3D"]
+
+[node name="Strip_Garden_0" parent="Crops/Garden" instance=ExtResource("m_crops_dirtRow")]
+transform = Transform3D(1.999883, 0, 0.021624, 0, 1.000000, 0, -0.010812, 0, 0.999942, -16.6000, 0.0220, 5.6000)
+
+[node name="Crop_Garden_0_2" parent="Crops/Garden" instance=ExtResource("m_crop_carrot")]
+transform = Transform3D(0.952153, 0, -0.466233, 0, 1.060174, 0, 0.466233, 0, 0.952153, -16.7080, 0.0220, 5.5442)
+
+[node name="Crop_Garden_0_3" parent="Crops/Garden" instance=ExtResource("m_crop_carrot")]
+transform = Transform3D(-0.174818, 0, 1.063916, 0, 1.078183, 0, -1.063916, 0, -0.174818, -16.2111, 0.0220, 5.4439)
+
+[node name="Crop_Garden_0_4" parent="Crops/Garden" instance=ExtResource("m_crop_carrot")]
+transform = Transform3D(-0.963268, 0, 0.538184, 0, 1.103416, 0, -0.538184, 0, -0.963268, -15.4380, 0.0220, 5.5276)
+
+[node name="Strip_Garden_1" parent="Crops/Garden" instance=ExtResource("m_crops_dirtRow")]
+transform = Transform3D(1.999738, 0, -0.032379, 0, 1.000000, 0, 0.016190, 0, 0.999869, -16.6000, 0.0220, 7.6000)
+
+[node name="Crop_Garden_1_0" parent="Crops/Garden" instance=ExtResource("m_crop_carrot")]
+transform = Transform3D(0.938519, 0, 0.598833, 0, 1.113292, 0, -0.598833, 0, 0.938519, -17.6958, 0.0220, 7.6792)
+
+[node name="Crop_Garden_1_1" parent="Crops/Garden" instance=ExtResource("m_crop_carrot")]
+transform = Transform3D(-0.480592, 0, -0.954754, 0, 1.068889, 0, 0.954754, 0, -0.480592, -17.2470, 0.0220, 7.7253)
+
+[node name="Crop_Garden_1_2" parent="Crops/Garden" instance=ExtResource("m_crop_carrot")]
+transform = Transform3D(-0.117131, 0, 0.880433, 0, 0.888190, 0, -0.880433, 0, -0.117131, -16.7531, 0.0220, 7.5501)
+
+[node name="Crop_Garden_1_4" parent="Crops/Garden" instance=ExtResource("m_crop_carrot")]
+transform = Transform3D(-0.115014, 0, -1.014308, 0, 1.020808, 0, 1.014308, 0, -0.115014, -15.5876, 0.0220, 7.5437)
+
+[node name="Strip_Garden_2" parent="Crops/Garden" instance=ExtResource("m_crops_dirtRow")]
+transform = Transform3D(1.999494, 0, -0.045008, 0, 1.000000, 0, 0.022504, 0, 0.999747, -16.6000, 0.0220, 9.6000)
+
+[node name="Crop_Garden_2_0" parent="Crops/Garden" instance=ExtResource("m_crop_carrot")]
+transform = Transform3D(0.784784, 0, -0.343183, 0, 0.856540, 0, 0.343183, 0, 0.784784, -17.6113, 0.0220, 9.7347)
+
+[node name="Crop_Garden_2_3" parent="Crops/Garden" instance=ExtResource("m_crop_carrot")]
+transform = Transform3D(1.095943, 0, -0.236599, 0, 1.121191, 0, 0.236599, 0, 1.095943, -16.0229, 0.0220, 9.4420)
+
+[node name="Crop_Garden_2_4" parent="Crops/Garden" instance=ExtResource("m_crop_carrot")]
+transform = Transform3D(0.629824, 0, 0.882994, 0, 1.084600, 0, -0.882994, 0, 0.629824, -15.5277, 0.0220, 9.4608)
+
+[node name="Patch0" parent="Crops" instance=ExtResource("m_crop_melon")]
+transform = Transform3D(1.000000, 0, -0.000000, 0, 1.000000, 0, 0.000000, 0, 1.000000, -16.4000, -0.0300, 10.2000)
+
+[node name="Patch1" parent="Crops" instance=ExtResource("m_crop_pumpkin")]
+transform = Transform3D(0.766044, 0, -0.642788, 0, 1.000000, 0, 0.642788, 0, 0.766044, -15.6000, -0.0300, 10.4000)
+
+[node name="Patch2" parent="Crops" instance=ExtResource("m_crop_turnip")]
+transform = Transform3D(0.173648, 0, -0.984808, 0, 1.000000, 0, 0.984808, 0, 0.173648, -16.0000, -0.0300, 11.0000)
+
+[node name="Fences" parent="." type="Node3D"]
+
+[node name="PastureW" parent="Fences" type="Node3D"]
+
+[node name="PastureW_0" parent="Fences/PastureW" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(-0.216814, 0, -0.976213, 0, 1.000000, 0, 0.976213, 0, -0.216814, -2.2000, -0.0300, -1.4000)
+
+[node name="PastureW_1" parent="Fences/PastureW" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(-0.207200, 0, -0.978299, 0, 1.000000, 0, 0.978299, 0, -0.207200, -2.3600, -0.0300, -2.3200)
+
+[node name="PastureW_2" parent="Fences/PastureW" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(-0.173521, 0, -0.984830, 0, 1.000000, 0, 0.984830, 0, -0.173521, -2.5200, -0.0300, -3.2400)
+
+[node name="PastureN" parent="Fences" type="Node3D"]
+
+[node name="GardenW" parent="Fences" type="Node3D"]
+
+[node name="GardenW_2" parent="Fences/GardenW" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(-0.051088, 0, 0.998694, 0, 1.000000, 0, -0.998694, 0, -0.051088, -16.6000, -0.0300, 8.2000)
+
+[node name="GardenW_3" parent="Fences/GardenW" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(-0.039550, 0, 0.999218, 0, 1.000000, 0, -0.999218, 0, -0.039550, -16.6000, -0.0300, 9.3000)
+
+[node name="GardenW_4" parent="Fences/GardenW" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(-0.040122, 0, 0.999195, 0, 1.000000, 0, -0.999195, 0, -0.040122, -16.6000, -0.0300, 10.4000)
+
+[node name="GardenN" parent="Fences" type="Node3D"]
+
+[node name="PondN" parent="Fences" type="Node3D"]
+
+[node name="PondN_0" parent="Fences/PondN" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(0.991577, 0, 0.129517, 0, 1.000000, 0, -0.129517, 0, 0.991577, -22.6000, -0.0300, 8.6000)
+
+[node name="PondN_1" parent="Fences/PondN" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(0.989964, 0, 0.141318, 0, 1.000000, 0, -0.141318, 0, 0.989964, -21.6667, -0.0300, 8.7333)
+
+[node name="PondN_2" parent="Fences/PondN" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(0.986110, 0, 0.166091, 0, 1.000000, 0, -0.166091, 0, 0.986110, -20.7333, -0.0300, 8.8667)
+
+[node name="PondN_3" parent="Fences/PondN" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(0.981576, 0, 0.191073, 0, 1.000000, 0, -0.191073, 0, 0.981576, -19.8000, -0.0300, 9.0000)
+
+[node name="FieldW" parent="Fences" type="Node3D"]
+
+[node name="FieldN" parent="Fences" type="Node3D"]
+
+[node name="FieldS" parent="Fences" type="Node3D"]
+
+[node name="FieldS_2" parent="Fences/FieldS" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(0.983741, 0, -0.179596, 0, 1.000000, 0, 0.179596, 0, 0.983741, 22.4667, -0.0300, 18.1333)
+
+[node name="FieldS_3" parent="Fences/FieldS" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(0.995421, 0, -0.095591, 0, 1.000000, 0, 0.095591, 0, 0.995421, 23.4000, -0.0300, 18.0000)
+
+[node name="FieldE" parent="Fences" type="Node3D"]
+
+[node name="FieldE_8" parent="Fences/FieldE" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(0.006088, 0, 0.999981, 0, 1.000000, 0, -0.999981, 0, 0.006088, 23.3778, -0.0300, 16.9556)
+
+[node name="FieldE_9" parent="Fences/FieldE" instance=ExtResource("m_fence_simple")]
+transform = Transform3D(-0.010414, 0, 0.999946, 0, 1.000000, 0, -0.999946, 0, -0.010414, 23.4000, -0.0300, 18.0000)
+
+[node name="Scatter" parent="." type="Node3D"]
+
+[node name="GrassTufts" parent="Scatter" type="Node3D"]
+metadata/model = "grass"
+metadata/count = 900
+metadata/area = Vector4(-25, -23, 25, 23)
+metadata/scale_min = 0.75
+metadata/scale_max = 1.50
+metadata/y = -0.030
+metadata/seed = 95484
+
+[node name="GrassLarge" parent="Scatter" type="Node3D"]
+metadata/model = "grass_large"
+metadata/count = 420
+metadata/area = Vector4(-25, -23, 25, 23)
+metadata/scale_min = 0.80
+metadata/scale_max = 1.60
+metadata/y = -0.030
+metadata/seed = 40935
+
+[node name="LeafLitter" parent="Scatter" type="Node3D"]
+metadata/model = "grass_leafs"
+metadata/count = 380
+metadata/area = Vector4(-25, -23, 25, 23)
+metadata/scale_min = 0.80
+metadata/scale_max = 1.50
+metadata/y = -0.030
+metadata/seed = 7745
+
+[node name="LeafLitterLarge" parent="Scatter" type="Node3D"]
+metadata/model = "grass_leafsLarge"
+metadata/count = 200
+metadata/area = Vector4(-25, -23, 25, 23)
+metadata/scale_min = 0.90
+metadata/scale_max = 1.70
+metadata/y = -0.030
+metadata/seed = 90355
+
+[node name="Bushes" parent="Scatter" type="Node3D"]
+metadata/model = "plant_bushSmall"
+metadata/count = 150
+metadata/area = Vector4(-25, -23, 25, 23)
+metadata/scale_min = 0.80
+metadata/scale_max = 1.40
+metadata/y = -0.030
+metadata/seed = 12847
+
+[node name="Flowers" parent="Scatter" type="Node3D"]
+metadata/model = "flower_yellowA"
+metadata/count = 120
+metadata/area = Vector4(-25, -14, 25, 23)
+metadata/scale_min = 0.90
+metadata/scale_max = 1.50
+metadata/y = -0.030
+metadata/seed = 77415
+
+[node name="FlowersRed" parent="Scatter" type="Node3D"]
+metadata/model = "flower_redB"
+metadata/count = 90
+metadata/area = Vector4(-25, -14, 25, 23)
+metadata/scale_min = 0.90
+metadata/scale_max = 1.50
+metadata/y = -0.030
+metadata/seed = 76199
+
+[node name="Mushrooms" parent="Scatter" type="Node3D"]
+metadata/model = "mushroom_tan"
+metadata/count = 70
+metadata/area = Vector4(-24, -22, 12, -14)
+metadata/scale_min = 0.90
+metadata/scale_max = 1.40
+metadata/y = -0.030
+metadata/seed = 69916
+
+[node name="HousePlots" parent="." type="Node3D"]
+
+[node name="Sites" parent="HousePlots" type="Node3D"]
+
+[node name="A1" parent="HousePlots" type="Node3D"]
+position = Vector3(-23.5950, -0.0300, 1.8723)
+rotation = Vector3(0, 4.6326, 0)
+metadata/cluster = "green_west"
+metadata/role = "starter"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_A1" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(-0.234116, 0, 2.926452, 0, 1.000000, 0, -2.926452, 0, -0.234116, -23.5950, -0.0280, 1.8723)
+
+[node name="Site0_A1" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(0.518524, 0, -0.926301, 0, 1.061556, 0, 0.926301, 0, 0.518524, -23.9447, -0.0300, 3.9496)
+
+[node name="Site3_A1" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(1.116403, 0, 0.090828, 0, 1.120092, 0, -0.090828, 0, 1.116403, -24.5152, -0.0300, 4.1728)
+
+[node name="A2" parent="HousePlots" type="Node3D"]
+position = Vector3(-20.0190, -0.0300, 2.2875)
+rotation = Vector3(0, 4.6326, 0)
+metadata/cluster = "green_west"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_A2" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(-0.233429, 0, 2.917868, 0, 1.000000, 0, -2.917868, 0, -0.233429, -20.0190, -0.0280, 2.2875)
+
+[node name="Site0_A2" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-0.746849, 0, 0.780244, 0, 1.080076, 0, -0.780244, 0, -0.746849, -17.5932, -0.0300, 3.1294)
+
+[node name="Site2_A2" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(0.972401, 0, -0.493003, 0, 1.090236, 0, 0.493003, 0, 0.972401, -18.3556, -0.0300, 4.0805)
+
+[node name="Site3_A2" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.870384, 0, -0.232242, 0, 0.900836, 0, 0.232242, 0, -0.870384, -20.7607, -0.0300, 0.1882)
+
+[node name="A3" parent="HousePlots" type="Node3D"]
+position = Vector3(-16.4530, -0.0300, 1.7936)
+rotation = Vector3(0, 4.6326, 0)
+metadata/cluster = "green_west"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Site0_A3" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-0.518738, 0, 0.830838, 0, 0.979480, 0, -0.830838, 0, -0.518738, -17.1199, -0.0300, -1.0986)
+
+[node name="A4" parent="HousePlots" type="Node3D"]
+position = Vector3(-13.2298, -0.0300, 3.3970)
+rotation = Vector3(0, 4.8318, 0)
+metadata/cluster = "green_west"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Site2_A4" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(-0.656309, 0, 0.636487, 0, 0.914252, 0, -0.636487, 0, -0.656309, -11.0856, -0.0300, 4.1431)
+
+[node name="Site3_A4" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.834997, 0, 0.746091, 0, 1.119764, 0, -0.746091, 0, -0.834997, -15.1293, -0.0300, 1.4919)
+
+[node name="B1" parent="HousePlots" type="Node3D"]
+position = Vector3(-11.5189, -0.0300, 0.2296)
+rotation = Vector3(0, 4.8318, 0)
+metadata/cluster = "green_east"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_B1" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(0.334592, 0, 2.788267, 0, 1.000000, 0, -2.788267, 0, 0.334592, -11.5189, -0.0280, 0.2296)
+
+[node name="Site0_B1" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-1.157118, 0, 0.056900, 0, 1.158516, 0, -0.056900, 0, -1.157118, -10.5209, -0.0300, -1.5783)
+
+[node name="Site1_B1" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(0.686758, 0, 0.781742, 0, 1.040556, 0, -0.781742, 0, 0.686758, -9.4784, -0.0300, 0.7373)
+
+[node name="Site2_B1" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(1.106618, 0, -0.215281, 0, 1.127364, 0, 0.215281, 0, 1.106618, -8.8296, -0.0300, 0.2646)
+
+[node name="Site3_B1" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(0.328468, 0, -0.807593, 0, 0.871836, 0, 0.807593, 0, 0.328468, -11.7797, -0.0300, -2.0428)
+
+[node name="B2" parent="HousePlots" type="Node3D"]
+position = Vector3(-5.1028, -0.0300, 0.5466)
+rotation = Vector3(0, 4.6326, 0)
+metadata/cluster = "green_east"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Site1_B2" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(0.302543, 0, 0.792216, 0, 0.848020, 0, -0.792216, 0, 0.302543, -3.2495, -0.0300, -0.9512)
+
+[node name="Site3_B2" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(0.531597, 0, -0.608969, 0, 0.808356, 0, 0.608969, 0, 0.531597, -3.1541, -0.0300, 1.8563)
+
+[node name="B3" parent="HousePlots" type="Node3D"]
+position = Vector3(-1.6484, -0.0300, 1.5600)
+rotation = Vector3(0, 4.6326, 0)
+metadata/cluster = "green_east"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_B3" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(-0.223737, 0, 2.796713, 0, 1.000000, 0, -2.796713, 0, -0.223737, -1.6484, -0.0280, 1.5600)
+
+[node name="Site0_B3" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-0.890386, 0, -0.259106, 0, 0.927320, 0, 0.259106, 0, -0.890386, -3.6989, -0.0300, 0.4000)
+
+[node name="Site3_B3" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.866075, 0, 0.699683, 0, 1.113392, 0, -0.699683, 0, -0.866075, 0.3391, -0.0300, 0.5047)
+
+[node name="B4" parent="HousePlots" type="Node3D"]
+position = Vector3(1.9313, -0.0300, 1.1782)
+rotation = Vector3(0, 4.6326, 0)
+metadata/cluster = "green_east"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_B4" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(-0.233109, 0, 2.913866, 0, 1.000000, 0, -2.913866, 0, -0.233109, 1.9313, -0.0280, 1.1782)
+
+[node name="Site1_B4" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(-0.256352, 0, 1.007353, 0, 1.039460, 0, -1.007353, 0, -0.256352, 3.7223, -0.0300, -0.0405)
+
+[node name="Site3_B4" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.030428, 0, -0.867519, 0, 0.868052, 0, 0.867519, 0, -0.030428, 0.2621, -0.0300, 2.4301)
+
+[node name="G1" parent="HousePlots" type="Node3D"]
+position = Vector3(5.9136, -0.0300, 2.0936)
+rotation = Vector3(0, 4.8121, 0)
+metadata/cluster = "farm_lane"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_G1" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(0.298329, 0, 2.983290, 0, 1.000000, 0, -2.983290, 0, 0.298329, 5.9136, -0.0280, 2.0936)
+
+[node name="Site0_G1" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-1.029549, 0, -0.016691, 0, 1.029684, 0, 0.016691, 0, -1.029549, 8.1826, -0.0300, 3.3825)
+
+[node name="Site1_G1" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(-0.306051, 0, 0.789177, 0, 0.846444, 0, -0.789177, 0, -0.306051, 3.4830, -0.0300, 2.8064)
+
+[node name="Site2_G1" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(0.359280, 0, 0.723232, 0, 0.807556, 0, -0.723232, 0, 0.359280, 4.1797, -0.0300, 3.4473)
+
+[node name="G2" parent="HousePlots" type="Node3D"]
+position = Vector3(10.0911, -0.0300, 0.9635)
+rotation = Vector3(0, 4.8121, 0)
+metadata/cluster = "farm_lane"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_G2" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(0.292730, 0, 2.927301, 0, 1.000000, 0, -2.927301, 0, 0.292730, 10.0911, -0.0280, 0.9635)
+
+[node name="Site0_G2" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-0.800428, 0, 0.129045, 0, 0.810764, 0, -0.129045, 0, -0.800428, 9.4760, -0.0300, 3.4078)
+
+[node name="Site2_G2" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(0.495662, 0, 0.702437, 0, 0.859708, 0, -0.702437, 0, 0.495662, 12.0391, -0.0300, 2.2426)
+
+[node name="Site3_G2" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(0.286380, 0, -0.911297, 0, 0.955236, 0, 0.911297, 0, 0.286380, 10.2917, -0.0300, -1.5367)
+
+[node name="G3" parent="HousePlots" type="Node3D"]
+position = Vector3(14.3059, -0.0300, 1.2113)
+rotation = Vector3(0, 4.6375, 0)
+metadata/cluster = "farm_lane"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_G3" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(-0.206696, 0, 2.755950, 0, 1.000000, 0, -2.755950, 0, -0.206696, 14.3059, -0.0280, 1.2113)
+
+[node name="Site0_G3" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-0.218390, 0, 1.172434, 0, 1.192600, 0, -1.172434, 0, -0.218390, 12.5168, -0.0300, 2.2419)
+
+[node name="Site2_G3" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(-0.751187, 0, 0.479968, 0, 0.891432, 0, -0.479968, 0, -0.751187, 12.3496, -0.0300, 2.2591)
+
+[node name="Site3_G3" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(0.879661, 0, 0.673613, 0, 1.107952, 0, -0.673613, 0, 0.879661, 14.8431, -0.0300, -0.9070)
+
+[node name="G4" parent="HousePlots" type="Node3D"]
+position = Vector3(19.1804, -0.0300, 1.4903)
+rotation = Vector3(0, 4.6375, 0)
+metadata/cluster = "farm_lane"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_G4" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(-0.248029, 0, 3.307050, 0, 1.000000, 0, -3.307050, 0, -0.248029, 19.1804, -0.0280, 1.4903)
+
+[node name="Site0_G4" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-1.009745, 0, -0.421375, 0, 1.094140, 0, 0.421375, 0, -1.009745, 20.8109, -0.0300, 3.6292)
+
+[node name="Site1_G4" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(0.096993, 0, 0.932220, 0, 0.937252, 0, -0.932220, 0, 0.096993, 17.2097, -0.0300, -0.5923)
+
+[node name="Site2_G4" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(0.967714, 0, 0.574605, 0, 1.125452, 0, -0.574605, 0, 0.967714, 21.9120, -0.0300, 1.0594)
+
+[node name="Site3_G4" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-1.036640, 0, -0.386067, 0, 1.106196, 0, 0.386067, 0, -1.036640, 21.6547, -0.0300, 0.4526)
+
+[node name="G5" parent="HousePlots" type="Node3D"]
+position = Vector3(22.9495, -0.0300, 1.8339)
+rotation = Vector3(0, 4.7623, 0)
+metadata/cluster = "farm_lane"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_G5" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(0.147587, 0, 2.951740, 0, 1.000000, 0, -2.951740, 0, 0.147587, 22.9495, -0.0280, 1.8339)
+
+[node name="Site0_G5" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-0.047988, 0, -0.807255, 0, 0.808680, 0, 0.807255, 0, -0.047988, 24.9890, -0.0300, 0.2877)
+
+[node name="Site1_G5" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(-0.812465, 0, -0.738820, 0, 1.098160, 0, 0.738820, 0, -0.812465, 22.7178, -0.0300, 4.4798)
+
+[node name="C1" parent="HousePlots" type="Node3D"]
+position = Vector3(-8.1536, -0.0300, 2.6634)
+rotation = Vector3(0, 0.0950, 0)
+metadata/cluster = "north_row"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Site1_C1" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(0.410800, 0, 0.819949, 0, 0.917100, 0, -0.819949, 0, 0.410800, -6.5479, -0.0300, 4.4983)
+
+[node name="Site2_C1" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(-0.756446, 0, -0.774336, 0, 1.082500, 0, 0.774336, 0, -0.756446, -6.3823, -0.0300, 1.6280)
+
+[node name="Site3_C1" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.649713, 0, -0.829826, 0, 1.053916, 0, 0.829826, 0, -0.649713, -6.0578, -0.0300, 3.7100)
+
+[node name="C2" parent="HousePlots" type="Node3D"]
+position = Vector3(-8.0288, -0.0300, -4.8301)
+rotation = Vector3(0, 5.7675, 0)
+metadata/cluster = "north_row"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_C2" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(2.745730, 0, 1.556350, 0, 1.000000, 0, -1.556350, 0, 2.745730, -8.0288, -0.0280, -4.8301)
+
+[node name="Site3_C2" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.950780, 0, -0.314087, 0, 1.001316, 0, 0.314087, 0, -0.950780, -9.8095, -0.0300, -3.3302)
+
+[node name="C3" parent="HousePlots" type="Node3D"]
+position = Vector3(-5.1239, -0.0300, -8.0788)
+rotation = Vector3(0, 5.6471, 0)
+metadata/cluster = "north_row"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_C3" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(2.169200, 0, 1.601871, 0, 1.000000, 0, -1.601871, 0, 2.169200, -5.1239, -0.0280, -8.0788)
+
+[node name="Site1_C3" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(-0.917842, 0, 0.646191, 0, 1.122496, 0, -0.646191, 0, -0.917842, -2.5230, -0.0300, -8.4793)
+
+[node name="Site2_C3" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(-0.247215, 0, 0.891984, 0, 0.925608, 0, -0.891984, 0, -0.247215, -5.6423, -0.0300, -5.5762)
+
+[node name="Site3_C3" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.970581, 0, 0.028243, 0, 0.970992, 0, -0.028243, 0, -0.970581, -3.1469, -0.0300, -6.9389)
+
+[node name="C4" parent="HousePlots" type="Node3D"]
+position = Vector3(-2.7405, -0.0300, -11.3317)
+rotation = Vector3(0, 5.6471, 0)
+metadata/cluster = "north_row"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_C4" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(2.253743, 0, 1.664302, 0, 1.000000, 0, -1.664302, 0, 2.253743, -2.7405, -0.0280, -11.3317)
+
+[node name="Site2_C4" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(0.572839, 0, -1.033361, 0, 1.181516, 0, 1.033361, 0, 0.572839, -4.7606, -0.0300, -12.5758)
+
+[node name="Site3_C4" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.187962, 0, 0.847392, 0, 0.867988, 0, -0.847392, 0, -0.187962, -3.1517, -0.0300, -9.1842)
+
+[node name="D1" parent="HousePlots" type="Node3D"]
+position = Vector3(-8.2306, -0.0300, -1.2358)
+rotation = Vector3(0, 1.0819, 0)
+metadata/cluster = "hill_orchard"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_D1" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(1.415715, 0, -2.661544, 0, 1.000000, 0, 2.661544, 0, 1.415715, -8.2306, -0.0280, -1.2358)
+
+[node name="Site0_D1" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(0.174058, 0, 1.127366, 0, 1.140724, 0, -1.127366, 0, 0.174058, -6.0423, -0.0300, -0.4640)
+
+[node name="Site1_D1" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(-0.869954, 0, 0.115681, 0, 0.877612, 0, -0.115681, 0, -0.869954, -7.5793, -0.0300, -3.3507)
+
+[node name="Site2_D1" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(0.742274, 0, 0.886089, 0, 1.155908, 0, -0.886089, 0, 0.742274, -5.6877, -0.0300, -2.0577)
+
+[node name="Site3_D1" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-1.000442, 0, 0.389429, 0, 1.073564, 0, -0.389429, 0, -1.000442, -5.9599, -0.0300, -0.2596)
+
+[node name="D2" parent="HousePlots" type="Node3D"]
+position = Vector3(-12.1135, -0.0300, -3.3210)
+rotation = Vector3(0, 0.7854, 0)
+metadata/cluster = "hill_orchard"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Site0_D2" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(0.148291, 0, 1.006555, 0, 1.017420, 0, -1.006555, 0, 0.148291, -11.9828, -0.0300, -5.7876)
+
+[node name="Site1_D2" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(0.829808, 0, -0.172933, 0, 0.847636, 0, 0.172933, 0, 0.829808, -10.0878, -0.0300, -1.9174)
+
+[node name="Site3_D2" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.967613, 0, 0.541650, 0, 1.108900, 0, -0.541650, 0, -0.967613, -13.8817, -0.0300, -1.4113)
+
+[node name="D3" parent="HousePlots" type="Node3D"]
+position = Vector3(-15.2404, -0.0300, -6.7573)
+rotation = Vector3(0, 0.7854, 0)
+metadata/cluster = "hill_orchard"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Site0_D3" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-0.768307, 0, 0.766860, 0, 1.085528, 0, -0.766860, 0, -0.768307, -14.5964, -0.0300, -4.4118)
+
+[node name="Site2_D3" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(0.926658, 0, -0.571306, 0, 1.088616, 0, 0.571306, 0, 0.926658, -15.6262, -0.0300, -4.2553)
+
+[node name="Site3_D3" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.926283, 0, 0.566427, 0, 1.085744, 0, -0.566427, 0, -0.926283, -16.9486, -0.0300, -4.9917)
+
+[node name="D4" parent="HousePlots" type="Node3D"]
+position = Vector3(-17.9788, -0.0300, -9.8425)
+rotation = Vector3(0, 0.7086, 0)
+metadata/cluster = "hill_orchard"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_D4" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(2.042930, 0, -1.751083, 0, 1.000000, 0, 1.751083, 0, 2.042930, -17.9788, -0.0280, -9.8425)
+
+[node name="Site0_D4" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(0.883112, 0, -0.005993, 0, 0.883132, 0, 0.005993, 0, 0.883112, -20.1442, -0.0300, -11.1631)
+
+[node name="Site1_D4" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(0.721463, 0, -0.594559, 0, 0.934884, 0, 0.594559, 0, 0.721463, -19.5047, -0.0300, -8.1519)
+
+[node name="Site3_D4" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(0.672231, 0, 0.668693, 0, 0.948180, 0, -0.668693, 0, 0.672231, -17.8389, -0.0300, -7.4618)
+
+[node name="E1" parent="HousePlots" type="Node3D"]
+position = Vector3(-13.7490, -0.0300, 6.9594)
+rotation = Vector3(0, 6.0382, 0)
+metadata/cluster = "pond_cottages"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Site0_E1" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-0.692132, 0, -0.842016, 0, 1.089972, 0, 0.842016, 0, -0.692132, -16.1437, -0.0300, 8.0030)
+
+[node name="Site1_E1" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(-0.534699, 0, 1.025714, 0, 1.156716, 0, -1.025714, 0, -0.534699, -15.2971, -0.0300, 8.8477)
+
+[node name="Site3_E1" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.488652, 0, 0.851470, 0, 0.981724, 0, -0.851470, 0, -0.488652, -16.0501, -0.0300, 6.2945)
+
+[node name="E2" parent="HousePlots" type="Node3D"]
+position = Vector3(-12.4126, -0.0300, 10.3021)
+rotation = Vector3(0, 0.0798, 0)
+metadata/cluster = "pond_cottages"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Site0_E2" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-0.003082, 0, -0.875911, 0, 0.875916, 0, 0.875911, 0, -0.003082, -11.3100, -0.0300, 12.6947)
+
+[node name="Site1_E2" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(-0.587484, 0, -0.971796, 0, 1.135572, 0, 0.971796, 0, -0.587484, -14.6428, -0.0300, 11.1655)
+
+[node name="Site3_E2" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(0.641792, 0, -0.966941, 0, 1.160548, 0, 0.966941, 0, 0.641792, -13.4594, -0.0300, 12.7924)
+
+[node name="E3" parent="HousePlots" type="Node3D"]
+position = Vector3(-13.2473, -0.0300, 13.8040)
+rotation = Vector3(0, 5.7266, 0)
+metadata/cluster = "pond_cottages"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_E3" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(2.414260, 0, 1.502206, 0, 1.000000, 0, -1.502206, 0, 2.414260, -13.2473, -0.0280, 13.8040)
+
+[node name="Site0_E3" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(1.030390, 0, 0.413587, 0, 1.110296, 0, -0.413587, 0, 1.030390, -14.3584, -0.0300, 15.9924)
+
+[node name="Site1_E3" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(0.096641, 0, -1.179600, 0, 1.183552, 0, 1.179600, 0, 0.096641, -10.8375, -0.0300, 14.5990)
+
+[node name="Site2_E3" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(-0.732019, 0, 0.703602, 0, 1.015336, 0, -0.703602, 0, -0.732019, -14.8205, -0.0300, 12.1716)
+
+[node name="E4" parent="HousePlots" type="Node3D"]
+position = Vector3(-14.9011, -0.0300, 17.0016)
+rotation = Vector3(0, 5.2528, 0)
+metadata/cluster = "pond_cottages"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_E4" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(1.436961, 0, 2.394935, 0, 1.000000, 0, -2.394935, 0, 1.436961, -14.9011, -0.0280, 17.0016)
+
+[node name="Site0_E4" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(1.075718, 0, -0.296755, 0, 1.115900, 0, 0.296755, 0, 1.075718, -16.1227, -0.0300, 19.3448)
+
+[node name="Site1_E4" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(-0.738539, 0, 0.399873, 0, 0.839844, 0, -0.399873, 0, -0.738539, -12.6893, -0.0300, 15.9641)
+
+[node name="F1" parent="HousePlots" type="Node3D"]
+position = Vector3(18.7292, -0.0300, 6.6732)
+rotation = Vector3(0, 0.4182, 0)
+metadata/cluster = "east_farm"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_F1" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(2.785109, 0, -1.237826, 0, 1.000000, 0, 1.237826, 0, 2.785109, 18.7292, -0.0280, 6.6732)
+
+[node name="Site0_F1" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(-1.119620, 0, 0.276547, 0, 1.153268, 0, -0.276547, 0, -1.119620, 16.6153, -0.0300, 7.5262)
+
+[node name="Site1_F1" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(-0.763848, 0, -0.422432, 0, 0.872876, 0, 0.422432, 0, -0.763848, 21.1703, -0.0300, 7.4403)
+
+[node name="F2" parent="HousePlots" type="Node3D"]
+position = Vector3(21.9488, -0.0300, 8.4550)
+rotation = Vector3(0, 0.4182, 0)
+metadata/cluster = "east_farm"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_F2" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(2.867934, 0, -1.274637, 0, 1.000000, 0, 1.274637, 0, 2.867934, 21.9488, -0.0280, 8.4550)
+
+[node name="Site0_F2" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(0.943178, 0, -0.723663, 0, 1.188812, 0, 0.723663, 0, 0.943178, 24.2240, -0.0300, 9.6626)
+
+[node name="Site1_F2" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(0.740592, 0, 0.520775, 0, 0.905364, 0, -0.520775, 0, 0.740592, 23.6865, -0.0300, 6.7629)
+
+[node name="Site3_F2" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(1.060757, 0, 0.262574, 0, 1.092772, 0, -0.262574, 0, 1.060757, 23.1751, -0.0300, 10.5549)
+
+[node name="F3" parent="HousePlots" type="Node3D"]
+position = Vector3(19.1181, -0.0300, 10.6793)
+rotation = Vector3(0, 6.0858, 0)
+metadata/cluster = "east_farm"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Pad_F3" parent="HousePlots/Sites" type="MeshInstance3D"]
+mesh = SubResource("Box_Earth_4")
+transform = Transform3D(2.927318, 0, 0.585464, 0, 1.000000, 0, -0.585464, 0, 2.927318, 19.1181, -0.0280, 10.6793)
+
+[node name="Site1_F3" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(-0.054210, 0, -0.819713, 0, 0.821504, 0, 0.819713, 0, -0.054210, 19.1456, -0.0300, 12.9870)
+
+[node name="Site2_F3" parent="HousePlots/Sites" instance=ExtResource("m_stone_largeC")]
+transform = Transform3D(-0.354334, 0, 0.971350, 0, 1.033960, 0, -0.971350, 0, -0.354334, 20.6487, -0.0300, 9.0322)
+
+[node name="Site3_F3" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(-0.642243, 0, 0.947464, 0, 1.144624, 0, -0.947464, 0, -0.642243, 16.3310, -0.0300, 10.5730)
+
+[node name="F4" parent="HousePlots" type="Node3D"]
+position = Vector3(20.9678, -0.0300, 13.7678)
+rotation = Vector3(0, 5.5746, 0)
+metadata/cluster = "east_farm"
+metadata/role = "mandatory"
+metadata/size = Vector3(3.2, 3.2, 3.2)
+
+[node name="Site0_F4" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallB")]
+transform = Transform3D(1.024190, 0, -0.330789, 0, 1.076284, 0, 0.330789, 0, 1.024190, 23.2837, -0.0300, 13.8971)
+
+[node name="Site1_F4" parent="HousePlots/Sites" instance=ExtResource("m_stump_round")]
+transform = Transform3D(-0.332230, 0, 0.958558, 0, 1.014500, 0, -0.958558, 0, -0.332230, 20.9718, -0.0300, 15.9129)
+
+[node name="Site3_F4" parent="HousePlots/Sites" instance=ExtResource("m_rock_smallD")]
+transform = Transform3D(0.449569, 0, -0.753466, 0, 0.877396, 0, 0.753466, 0, 0.449569, 20.1339, -0.0300, 15.8471)
+
+[node name="Collision" parent="." type="StaticBody3D"]
+
+[node name="Land0" parent="Collision" type="CollisionShape3D"]
+shape = SubResource("Shape_Land_6")
+position = Vector3(0.0000, -1.0000, -10.1250)
+
+[node name="Land1" parent="Collision" type="CollisionShape3D"]
+shape = SubResource("Shape_Land_7")
+position = Vector3(0.0000, -1.0000, 23.1250)
+
+[node name="Land3" parent="Collision" type="CollisionShape3D"]
+shape = SubResource("Shape_Land_8")
+position = Vector3(7.1250, -1.0000, 13.0000)
+
+[node name="PondBed" parent="Collision" type="CollisionShape3D"]
+shape = SubResource("Shape_Pond_9")
+position = Vector3(-19.0000, -1.4500, 13.0000)
+

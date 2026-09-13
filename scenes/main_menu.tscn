@@ -82,6 +82,14 @@ size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 20
 text = "Level 3 City"
 
+[node name="LevelFieldsButton" type="Button" parent="CenterContainer/VBox" unique_id=771204318]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "Village Fields (authored preview)"
+
 [node name="OptionsButton" type="Button" parent="CenterContainer/VBox" unique_id=1633201899]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(280, 48)
@@ -167,6 +175,7 @@ horizontal_alignment = 2
 [connection signal="pressed" from="CenterContainer/VBox/StartButton" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="CenterContainer/VBox/Level2Button" to="." method="_on_level2_pressed"]
 [connection signal="pressed" from="CenterContainer/VBox/Level3Button" to="." method="_on_level3_pressed"]
+[connection signal="pressed" from="CenterContainer/VBox/LevelFieldsButton" to="." method="_on_level_fields_pressed"]
 [connection signal="pressed" from="CenterContainer/VBox/OptionsButton" to="." method="_on_options_pressed"]
 [connection signal="pressed" from="CenterContainer/VBox/QuitButton" to="." method="_on_quit_pressed"]
 [connection signal="value_changed" from="OptionsPanel/OptionsVBox/VolumeBox/VolumeSlider" to="." method="_on_volume_changed"]

@@ -1,0 +1,114 @@
+[gd_scene format=3 uid="uid://bv4ef0o2o0gp"]
+
+[ext_resource type="PackedScene" uid="uid://bq4lawai32vcx" path="res://assets/nature/crop_carrot.glb" id="carrot"]
+[ext_resource type="PackedScene" uid="uid://bbealdi22dn6y" path="res://assets/nature/cliff_block_stone.glb" id="cliff"]
+[ext_resource type="PackedScene" uid="uid://bol8a5dg1c2dv" path="res://assets/nature/crops_dirtRow.glb" id="dirt"]
+[ext_resource type="PackedScene" uid="uid://fasl17pcoee8" path="res://assets/nature/fence_simple.glb" id="fence"]
+[ext_resource type="PackedScene" uid="uid://cmknk0ycqjuyi" path="res://assets/nature/fence_corner.glb" id="fence_c"]
+[ext_resource type="PackedScene" uid="uid://c2ggu4qq5kbbr" path="res://assets/nature/grass.glb" id="grass"]
+[ext_resource type="PackedScene" uid="uid://yev8h7bkha0x" path="res://assets/nature/grass_large.glb" id="grass_l"]
+[ext_resource type="PackedScene" uid="uid://7p8nikqs5ut6" path="res://assets/nature/ground_grass.glb" id="ground_grass"]
+[ext_resource type="PackedScene" uid="uid://ddtvwjl6naujy" path="res://assets/nature/ground_pathRocks.glb" id="path_rocks"]
+[ext_resource type="PackedScene" uid="uid://cyq5osqemsw7m" path="res://assets/nature/ground_pathStraight.glb" id="path_s"]
+[ext_resource type="PackedScene" uid="uid://c8wav32osyt1r" path="res://assets/nature/ground_pathTile.glb" id="path_t"]
+[ext_resource type="PackedScene" uid="uid://ctgdqrw7aqbnf" path="res://assets/nature/tree_pineTallA.glb" id="pine"]
+[ext_resource type="PackedScene" uid="uid://ddnw5vq7my4p6" path="res://assets/nature/ground_riverBendBank.glb" id="river_bank"]
+[ext_resource type="PackedScene" uid="uid://dcjswylaxcedp" path="res://assets/nature/ground_riverStraight.glb" id="river_s"]
+[ext_resource type="PackedScene" uid="uid://bvqfqp0dj8fc0" path="res://assets/nature/rock_largeA.glb" id="rock_l"]
+[ext_resource type="PackedScene" uid="uid://ce0vymgb01lqj" path="res://assets/nature/tree_default.glb" id="tree"]
+[ext_resource type="PackedScene" uid="uid://dga0pdl76y3xt" path="res://assets/nature/path_wood.glb" id="wood"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_house"]
+albedo_color = Color(0.92, 0.82, 0.66, 1)
+
+[sub_resource type="BoxMesh" id="Box_house"]
+material = SubResource("Mat_house")
+size = Vector3(2, 2, 2)
+
+[node name="ScaleTest" type="Node3D" unique_id=1412278224]
+
+[node name="Ground" type="Node3D" parent="." unique_id=488550122]
+
+[node name="Lawn" parent="Ground" unique_id=2093147346 instance=ExtResource("ground_grass")]
+transform = Transform3D(14, 0, 0, 0, 1, 0, 0, 0, 14, 0, 0, 0)
+
+[node name="Lane" parent="Ground" unique_id=1518727093 instance=ExtResource("path_s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.008, 3)
+
+[node name="Lane2" parent="Ground" unique_id=1891418875 instance=ExtResource("path_s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.008, 3)
+
+[node name="Plaza" parent="Ground" unique_id=1030600347 instance=ExtResource("path_t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.008, 2)
+
+[node name="Plaza2" parent="Ground" unique_id=1135355765 instance=ExtResource("path_t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.008, 3)
+
+[node name="Rocky" parent="Ground" unique_id=1447278347 instance=ExtResource("path_rocks")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.008, 3)
+
+[node name="RiverBankN" parent="Ground" unique_id=1149417136 instance=ExtResource("river_bank")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.008, -1)
+
+[node name="RiverBed" type="MeshInstance3D" parent="Ground" unique_id=192143586]
+transform = Transform3D(4, 0, 0, 0, 0.3, 0, 0, 0, 4, -4, -0.35, 1)
+visible = false
+mesh = SubResource("Box_house")
+
+[node name="Water" parent="Ground" unique_id=1667305950 instance=ExtResource("river_s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -0.1, 0)
+
+[node name="Water2" parent="Ground" unique_id=706331608 instance=ExtResource("river_s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -0.1, 1)
+
+[node name="Water3" parent="Ground" unique_id=546732745 instance=ExtResource("river_s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -0.1, 2)
+
+[node name="RiverBankS" parent="Ground" unique_id=1969149584 instance=ExtResource("river_bank")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.008, 3)
+
+[node name="WoodPath" parent="Ground" unique_id=2086584948 instance=ExtResource("wood")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3, 0.02, -1)
+
+[node name="Props" type="Node3D" parent="." unique_id=989832298]
+
+[node name="H1" parent="Props" unique_id=900367970 instance=ExtResource("grass")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
+
+[node name="H2" parent="Props" unique_id=1346648869 instance=ExtResource("grass_l")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 1)
+
+[node name="T1" parent="Props" unique_id=2144685138 instance=ExtResource("tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -3)
+
+[node name="T2" parent="Props" unique_id=33966535 instance=ExtResource("pine")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -3)
+
+[node name="R1" parent="Props" unique_id=2135379630 instance=ExtResource("rock_l")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 3)
+
+[node name="F1" parent="Props" unique_id=220960588 instance=ExtResource("fence")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -2)
+
+[node name="F2" parent="Props" unique_id=2035709657 instance=ExtResource("fence")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -2)
+
+[node name="F3" parent="Props" unique_id=1718344108 instance=ExtResource("fence_c")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -2)
+
+[node name="Dirt" parent="Props" unique_id=177947879 instance=ExtResource("dirt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.008, 4)
+
+[node name="Crop1" parent="Props" unique_id=180056142 instance=ExtResource("carrot")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 4)
+
+[node name="CliffStack" parent="Props" unique_id=1848300344 instance=ExtResource("cliff")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1, 4)
+
+[node name="HouseRef" type="MeshInstance3D" parent="Props" unique_id=346548521]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -3)
+mesh = SubResource("Box_house")
+
+[node name="VillagerRef" type="MeshInstance3D" parent="Props" unique_id=1858023743]
+transform = Transform3D(0.3, 0, 0, 0, 0.7, 0, 0, 0, 0.3, 3, 0.7, -3)
+mesh = SubResource("Box_house")

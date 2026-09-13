@@ -42,6 +42,16 @@ var embers: int = EMBER_START
 var ember_reward_timer: float = 0.0
 var anti_stall_timer: float = 0.0
 var starter_ignited: bool = false
+## Handcrafted levels report reserved building sites here and load in "staging"
+## mode until houses exist, which suspends win/lose evaluation.
+var plots: Array[Dictionary] = []
+var staging: bool = false
+
+# Atmosphere captured from game.tscn so level scenes can override it safely.
+var _base_environment: Environment = null
+var _base_sun_transform: Transform3D = Transform3D.IDENTITY
+var _base_sun_color: Color = Color.WHITE
+var _base_sun_energy: float = 1.0
 
 # Wind Gust state
 var wind_cooldown: float = 0.0
@@ -101,6 +111,8 @@ var edge_pan: bool = false
 @onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var village_root: Node3D = $Village
 @onready var units_root: Node3D = $Units
+@onready var world_environment: WorldEnvironment = $WorldEnvironment
+@onready var sun: DirectionalLight3D = $Sun
 
 # HUD nodes
 @onready var fire_bar: ProgressBar = %FireBar
@@ -124,8 +136,9 @@ var edge_pan: bool = false
 func _ready() -> void:
 	randomize()
 	_setup_input_actions()
-	level_idx = clampi(RunState.level, 0, 2)
+	level_idx = clampi(RunState.level, 0, RunState.PLAYABLE_LEVELS - 1)
 	edge_pan = RunState.edge_pan
+	_capture_base_atmosphere()
 
 	_setup_subsystems()
 	_setup_hud()
@@ -346,13 +359,14 @@ func _load_level() -> void:
 	last_spark_house = null
 	last_spark_timer = 0.0
 
-	# Build Level geometry & actors via LevelBuilder
-	var ctx := LevelBuilder.build_level(level_idx, village_root, units_root)
+	# Build Level geometry & actors via LevelBuilder, or load a handcrafted level scene.
+	var ctx := _build_level_context()
 	level_name = ctx.name
 	level_sub = ctx.sub
 	cam_bound = ctx.cam_bound
 	camera.size = ctx.camera_size
 	rig.position = Vector3.ZERO
+	staging = ctx.staging
 
 	houses = ctx.houses
 	mandatory_houses = ctx.mandatory_houses
@@ -360,6 +374,9 @@ func _load_level() -> void:
 	starter_house = ctx.starter_house
 	shaman = ctx.shaman
 	starter_ignited = false
+
+	# Handcrafted levels report reserved building sites instead of generated houses.
+	plots = ctx.plots
 
 	# Wire house signals
 	for h in houses:
@@ -387,8 +404,66 @@ func _load_level() -> void:
 	pause_panel.hide()
 	get_tree().paused = false
 
-	_flash_hint("Tip: First fire is free on the starter house. Observe the wind direction before sparking.")
+	if staging:
+		_flash_hint("Foundations staged: %d building plots reserved." % plots.size())
+	elif not mandatory_houses.is_empty():
+		_flash_hint("Tip: First fire is free on the starter house. Observe the wind direction before sparking.")
 	_update_hud()
+
+
+## Handcrafted levels are scenes owned by the game (SPEC Section 19): the level
+## scene supplies geometry, atmosphere, reserved plots and its own water sources.
+func _build_level_context() -> LevelBuilder.LevelContext:
+	if RunState.is_handcrafted(level_idx):
+		var scene_path := RunState.handcrafted_scene(level_idx)
+		var packed: PackedScene = load(scene_path) if ResourceLoader.exists(scene_path) else null
+		if packed != null:
+			var lvl := packed.instantiate() as VillageFieldsLevel
+			if lvl != null:
+				village_root.add_child(lvl)
+				_apply_level_atmosphere(lvl)
+				lvl.release_atmosphere_visuals()
+				return lvl.build_context(units_root)
+		push_error("Handcrafted level scene unavailable: %s" % scene_path)
+	_restore_base_atmosphere()
+	return LevelBuilder.build_level(level_idx, village_root, units_root)
+
+
+## Base atmosphere of game.tscn, restored whenever a level does not define its own.
+func _capture_base_atmosphere() -> void:
+	if world_environment != null and world_environment.environment != null:
+		_base_environment = world_environment.environment.duplicate()
+	if sun != null:
+		_base_sun_transform = sun.transform
+		_base_sun_color = sun.light_color
+		_base_sun_energy = sun.light_energy
+
+
+func _restore_base_atmosphere() -> void:
+	if world_environment != null and _base_environment != null:
+		world_environment.environment = _base_environment.duplicate()
+	if sun != null:
+		sun.transform = _base_sun_transform
+		sun.light_color = _base_sun_color
+		sun.light_energy = _base_sun_energy
+
+
+## Copy the level's authored sky/fog/light onto the game's single Environment + Sun
+## so the running scene never has two competing environments.
+func _apply_level_atmosphere(lvl: VillageFieldsLevel) -> void:
+	var src := lvl.get_environment()
+	var src_sun := lvl.get_sun()
+	if world_environment == null:
+		return
+	if src != null:
+		world_environment.environment = src.duplicate() as Environment
+	elif _base_environment != null:
+		world_environment.environment = _base_environment.duplicate()
+	if sun != null and src_sun != null:
+		sun.transform = src_sun.transform
+		sun.light_color = src_sun.light_color
+		sun.light_energy = src_sun.light_energy
+		sun.shadow_enabled = true
 
 
 func _clear_level() -> void:
@@ -520,6 +595,13 @@ func _process(delta: float) -> void:
 			burnt_mandatory += 1
 
 	burn_percent = 100.0 * float(burnt_mandatory) / float(maxi(1, mandatory_houses.size()))
+
+	# Staging levels (foundations without burnable structures) cannot be won or lost.
+	if staging:
+		_update_hud()
+		_update_hover_inspection(delta)
+		_update_directional_embers(delta)
+		return
 
 	# Win check: 100% of ordinary combustible settlement structures destroyed
 	if burnt_mandatory >= mandatory_houses.size():
@@ -1181,7 +1263,10 @@ func _update_hud() -> void:
 		ember_label.text = "Embers: %d / %d%s" % [embers, EMBER_MAX, extra]
 
 	if burn_label != null:
-		burn_label.text = "Settlement: %d / %d (100%% Goal)" % [burnt_mandatory, mandatory_houses.size()]
+		if staging:
+			burn_label.text = "Plots reserved: %d (foundations only)" % plots.size()
+		else:
+			burn_label.text = "Settlement: %d / %d (100%% Goal)" % [burnt_mandatory, mandatory_houses.size()]
 
 	if wind_label != null:
 		var gust_str := ""
@@ -1220,7 +1305,9 @@ func _update_hud() -> void:
 		elif not last_spark_available:
 			spark_status = "USED"
 
-		if not starter_ignited:
+		if staging:
+			objective_label.text = "STAGING: %s — %d plots reserved" % [level_name, plots.size()]
+		elif not starter_ignited:
 			objective_label.text = "SPARK PHASE: Click the highlighted STARTER house to begin"
 		elif last_spark_active:
 			objective_label.text = "CRITICAL: LAST SPARK SMOLDERING (%.1fs)! Click house to save (1 Ember)!" % maxf(0.0, last_spark_timer)
