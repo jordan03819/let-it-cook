@@ -13,7 +13,25 @@ const CharBurnScript := preload("res://scenes/char_burn.gd")
 var speed: float = 4.2
 var speed_flee: float = 5.0
 var spray_range: float = 4.5
-var spray_rate: float = 0.85
+## Water put on a fire per second. Deliberately modest: a hose should wear a
+## fire down, not delete it — the fire is the player's, and the crew's real
+## power is that they keep coming back (SPEC 6.7).
+var spray_rate: float = 0.32
+## Seconds of spraying one tank holds. Empty means breaking off to refill, which
+## is the window a player can exploit.
+var tank_max: float = 5.0
+var tank: float = 5.0
+## Water per second while standing at a source, and how close counts as there.
+var refill_rate: float = 1.8
+## How close to a source counts as standing at it. Generous on purpose: a water
+## marker can sit inside the pond's shore or the well's own collider, and a crew
+## that cannot quite reach the exact point would otherwise jitter there forever.
+const REFILL_RANGE: float = 3.4
+var refill_target: Node3D = null
+## True for the whole trip: a crew that leaves the water as soon as the tank
+## shows a splash just oscillates between the fire and the shore, spraying
+## nothing. Filling up is a commitment, and that is the point of the mechanic.
+var _refilling: bool = false
 var courage: float = 1.0
 var elite: bool = false # L3 elites: faster, more spray, braver
 var target_house: VoxelHouse = null
@@ -50,8 +68,12 @@ func _ready() -> void:
 	_build_telegraph()
 	if elite:
 		speed = 5.2
-		spray_rate = 1.3
+		spray_rate = 0.55
+		tank_max = 7.0
+		tank = 7.0
+		refill_rate = 2.4
 		courage = 1.6
+	tank = tank_max
 	burn = CharBurnScript.new()
 	add_child(burn)
 	burn.configure(self, _visual, KitCharacter.RESPONDER_HEIGHT, randf_range(5.0, 6.0))
@@ -302,6 +324,12 @@ func _physics_process(delta: float) -> void:
 		_physics_flee(delta)
 		return
 
+	# Out of water: back to a source before anything else. A crew that has to
+	# keep making this trip cannot hold a fire down on its own.
+	if tank <= 0.0 or _refilling:
+		_refill_trip(delta)
+		return
+
 	# Target commitment (SPEC Section 6.7: commits for >= 6 seconds unless fire goes out)
 	if commit_timer > 0.0:
 		commit_timer -= delta
@@ -346,6 +374,47 @@ func _physics_process(delta: float) -> void:
 	else:
 		_set_spray(false)
 		_move(to_target.normalized(), delta)
+
+
+## Walks to the nearest water source, refills, and heads back to the fire.
+func _refill_trip(delta: float) -> void:
+	_set_spray(false)
+	_refilling = true
+	if refill_target == null or not is_instance_valid(refill_target):
+		refill_target = _nearest_water_source()
+	_update_target_telegraph()
+	if refill_target == null:
+		# No source left in the level: fall back to walking home and clocking off.
+		retreating = true
+		_retreat_t = 6.0
+		return
+	var to_water: Vector3 = refill_target.global_position - global_position
+	to_water.y = 0.0
+	if to_water.length() > REFILL_RANGE:
+		_move(to_water.normalized(), delta)
+		return
+	# At the water: stand still and fill up, visibly.
+	velocity = Vector3.ZERO
+	move_and_slide()
+	_animate(false)
+	tank = minf(tank_max, tank + refill_rate * delta)
+	if tank >= tank_max * 0.999:
+		_refilling = false
+		refill_target = null
+		_show_bubble("HOSE READY", Color(0.5, 0.8, 1.0))
+
+
+## Closest `water_sources` marker: wells, ponds and the like.
+func _nearest_water_source() -> Node3D:
+	var best: Node3D = null
+	var best_d := 1e9
+	for w in get_tree().get_nodes_in_group("water_sources"):
+		if w is Node3D:
+			var d: float = (w as Node3D).global_position.distance_to(global_position)
+			if d < best_d:
+				best_d = d
+				best = w as Node3D
+	return best
 
 
 func _physics_flee(delta: float) -> void:
@@ -442,6 +511,7 @@ func _find_best_fire() -> VoxelHouse:
 
 func _spray_at(house: VoxelHouse, delta: float) -> void:
 	_set_spray(true)
+	tank = maxf(0.0, tank - delta)
 	house.apply_water(spray_rate * 2.2, delta)
 	# Hose water also rescues burning characters near the spray or self.
 	for c in get_tree().get_nodes_in_group("burning_chars"):

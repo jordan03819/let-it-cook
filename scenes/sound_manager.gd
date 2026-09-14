@@ -31,7 +31,21 @@ func _init() -> void:
 func _ready() -> void:
 	if _instance == null:
 		_instance = self
-	_synth_all_streams()
+	_streams = _load_audio()
+	if _streams.size() < AUDIO_FILES.size():
+		# Fill any gap — a missing file must never silence a cue.
+		var synth := {}
+		var previous := _streams
+		_streams = {}
+		_synth_all_streams()
+		synth = _streams
+		_streams = previous
+		for k in synth:
+			if not _streams.has(k):
+				_streams[k] = synth[k]
+		print("SoundManager: %d/%d shipped sounds loaded, rest synthesised" % [previous.size(), AUDIO_FILES.size()])
+	else:
+		print("SoundManager: loaded %d CC0 sounds from %s" % [_streams.size(), AUDIO_DIR])
 	_setup_audio_players()
 	_load_settings_impl()
 
@@ -228,6 +242,43 @@ func _load_settings_impl() -> void:
 
 
 # ---------- Procedural PCM Audio Synthesis ----------
+## The audio shipped with the game: CC0 files under assets/audio (see
+## CREDITS.md there), mapped onto the sound names the rest of the code asks for.
+## `loop` is for ambiences, which the manager plays on their own players.
+const AUDIO_DIR := "res://assets/audio/"
+const AUDIO_FILES := {
+	"ignite": "ignite.ogg",
+	"wind_gust": "wind_gust.ogg",
+	"explosion": "explosion.ogg",
+	"collapse": "collapse.ogg",
+	"splash": "splash.ogg",
+	"siren": "siren.ogg",
+	"shaman_cue": "shaman_cue.ogg",
+	"helicopter": "helicopter.ogg",
+	"last_spark": "last_spark.ogg",
+	"crackle": "fire_crackle.ogg",
+	"rain": "rain.ogg",
+}
+const LOOPING_SOUNDS: Array[String] = ["crackle", "rain", "helicopter"]
+
+
+## Loads the shipped CC0 audio. Anything missing falls back to the synthesiser
+## below, so a stripped build (or a missing file) still makes sound.
+func _load_audio() -> Dictionary:
+	var out := {}
+	for sound_name in AUDIO_FILES:
+		var path: String = AUDIO_DIR + str(AUDIO_FILES[sound_name])
+		if not ResourceLoader.exists(path):
+			continue
+		var stream := load(path)
+		if stream == null:
+			continue
+		if sound_name in LOOPING_SOUNDS and stream is AudioStreamOggVorbis:
+			(stream as AudioStreamOggVorbis).loop = true
+		out[sound_name] = stream
+	return out
+
+
 func _synth_all_streams() -> void:
 	_streams["ignite"] = _synth_ignite()
 	_streams["wind_gust"] = _synth_wind()

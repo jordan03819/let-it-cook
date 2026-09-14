@@ -12,6 +12,11 @@ const MANUAL_IGNITE_COST: int = 3
 const WIND_GUST_COST: int = 1
 const LAST_SPARK_COST: int = 1
 
+## How much of a level's settlement has to burn to win (SPEC 6.1). Clearing the
+## last stubborn corners of a map is busywork, not play, so the goal is a share
+## of the mandatory structures rather than every one of them.
+const WIN_FRACTION: float = 0.80
+
 # Local Wind Gust ability (SPEC Section 6.6, 7.3 & 7.4)
 const WIND_COOLDOWN_MAX: float = 6.0
 const WIND_GUST_DURATION: float = 4.0
@@ -522,6 +527,8 @@ func _process(delta: float) -> void:
 	if ember_reward_timer > 0.0:
 		ember_reward_timer = maxf(0.0, ember_reward_timer - delta)
 
+	_ember_characters(delta)
+
 	# Active gust visual lifetime
 	if active_gust_timer > 0.0:
 		active_gust_timer = maxf(0.0, active_gust_timer - delta)
@@ -585,7 +592,7 @@ func _process(delta: float) -> void:
 	else:
 		fire_strength = move_toward(fire_strength, 0.0, 30.0 * delta)
 
-	# 100% Mandatory structure progress (SPEC Section 11.4)
+	# Mandatory structure progress (SPEC Section 11.4)
 	burnt_mandatory = 0
 	for h in mandatory_houses:
 		if is_instance_valid(h) and h.state == VoxelHouse.State.BURNT:
@@ -600,8 +607,8 @@ func _process(delta: float) -> void:
 		_update_directional_embers(delta)
 		return
 
-	# Win check: 100% of ordinary combustible settlement structures destroyed
-	if burnt_mandatory >= mandatory_houses.size():
+	# Win check: enough of the settlement destroyed (SPEC 6.1).
+	if burnt_mandatory >= houses_required_to_win():
 		_end_game(true)
 		return
 
@@ -633,7 +640,7 @@ func _on_house_burn_ending(h: VoxelHouse) -> void:
 		if is_instance_valid(other) and other != h and other.state == VoxelHouse.State.BURNING:
 			other_burning += 1
 
-	if other_burning == 0 and last_spark_available and burnt_mandatory < mandatory_houses.size():
+	if other_burning == 0 and last_spark_available and burnt_mandatory < houses_required_to_win():
 		last_spark_available = false
 		last_spark_active = true
 		last_spark_house = h
@@ -646,7 +653,7 @@ func _on_house_burn_ending(h: VoxelHouse) -> void:
 func _on_house_extinguished(h: VoxelHouse) -> void:
 	if game_over or not fire_started:
 		return
-	if fire_sim.count_burning() == 0 and fire_sim.count_smoldering() == 0 and last_spark_available and burnt_mandatory < mandatory_houses.size():
+	if fire_sim.count_burning() == 0 and fire_sim.count_smoldering() == 0 and last_spark_available and burnt_mandatory < houses_required_to_win():
 		last_spark_available = false
 		last_spark_active = true
 		last_spark_house = h
@@ -915,6 +922,53 @@ func _release_wind_aim() -> void:
 		_flash_hint("Drag further from the fire to establish wind direction.")
 
 
+## A gust is a wall of embers, not just pressure: anyone caught in the cone down
+## wind of a *burning* structure is set alight, which is how a crew hosing a fire
+## gets broken up — a firefighter that catches light drops the nozzle and runs
+## (SPEC 6.7 / 9.1). Villagers burn the same way, so this also answers a bucket
+## brigade standing in the wrong place.
+func _ember_characters(delta: float) -> void:
+	if fire_sim == null or not fire_sim.is_gust_active():
+		return
+	var origin := fire_sim.active_gust_origin
+	var dir := fire_sim.active_gust_dir
+	# Embers have to come from somewhere: no fire near the gust origin, no carry.
+	var source_found := false
+	for h in mandatory_houses:
+		if h.state == VoxelHouse.State.BURNING and h.global_position.distance_to(origin) < 8.0:
+			source_found = true
+			break
+	if not source_found:
+		for h in houses:
+			if h.kind == "tree" and h.state == VoxelHouse.State.BURNING and h.global_position.distance_to(origin) < 8.0:
+				source_found = true
+				break
+	if not source_found:
+		return
+
+	var cos_half := cos(FireSimulation.WIND_GUST_HALF_ANGLE)
+	for c in get_tree().get_nodes_in_group("flammable"):
+		var body := c as CharacterBody3D
+		if body == null or not is_instance_valid(body):
+			continue
+		if not body.has_method("ignite") or (body.has_method("is_burning") and body.is_burning()):
+			continue
+		var to_c: Vector3 = body.global_position - origin
+		to_c.y = 0.0
+		var dist := to_c.length()
+		if dist < 0.3 or dist > WIND_GUST_RANGE:
+			continue
+		if to_c.normalized().dot(dir) < cos_half:
+			continue
+		# Near the source catches fast, the far end of the cone is a gamble.
+		var closeness := 1.0 - clampf(dist / WIND_GUST_RANGE, 0.0, 1.0)
+		var chance := (0.35 + closeness * 1.15) * delta
+		if randf() < chance:
+			body.ignite()
+			if body.has_method("_show_bubble"):
+				body._show_bubble("AAAH!", Color(1.0, 0.35, 0.1))
+
+
 func _cast_wind_gust(origin: Vector3, dir: Vector3) -> void:
 	active_gust_origin = origin
 	active_gust_dir = dir
@@ -1144,7 +1198,10 @@ func _update_hover_inspection(delta: float) -> void:
 		else:
 			hover_badge.global_position = hover_badge.global_position.lerp(target_pos, minf(1.0, delta * 20.0))
 
-		if not fire_started and hover_target.kind != "stone":
+		# The free opening spark line only makes sense on a building that can
+		# actually take it: hover targets also include the shaman and barrels.
+		var sparkable := hover_target is VoxelHouse and (hover_target as VoxelHouse).kind != "stone"
+		if not fire_started and sparkable:
 			hover_label.text = "[ %s ]\nFree Spark — click to ignite." % eval.status.to_upper()
 			hover_label.modulate = Color(1.0, 0.85, 0.2)
 			if _hint_t <= 0.0 and hint_label != null:
@@ -1282,7 +1339,8 @@ func _update_hud() -> void:
 		if staging:
 			burn_label.text = "Plots reserved: %d (foundations only)" % plots.size()
 		else:
-			burn_label.text = "Settlement: %d / %d (100%% Goal)" % [burnt_mandatory, mandatory_houses.size()]
+			burn_label.text = "Settlement: %d / %d (%d%% Goal)" % [
+				burnt_mandatory, houses_required_to_win(), int(WIN_FRACTION * 100.0)]
 
 	if wind_label != null:
 		var gust_str := ""
@@ -1332,9 +1390,10 @@ func _update_hud() -> void:
 		elif director != null and director.helicopter_active:
 			objective_label.text = "THREAT: HELICOPTER WATER DROP in %.1fs! Divert spread away from drop zone!" % maxf(0.0, director.helicopter_timer)
 		elif weather.rain_active:
-			objective_label.text = "WEATHER: Torrential Rain (%.1fs) — Spread dampened! Burn %d/%d houses." % [weather.rain_timer, burnt_mandatory, mandatory_houses.size()]
+			objective_label.text = "WEATHER: Torrential Rain (%.1fs) — Spread dampened! Burn %d/%d houses." % [weather.rain_timer, burnt_mandatory, houses_required_to_win()]
 		else:
-			objective_label.text = "Lv%d %s: Burn 100%% of settlement houses (%d/%d) · Last Spark: %s" % [level_idx + 1, level_name, burnt_mandatory, mandatory_houses.size(), spark_status]
+			objective_label.text = "Lv%d %s: Burn %d%% of settlement houses (%d/%d) · Last Spark: %s" % [
+				level_idx + 1, level_name, int(WIN_FRACTION * 100.0), burnt_mandatory, houses_required_to_win(), spark_status]
 
 	if controls_label != null:
 		controls_label.text = "LMB: Ignite (Starter free / Manual 3) | RMB Drag: Wind Gust (1 Ember) | WASD: Pan | Q/E: Zoom | P: Pause"
@@ -1355,6 +1414,12 @@ func _toggle_pause() -> void:
 		resume_button.grab_focus()
 
 
+## How many mandatory structures this level demands, from WIN_FRACTION. Rounded
+## up, so a small map still asks for a real share of itself.
+func houses_required_to_win() -> int:
+	return int(ceil(float(mandatory_houses.size()) * WIN_FRACTION))
+
+
 func _end_game(did_win: bool) -> void:
 	game_over = true
 	won = did_win
@@ -1366,11 +1431,11 @@ func _end_game(did_win: bool) -> void:
 		if RunState.is_handcrafted(level_idx):
 			# A scene-authored level is a preview: finishing it must not read as
 			# winning the campaign, and it never advances the campaign levels.
-			msg_label.text = "%s FULLY COOKED!\nAll %d structures consumed." % [level_name, mandatory_houses.size()]
-			stats_label.text = "Time: %ds | Embers remaining: %d\nAuthored preview — no campaign progress." % [int(RunState.level_time), embers]
+			msg_label.text = "%s FULLY COOKED!\n%d of %d structures consumed." % [level_name, burnt_mandatory, mandatory_houses.size()]
+			stats_label.text = "Time: %ds | Embers remaining: %d\nExtra level — no campaign progress." % [int(RunState.level_time), embers]
 			restart_button.text = "Replay %s" % level_name.capitalize()
 		elif level_idx < 2:
-			msg_label.text = "%s FULLY COOKED!\nAll %d settlement structures consumed." % [level_name, mandatory_houses.size()]
+			msg_label.text = "%s FULLY COOKED!\n%d of %d settlement structures consumed." % [level_name, burnt_mandatory, mandatory_houses.size()]
 			stats_label.text = "Time: %ds | Embers remaining: %d\nProceed to Level %d." % [int(RunState.level_time), embers, level_idx + 2]
 			restart_button.text = "Advance to Lv%d" % [level_idx + 2]
 		else:

@@ -40,13 +40,6 @@ theme_override_font_sizes/font_size = 72
 text = "LET IT COOK"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="CenterContainer/VBox" unique_id=575904923]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 0.7)
-theme_override_font_sizes/font_size = 22
-text = "A reverse-firefighting jam game - keep the fire alive, cook the village!"
-horizontal_alignment = 1
-
 [node name="ControlsHint" type="Label" parent="CenterContainer/VBox" unique_id=184706226]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 0.5)
@@ -88,7 +81,7 @@ custom_minimum_size = Vector2(280, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 20
-text = "Village Fields (authored preview)"
+text = "Village Fields (extra level)"
 
 [node name="OptionsButton" type="Button" parent="CenterContainer/VBox" unique_id=1633201899]
 unique_name_in_owner = true
@@ -153,24 +146,6 @@ value = 1.0
 unique_name_in_owner = true
 layout_mode = 2
 text = "Back"
-
-[node name="VersionLabel" type="Label" parent="." unique_id=633710316]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -110.0
-offset_top = -40.0
-offset_right = -16.0
-offset_bottom = -16.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_colors/font_color = Color(1, 1, 1, 0.5)
-theme_override_font_sizes/font_size = 14
-text = "v0.1.0"
-horizontal_alignment = 2
 
 [connection signal="pressed" from="CenterContainer/VBox/StartButton" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="CenterContainer/VBox/Level2Button" to="." method="_on_level2_pressed"]

@@ -525,7 +525,7 @@ Purpose: test mastery against firebreaks and advanced suppression.
 ### 11.4 Completion and failure
 
 - The completion bar measures ordinary combustible settlement structures destroyed.
-- The goal is **100% of ordinary combustible settlement structures**, not the prototype's 70–80% thresholds.
+- The goal is **80% of ordinary combustible settlement structures** (`WIN_FRACTION` in `game.gd`): a settlement counts as destroyed once the bulk of it is gone, and chasing the last few corners is left to the player's own ambition.
 - City stone, trees, barrels, and decorative props do not count toward completion.
 - The level fails when no viable player-controlled or naturally spreading flame remains and the player has no immediate recovery action.
 - Results freeze gameplay simulation before presenting statistics.
@@ -663,7 +663,7 @@ Display only information needed for immediate decisions:
 
 - Embers and ability costs;
 - global fire strength;
-- combustible destruction progress and 100% goal marker;
+- combustible destruction progress and the 80% goal marker;
 - current wind direction/strength;
 - selected ability and cooldown;
 - active major threat, such as incoming firefighters, rain, helicopter drop, or ritual cast.
@@ -725,7 +725,7 @@ Verified implementation details:
 
 Known gaps between the current prototype and the target design:
 
-- 70%, 75%, and 80% completion thresholds;
+- graduated completion thresholds (the shipped goal is a flat 80%);
 - rapid burn/spread pacing and early level wipes;
 - unrestricted first ignition;
 - direct manual barrel ignition;
@@ -748,7 +748,7 @@ The polished initial demo is complete when:
 2. A representative successful run of each level lasts 2:30–3:30.
 3. Leaving the initial fire unattended usually leads to containment rather than a level wipe.
 4. The opening ignition is free and may be placed on any combustible structure.
-5. Every ordinary combustible settlement structure must be destroyed; City stone, trees, barrels, and decorative props are clearly excluded from the counter.
+5. At least 80% of a level's ordinary combustible settlement structures must be destroyed; City stone, trees, barrels, and decorative props are clearly excluded from the counter.
 6. Villagers notice the initial fire and attempt a visible bucket response before official firefighters arrive.
 7. At least one level contains a shaman whose interruptible ritual summons fully presented rain.
 8. Barrels cannot be manually ignited and must be reached through fire spread.

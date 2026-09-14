@@ -1007,7 +1007,7 @@ the editor — the generator is only a convenience for tiling).
 * Scene: `res://scenes/levels/village_fields.tscn`
 * Script: `res://scenes/levels/village_fields.gd` (adds MultiMesh ground cover,
   normalises the kit's materials, exposes `house_plots()`)
-* Selectable in the main menu as **Village Fields (authored preview)** (level index
+* Selectable in the main menu as **Village Fields (extra level)** (level index
   3, `RunState.HANDCRAFTED_LEVEL`). It never affects campaign unlocks.
 * It ships with houses: `Houses/<plot>` instances one of the modular house
   scenes (`scenes/houses/*.tscn`) on every plot. The opening spark is free on

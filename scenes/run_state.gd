@@ -3,7 +3,7 @@ class_name RunState
 ## Just level progression + timing.
 
 const LEVEL_COUNT := 3        # campaign levels: Village, Town, City
-const PLAYABLE_LEVELS := 4     # campaign levels + the authored preview level
+const PLAYABLE_LEVELS := 4     # campaign levels + the extra authored level
 const HANDCRAFTED_LEVEL := 3   # index of the scene-authored level
 const HANDCRAFTED_SCENE := "res://scenes/levels/village_fields.tscn"
 
